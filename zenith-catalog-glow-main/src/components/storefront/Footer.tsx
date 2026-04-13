@@ -18,24 +18,30 @@ const Footer = () => {
   return (
     <footer className="bg-[#0f0f0f] text-white">
       <div className="section-container py-12">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 md:grid-cols-[1.6fr_1fr_1fr_1fr] items-start">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 md:grid-cols-4 items-start">
 
-          {/* Brand column */}
-          <div className="col-span-2 sm:col-span-1 flex flex-col gap-0">
-            {/* Logo */}
-            <img
-              src={settings.logoUrl || gadget69Logo}
-              alt={settings.siteTitle || "Gadget69"}
-              style={{ width: "120px", height: "auto" }}
-              className="brightness-0 invert"
-            />
+          {/* Brand column — heading placeholder keeps logo top-aligned with sibling column headings */}
+          <div className="col-span-2 sm:col-span-1 flex flex-col">
+            {/* Matches the heading row height (11px text + line-height) + gap-3 below it */}
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-transparent select-none font-heading" aria-hidden="true">
+              Brand
+            </p>
+            {/* Logo — sits in same row as first links of other columns */}
+            <div className="mt-3">
+              <img
+                src={settings.logoUrl || gadget69Logo}
+                alt={settings.siteTitle || "Gadget69"}
+                style={{ width: "110px", height: "auto" }}
+                className="brightness-0 invert"
+              />
+            </div>
             {/* Description */}
             {settings.footerText && (
               <p className="mt-3 text-xs leading-relaxed text-white/55 font-body max-w-[200px]">
                 {settings.footerText}
               </p>
             )}
-            {/* Social icons — directly below name */}
+            {/* Social icons */}
             <div className="mt-4 flex items-center gap-2">
               <a
                 href={settings.instagramUrl || "https://instagram.com"}
@@ -101,7 +107,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-6 text-[11px] font-body text-white/30">
+        <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-6 text-[11px] font-body text-white/30 mr-16 md:mr-20">
           <span>© {new Date().getFullYear()} {settings.siteTitle || "Gadget69"}. All rights reserved.</span>
           <button
             onClick={scrollToTop}
