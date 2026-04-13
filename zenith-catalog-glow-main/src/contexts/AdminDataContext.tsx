@@ -75,30 +75,29 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const refreshAll = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const [
-        sectionsData,
-        productsData,
-        bannersData,
-        settingsData,
-        communityData,
-      ] = await Promise.all([
-        isAuthenticated ? getAdminSections() : getSections(),
-        isAuthenticated ? getAdminProducts() : getProducts(),
-        isAuthenticated ? getAdminBanners() : getBanners(),
-        isAuthenticated ? getAdminSettings() : getSettings(),
-        isAuthenticated ? getAdminCommunityMedia() : getCommunityMedia(),
-      ]);
 
-      setSections(sortSections(sectionsData));
-      setProducts(sortProducts(productsData));
-      setBanners(sortBanners(bannersData));
-      setSettings(settingsData);
-      setCommunityMedia(sortCommunity(communityData));
-      // Reviews: try backend, fallback gracefully
+    const safeFetch = async <T>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+      try { return await fn(); } catch { return fallback; }
+    };
+
+    try {
+      const [sectionsData, productsData, bannersData, settingsData, communityData] =
+        await Promise.all([
+          safeFetch(isAuthenticated ? getAdminSections : getSections, mockSections),
+          safeFetch(isAuthenticated ? getAdminProducts : getProducts, mockProducts),
+          safeFetch(isAuthenticated ? getAdminBanners : getBanners, mockBanners),
+          safeFetch(isAuthenticated ? getAdminSettings : getSettings, mockSettings),
+          safeFetch(isAuthenticated ? getAdminCommunityMedia : getCommunityMedia, mockCommunityMedia),
+        ]);
+
+      setSections(sortSections(sectionsData as Section[]));
+      setProducts(sortProducts(productsData as Product[]));
+      setBanners(sortBanners(bannersData as Banner[]));
+      setSettings(settingsData as StoreSettings);
+      setCommunityMedia(sortCommunity(communityData as CommunityMedia[]));
       setReviews(mockReviews);
     } catch (error) {
-      console.warn("Backend unavailable — loading mock data", error);
+      console.warn("Unexpected error loading data — using full mock", error);
       setSections(sortSections(mockSections));
       setProducts(sortProducts(mockProducts));
       setBanners(sortBanners(mockBanners));
