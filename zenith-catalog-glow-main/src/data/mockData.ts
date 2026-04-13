@@ -93,8 +93,8 @@ export const mockCommunityMedia: CommunityMedia[] = [
     title: "Join The Clan 🔥",
     caption: "See how the Gadget69 community sets up, shoots, and creates.",
     mediaType: "VIDEO",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1&playlist=dQw4w9WgXcQ&controls=0&playsinline=1",
-    thumbnailUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=960&h=540&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/LiOPfpCJhpA?autoplay=1&mute=1&loop=1&playlist=LiOPfpCJhpA&controls=0&playsinline=1&modestbranding=1",
+    thumbnailUrl: "https://images.unsplash.com/photo-1593640408182-31c228cc32d2?w=960&h=540&fit=crop",
     displayOrder: 0,
     isActive: true,
   },
@@ -141,7 +141,14 @@ export const mockCommunityMedia: CommunityMedia[] = [
 ];
 
 export const mockReviews: Review[] = [
-  { id: 1, name: "Arjun Mehta", rating: 5, comment: "The MZ Pro Max is absolutely stunning. The build quality and camera are on another level.", date: "2024-03-10" },
-  { id: 2, name: "Priya Sharma", rating: 5, comment: "Ordered the Book Air — it arrived beautifully packaged. Performance is incredible.", date: "2024-02-28" },
-  { id: 3, name: "Rahul Verma", rating: 4, comment: "The Pods Elite sound amazing. Noise cancellation is top-tier.", date: "2024-03-05" },
+  { id: 1, name: "Arjun Mehta", rating: 5, comment: "The Gadget Pro Max is absolutely stunning. The build quality and camera are on another level — feels premium in every way.", date: "2024-03-10" },
+  { id: 2, name: "Priya Sharma", rating: 5, comment: "Ordered the Book Air and it arrived beautifully packaged. Performance is incredible for everyday work and creative tasks.", date: "2024-02-28" },
+  { id: 3, name: "Rahul Verma", rating: 4, comment: "The Pods Elite sound amazing. Noise cancellation is top-tier and the battery easily lasts a full day.", date: "2024-03-05" },
+  { id: 4, name: "Sneha Nair", rating: 5, comment: "Got the Watch Ultra last month — the GPS accuracy and sleep tracking are genuinely life-changing. Love every feature.", date: "2024-03-18" },
+  { id: 5, name: "Karthik Rajan", rating: 5, comment: "Delivery was super fast and the product was exactly as described. Gadget69 is my go-to store for premium electronics.", date: "2024-03-22" },
+  { id: 6, name: "Divya Krishnan", rating: 4, comment: "The ROG Gaming Laptop handles AAA titles at ultra settings without breaking a sweat. Seriously impressed with the cooling.", date: "2024-03-14" },
+  { id: 7, name: "Mohammed Irfan", rating: 5, comment: "Customer service is exceptional. Had a small issue with my order and it was resolved same-day. Will absolutely buy again.", date: "2024-03-25" },
+  { id: 8, name: "Ananya Patel", rating: 5, comment: "The GaN 65W charger is tiny but powerful. Charges my laptop, phone and earbuds all at once. Highly recommend.", date: "2024-02-20" },
+  { id: 9, name: "Vikram Suresh", rating: 4, comment: "Gaming headset audio clarity is phenomenal. The boom mic picks up every word clearly, even in loud rooms.", date: "2024-03-08" },
 ];
+

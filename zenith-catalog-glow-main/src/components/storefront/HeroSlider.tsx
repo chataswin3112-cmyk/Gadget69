@@ -5,7 +5,7 @@ import { useAdminData } from "@/contexts/AdminDataContext";
 import { cn } from "@/lib/utils";
 import MediaImage from "@/components/ui/media-image";
 
-const AUTO_PLAY_MS = 5000;
+const AUTO_PLAY_MS = 3000;
 
 const HeroSlider = () => {
   const { banners: allBanners } = useAdminData();

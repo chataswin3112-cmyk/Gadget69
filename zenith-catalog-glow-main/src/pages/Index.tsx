@@ -7,6 +7,7 @@ import TopCategoryGrid from "@/components/storefront/TopCategoryGrid";
 import ProductSectionRow from "@/components/storefront/ProductSectionRow";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import CommunitySection from "@/components/storefront/CommunitySection";
+import ReviewSection from "@/components/storefront/ReviewSection";
 import Footer from "@/components/storefront/Footer";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { useMemo } from "react";
@@ -93,6 +94,11 @@ const Index = () => {
       {/* Community — 🌼 Buttercup Yellow */}
       <div data-bg-color="#fef9c3">
         <CommunitySection />
+      </div>
+
+      {/* Reviews — 🌸 Soft Rose */}
+      <div data-bg-color="#fce7f3">
+        <ReviewSection />
       </div>
 
       <FloatingContactActions />
