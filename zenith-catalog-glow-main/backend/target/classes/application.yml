@@ -1,16 +1,15 @@
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 spring:
   application:
     name: gadget69-catalog-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/Gadget69
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: nextnext
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/Gadget69}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:nextnext}
   jpa:
-    show-sql: true
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     hibernate:
       ddl-auto: update
     open-in-view: false
@@ -24,24 +23,18 @@ spring:
       max-request-size: 250MB
 
 app:
-  upload-dir: ./uploads
-  public-base-url: http://localhost:8081
-  admin-secret: change-this-secret-before-production
+  upload-dir: ${APP_UPLOAD_DIR:./uploads}
+  public-base-url: ${APP_PUBLIC_BASE_URL:}
+  admin-secret: ${APP_ADMIN_SECRET:change-this-secret-before-production}
   admin-token-hours: 24
   twilio:
     account-sid: ${APP_TWILIO_ACCOUNT_SID:}
     auth-token: ${APP_TWILIO_AUTH_TOKEN:}
     whatsapp-from: ${APP_TWILIO_WHATSAPP_FROM:whatsapp:+14155238886}
   cloudinary:
-    cloud-name: ${APP_CLOUDINARY_CLOUD_NAME:gadget69}
-    api-key: ${APP_CLOUDINARY_API_KEY:165443797191698}
-    api-secret: ${APP_CLOUDINARY_API_SECRET:8SR8P_dMZlD1YNCwrxY-Mf1SqGM}
+    cloud-name: ${APP_CLOUDINARY_CLOUD_NAME:}
+    api-key: ${APP_CLOUDINARY_API_KEY:}
+    api-secret: ${APP_CLOUDINARY_API_SECRET:}
     community-video-folder: ${APP_CLOUDINARY_COMMUNITY_VIDEO_FOLDER:gadget69/community/videos}
     secure: ${APP_CLOUDINARY_SECURE:true}
-  allowed-origins:
-    - http://localhost:5173
-    - http://127.0.0.1:5173
-    - http://localhost:4173
-    - http://127.0.0.1:4173
-    - http://localhost:8080
-    - http://127.0.0.1:8080
+  allowed-origins: ${APP_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8080,http://127.0.0.1:8080}

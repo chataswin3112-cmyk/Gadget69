@@ -1,5 +1,5 @@
 const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
-const DEFAULT_API_BASE_URL = "http://localhost:8081/api";
+const DEFAULT_API_BASE_URL = "/api";
 
 export const FALLBACK_IMAGE_SRC = "/placeholder.svg";
 

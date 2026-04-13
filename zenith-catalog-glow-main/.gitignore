@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+backend/.m2repo/
+backend/target/surefire-reports/
+backend/target/classes/com/gadget69/catalog/config/SpaForwardingController.class
 
 # Editor directories and files
 .vscode/*

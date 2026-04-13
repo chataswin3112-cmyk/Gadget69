@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: gadget69-catalog
+    runtime: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: ./zenith-catalog-glow-main/Dockerfile
+    dockerContext: ./zenith-catalog-glow-main
+    autoDeployTrigger: commit
+    healthCheckPath: /api/health
+    disk:
+      name: uploads
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gadget69-catalog-db
+          property: connectionString
+      - key: APP_UPLOAD_DIR
+        value: /var/data/uploads
+      - key: APP_ADMIN_SECRET
+        sync: false
+
+databases:
+  - name: gadget69-catalog-db
+    plan: basic-256mb
+    region: singapore
+    databaseName: gadget69

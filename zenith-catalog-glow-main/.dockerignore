@@ -1,0 +1,15 @@
+.git
+.tmp
+.vscode
+node_modules
+dist
+dist-ssr
+backend/.m2repo
+backend/data
+backend/target
+backend/uploads
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.local

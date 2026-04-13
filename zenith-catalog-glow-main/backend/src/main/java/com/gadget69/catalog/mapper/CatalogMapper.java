@@ -1,6 +1,5 @@
 package com.gadget69.catalog.mapper;
 
-import com.gadget69.catalog.config.AppProperties;
 import com.gadget69.catalog.dto.ApiDtos;
 import com.gadget69.catalog.entity.Banner;
 import com.gadget69.catalog.entity.CommunityMedia;
@@ -10,14 +9,10 @@ import com.gadget69.catalog.entity.Product;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class CatalogMapper {
-
-  private final AppProperties appProperties;
 
   public ApiDtos.SectionResponse toSectionResponse(Section section) {
     return new ApiDtos.SectionResponse(
@@ -149,16 +144,9 @@ public class CatalogMapper {
     if (url == null || url.isBlank()) {
       return url;
     }
-    if (url.startsWith("http://") || url.startsWith("https://")) {
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/uploads/")) {
       return url;
     }
-    if (!url.startsWith("/uploads/")) {
-      return url;
-    }
-    String base = appProperties.getPublicBaseUrl();
-    if (base.endsWith("/")) {
-      return base.substring(0, base.length() - 1) + url;
-    }
-    return base + url;
+    return url;
   }
 }
