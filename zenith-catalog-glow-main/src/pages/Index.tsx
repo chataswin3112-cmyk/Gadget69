@@ -1,14 +1,13 @@
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import HeroSlider from "@/components/storefront/HeroSlider";
-import EditorialSpotlight from "@/components/storefront/EditorialSpotlight";
 import CategoryRail from "@/components/storefront/CategoryRail";
 import TopCategoryGrid from "@/components/storefront/TopCategoryGrid";
 import ProductSectionRow from "@/components/storefront/ProductSectionRow";
+import ProductMarqueeSection from "@/components/storefront/ProductMarqueeSection";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import CommunitySection from "@/components/storefront/CommunitySection";
 import ReviewSection from "@/components/storefront/ReviewSection";
-import ProductMarqueeSection from "@/components/storefront/ProductMarqueeSection";
 import Footer from "@/components/storefront/Footer";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { useMemo } from "react";
@@ -56,9 +55,9 @@ const Index = () => {
         <CategoryRail sections={sections} />
       </div>
 
-      {/* Editorial Spotlight — 🟠 Warm Orange */}
-      <div data-bg-color="#ffedd5">
-        <EditorialSpotlight products={products} sections={sections} />
+      {/* Browse All Products — 🟠 Warm Peach (replaces Editorial Spotlight) */}
+      <div data-bg-color="#fff7ed">
+        <ProductMarqueeSection />
       </div>
 
       {/* New Launches — 🩵 Sky Blue */}
@@ -95,11 +94,6 @@ const Index = () => {
       {/* Community — 🌼 Buttercup Yellow */}
       <div data-bg-color="#fef9c3">
         <CommunitySection />
-      </div>
-
-      {/* All Products Marquee — 🦶 Warm Peach */}
-      <div data-bg-color="#fff7ed">
-        <ProductMarqueeSection />
       </div>
 
       {/* Reviews — 🌸 Soft Rose */}
