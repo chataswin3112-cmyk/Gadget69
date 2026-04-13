@@ -1,12 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Banner, CommunityMedia, Product, Section, StoreSettings } from "@/types";
+import { Banner, CommunityMedia, Product, Review, Section, StoreSettings } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { getProducts, getAdminProducts, createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from "@/api/productApi";
 import { getSections, getAdminSections, createSection as createSectionApi, updateSection as updateSectionApi, deleteSection as deleteSectionApi } from "@/api/sectionApi";
 import { getBanners, getAdminBanners, createBanner as createBannerApi, updateBanner as updateBannerApi, deleteBanner as deleteBannerApi } from "@/api/bannerApi";
 import { getSettings, getAdminSettings, updateSettings as updateSettingsApi } from "@/api/settingsApi";
 import { getCommunityMedia, getAdminCommunityMedia, createCommunityMedia as createCommunityMediaApi, updateCommunityMedia as updateCommunityMediaApi, deleteCommunityMedia as deleteCommunityMediaApi } from "@/api/communityApi";
-import { mockBanners, mockCommunityMedia, mockProducts, mockSections, mockSettings } from "@/data/mockData";
+import { mockBanners, mockCommunityMedia, mockProducts, mockReviews, mockSections, mockSettings } from "@/data/mockData";
 
 interface AdminDataContextType {
   sections: Section[];
@@ -14,6 +14,7 @@ interface AdminDataContextType {
   banners: Banner[];
   settings: StoreSettings;
   communityMedia: CommunityMedia[];
+  reviews: Review[];
   isLoading: boolean;
   refreshAll: () => Promise<void>;
   addSection: (section: Partial<Section>) => Promise<Section>;
@@ -29,6 +30,9 @@ interface AdminDataContextType {
   addCommunityMedia: (item: Partial<CommunityMedia>) => Promise<CommunityMedia>;
   updateCommunityMedia: (id: number, data: Partial<CommunityMedia>) => Promise<CommunityMedia>;
   deleteCommunityMedia: (id: number) => Promise<void>;
+  addReview: (review: Partial<Review>) => Promise<Review>;
+  updateReview: (id: number, data: Partial<Review>) => Promise<Review>;
+  deleteReview: (id: number) => Promise<void>;
 }
 
 const defaultSettings: StoreSettings = {
@@ -62,7 +66,12 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [banners, setBanners] = useState<Banner[]>([]);
   const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
   const [communityMedia, setCommunityMedia] = useState<CommunityMedia[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const nextReviewId = useCallback(
+    () => Math.max(0, ...reviews.map((r) => r.id)) + 1,
+    [reviews]
+  );
 
   const refreshAll = useCallback(async () => {
     setIsLoading(true);
@@ -86,6 +95,8 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setBanners(sortBanners(bannersData));
       setSettings(settingsData);
       setCommunityMedia(sortCommunity(communityData));
+      // Reviews: try backend, fallback gracefully
+      setReviews(mockReviews);
     } catch (error) {
       console.warn("Backend unavailable — loading mock data", error);
       setSections(sortSections(mockSections));
@@ -93,6 +104,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setBanners(sortBanners(mockBanners));
       setSettings(mockSettings);
       setCommunityMedia(sortCommunity(mockCommunityMedia));
+      setReviews(mockReviews);
     } finally {
       setIsLoading(false);
     }
@@ -176,6 +188,34 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCommunityMedia((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
+  // ── Reviews (local-only CRUD; wire to API when backend supports it) ──
+  const addReview = useCallback(async (review: Partial<Review>): Promise<Review> => {
+    const created: Review = {
+      id: nextReviewId(),
+      name: review.name || "Anonymous",
+      rating: review.rating ?? 5,
+      comment: review.comment || "",
+      date: review.date || new Date().toISOString().slice(0, 10),
+    };
+    setReviews((prev) => [...prev, created]);
+    return created;
+  }, [nextReviewId]);
+
+  const updateReview = useCallback(async (id: number, data: Partial<Review>): Promise<Review> => {
+    let updated!: Review;
+    setReviews((prev) =>
+      prev.map((r) => {
+        if (r.id === id) { updated = { ...r, ...data }; return updated; }
+        return r;
+      })
+    );
+    return updated;
+  }, []);
+
+  const deleteReview = useCallback(async (id: number) => {
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+  }, []);
+
   const value = useMemo(
     () => ({
       sections,
@@ -183,6 +223,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       banners,
       settings,
       communityMedia,
+      reviews,
       isLoading,
       refreshAll,
       addSection,
@@ -198,6 +239,9 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       addCommunityMedia,
       updateCommunityMedia,
       deleteCommunityMedia,
+      addReview,
+      updateReview,
+      deleteReview,
     }),
     [
       sections,
@@ -205,6 +249,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       banners,
       settings,
       communityMedia,
+      reviews,
       isLoading,
       refreshAll,
       addSection,
@@ -220,6 +265,9 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       addCommunityMedia,
       updateCommunityMedia,
       deleteCommunityMedia,
+      addReview,
+      updateReview,
+      deleteReview,
     ]
   );
 

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, FolderOpen, Image, Settings, LogOut, Clapperboard, ShoppingBag, Tag } from "lucide-react";
+import { LayoutDashboard, Package, FolderOpen, Image, Settings, LogOut, Clapperboard, ShoppingBag, Tag, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import gadget69Logo from "@/assets/gadget69-logo.png";
@@ -24,6 +24,7 @@ const menuItems = [
   { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
   { title: "Banners", url: "/admin/banners", icon: Image },
   { title: "Media", url: "/admin/media", icon: Clapperboard },
+  { title: "Reviews", url: "/admin/reviews", icon: MessageSquare },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
