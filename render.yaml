@@ -20,6 +20,8 @@ services:
           property: connectionString
       - key: APP_UPLOAD_DIR
         value: /var/data/uploads
+      - key: APP_DATA_DIR
+        value: /var/data/data
       - key: APP_ADMIN_SECRET
         sync: false
 

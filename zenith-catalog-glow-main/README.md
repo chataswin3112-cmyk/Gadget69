@@ -44,6 +44,7 @@ Core Render settings already handled in code:
 - the frontend is served by Spring Boot from the same origin
 - Render's `DATABASE_URL` is converted into a JDBC URL automatically at startup
 - uploaded files are stored at `APP_UPLOAD_DIR`, which the blueprint points to `/var/data/uploads`
+- if no Postgres env is present, the backend falls back to an embedded H2 file database
 
 Required environment variables:
 
