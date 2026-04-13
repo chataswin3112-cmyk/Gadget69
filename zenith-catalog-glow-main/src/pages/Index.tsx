@@ -8,6 +8,7 @@ import ProductSectionRow from "@/components/storefront/ProductSectionRow";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import CommunitySection from "@/components/storefront/CommunitySection";
 import ReviewSection from "@/components/storefront/ReviewSection";
+import ProductMarqueeSection from "@/components/storefront/ProductMarqueeSection";
 import Footer from "@/components/storefront/Footer";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { useMemo } from "react";
@@ -96,13 +97,18 @@ const Index = () => {
         <CommunitySection />
       </div>
 
+      {/* All Products Marquee — 🦶 Warm Peach */}
+      <div data-bg-color="#fff7ed">
+        <ProductMarqueeSection />
+      </div>
+
       {/* Reviews — 🌸 Soft Rose */}
       <div data-bg-color="#fce7f3">
         <ReviewSection />
       </div>
 
       <FloatingContactActions />
-      <Footer variant="homepage" />
+      <Footer />
     </div>
   );
 };

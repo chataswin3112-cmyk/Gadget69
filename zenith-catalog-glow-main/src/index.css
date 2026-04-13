@@ -336,6 +336,18 @@
   animation: marquee-right 32s linear infinite;
 }
 
+/* Product marquee — slower speed */
+@keyframes product-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes product-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.animate-product-left  { animation: product-left  50s linear infinite; }
+.animate-product-right { animation: product-right 58s linear infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee-left,
   .animate-marquee-right {
