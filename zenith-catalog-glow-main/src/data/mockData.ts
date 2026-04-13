@@ -91,9 +91,10 @@ export const mockCommunityMedia: CommunityMedia[] = [
   {
     id: 1,
     title: "Join The Clan 🔥",
-    caption: "See how the Gadget69 community sets up, shoots, and creates.",
+    caption: "See how the Gadget69 community unboxes, reviews, and creates with the latest drops.",
     mediaType: "VIDEO",
-    videoUrl: "https://www.youtube.com/embed/LiOPfpCJhpA?autoplay=1&mute=1&loop=1&playlist=LiOPfpCJhpA&controls=0&playsinline=1&modestbranding=1",
+    // Direct MP4 — always plays, no YouTube restrictions
+    videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
     thumbnailUrl: "https://images.unsplash.com/photo-1593640408182-31c228cc32d2?w=960&h=540&fit=crop",
     displayOrder: 0,
     isActive: true,
