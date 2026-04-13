@@ -52,16 +52,22 @@ describe("CommunitySection", () => {
     });
   });
 
-  it("renders video items as poster cards and only mounts the video player after click", async () => {
+  it("autoplays the first community video inline on page load", () => {
     render(<CommunitySection />);
 
-    expect(screen.queryByTestId("community-video-player")).not.toBeInTheDocument();
-    expect(document.querySelectorAll("video")).toHaveLength(0);
+    const inlineVideo = screen.getByTestId("community-inline-video-1").querySelector("video");
+    expect(inlineVideo).toBeInTheDocument();
+    expect(inlineVideo).toHaveAttribute("autoplay");
+    expect(inlineVideo).toHaveProperty("muted", true);
+    expect(inlineVideo).toHaveAttribute("loop");
+  });
+
+  it("opens the full video player after click", async () => {
+    render(<CommunitySection />);
 
     fireEvent.click(screen.getByTestId("community-video-card-1"));
 
     await waitFor(() => expect(screen.getByTestId("community-video-player")).toBeInTheDocument());
-    expect(document.querySelectorAll("video")).toHaveLength(1);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
@@ -85,9 +91,10 @@ describe("CommunitySection", () => {
     fireEvent.click(screen.getByTestId("community-video-card-9"));
 
     await waitFor(() => expect(screen.getByTestId("community-video-player")).toBeInTheDocument());
-    expect(screen.getByTitle("YouTube recap")).toHaveAttribute(
+    const dialogFrame = screen.getByTestId("community-video-player").querySelector("iframe");
+    expect(dialogFrame).toHaveAttribute(
       "src",
-      "https://www.youtube-nocookie.com/embed/abc123XYZ?rel=0&modestbranding=1"
+      "https://www.youtube-nocookie.com/embed/abc123XYZ?rel=0&modestbranding=1&autoplay=1&playsinline=1&mute=1"
     );
   });
 });

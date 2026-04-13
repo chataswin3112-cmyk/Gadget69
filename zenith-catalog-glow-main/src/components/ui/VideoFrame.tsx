@@ -17,6 +17,54 @@ interface VideoFrameProps {
   objectFit?: "contain" | "cover";
 }
 
+const getEmbedPlaybackSrc = ({
+  src,
+  provider,
+  autoPlay,
+  muted,
+  loop,
+}: {
+  src: string;
+  provider: "youtube" | "instagram";
+  autoPlay: boolean;
+  muted: boolean;
+  loop: boolean;
+}) => {
+  if (!autoPlay && !muted && !loop) {
+    return src;
+  }
+
+  try {
+    const url = new URL(src);
+
+    if (provider === "youtube") {
+      if (autoPlay) {
+        url.searchParams.set("autoplay", "1");
+        url.searchParams.set("playsinline", "1");
+      }
+      if (muted) {
+        url.searchParams.set("mute", "1");
+      }
+      if (loop) {
+        const videoId = url.pathname.split("/").filter(Boolean).pop();
+        if (videoId) {
+          url.searchParams.set("loop", "1");
+          url.searchParams.set("playlist", videoId);
+        }
+      }
+      return url.toString();
+    }
+
+    if (provider === "instagram" && autoPlay) {
+      url.searchParams.set("autoplay", "1");
+    }
+
+    return url.toString();
+  } catch {
+    return src;
+  }
+};
+
 const VideoFrame = ({
   src,
   title,
@@ -38,6 +86,16 @@ const VideoFrame = ({
   }
 
   const resolvedPoster = resolveMediaUrl(poster);
+  const embedPlaybackSrc =
+    resolvedVideoSource.kind === "embed"
+      ? getEmbedPlaybackSrc({
+          src: resolvedVideoSource.src,
+          provider: resolvedVideoSource.provider,
+          autoPlay,
+          muted,
+          loop,
+        })
+      : null;
 
   return (
     <div
@@ -46,10 +104,10 @@ const VideoFrame = ({
     >
       {resolvedVideoSource.kind === "embed" ? (
         <iframe
-          src={resolvedVideoSource.src}
+          src={embedPlaybackSrc || resolvedVideoSource.src}
           title={title || "Embedded video"}
           className={cn("h-full w-full border-0 bg-black", mediaClassName)}
-          loading="lazy"
+          loading={autoPlay ? "eager" : "lazy"}
           allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
           allowFullScreen
           referrerPolicy="strict-origin-when-cross-origin"
@@ -68,7 +126,7 @@ const VideoFrame = ({
           muted={muted}
           loop={loop}
           playsInline
-          preload={controls ? "metadata" : "none"}
+          preload={autoPlay ? "auto" : controls ? "metadata" : "none"}
         />
       )}
     </div>

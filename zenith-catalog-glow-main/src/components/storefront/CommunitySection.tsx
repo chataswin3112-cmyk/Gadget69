@@ -32,6 +32,7 @@ const CommunitySection = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeVideo, setActiveVideo] = useState<CommunityMedia | null>(null);
 
+
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
     const amount = 280;
@@ -89,6 +90,7 @@ const CommunitySection = () => {
                 const poster = item.thumbnailUrl || item.imageUrl || "/placeholder.svg";
                 const hasVideo = item.mediaType === "VIDEO" || isVideoUrl(item.videoUrl);
                 const videoPoster = hasVideo ? getVideoPoster(item, 960, 540) : poster;
+                const shouldAutoPlayInline = hasVideo;
                 const motionSide = index % 2 === 0 ? "community-slide-left" : "community-slide-right";
                 const driftX = index % 2 === 0 ? -0.72 : 0.72;
 
@@ -108,19 +110,41 @@ const CommunitySection = () => {
                     >
                       <div className="overflow-hidden rounded-[28px] border border-white/78 bg-white/90 shadow-[0_28px_62px_-36px_hsl(var(--surface-shadow)/0.36)]">
                         <div className="group relative aspect-video overflow-hidden">
-                          <MediaImage
-                            src={videoPoster}
-                            alt={item.title || item.caption || "Community video"}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-foreground/38 via-foreground/6 to-transparent" />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/88 text-accent shadow-lg backdrop-blur">
-                              <Play className="ml-1 h-6 w-6 fill-current" />
-                            </div>
-                          </div>
+                          {shouldAutoPlayInline ? (
+                            <>
+                              <VideoFrame
+                                src={item.videoUrl}
+                                title={item.title || item.caption || "Community video"}
+                                videoPublicId={item.videoPublicId}
+                                poster={videoPoster}
+                                className="h-full rounded-none border-0 bg-black"
+                                mediaClassName="transition-transform duration-500 group-hover:scale-105"
+                                objectFit="cover"
+                                controls={false}
+                                autoPlay
+                                muted
+                                loop
+                                testId={`community-inline-video-${item.id}`}
+                              />
+                              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-foreground/40 via-foreground/10 to-transparent" />
+                            </>
+                          ) : (
+                            <>
+                              <MediaImage
+                                src={videoPoster}
+                                alt={item.title || item.caption || "Community video"}
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-foreground/38 via-foreground/6 to-transparent" />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/88 text-accent shadow-lg backdrop-blur">
+                                  <Play className="ml-1 h-6 w-6 fill-current" />
+                                </div>
+                              </div>
+                            </>
+                          )}
                           <div className="absolute left-4 top-4 rounded-full bg-white/88 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
-                            Video
+                            Playing
                           </div>
                         </div>
                         <div className="space-y-1 p-4">
@@ -189,6 +213,8 @@ const CommunitySection = () => {
                     poster={activeVideoPoster}
                     testId="community-video-player"
                     className="max-h-[75vh] rounded-none border-0"
+                    autoPlay
+                    muted
                   />
                 ) : (
                   <MediaImage
