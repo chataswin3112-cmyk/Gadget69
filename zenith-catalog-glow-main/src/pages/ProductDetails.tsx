@@ -17,7 +17,7 @@ import { getDisplayMrp, getEffectivePrice } from "@/lib/pricing";
 const ProductDetails = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
-  const { products: allProducts } = useAdminData();
+  const { products: allProducts, isLoading } = useAdminData();
   const product = allProducts.find((p) => p.id === Number(id));
 
   const variants = product?.variants || [];
@@ -48,6 +48,14 @@ const ProductDetails = () => {
     [allProducts, product]
   );
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen bg-background">
@@ -63,6 +71,7 @@ const ProductDetails = () => {
       </div>
     );
   }
+
 
   const allMedia = uniqueMediaUrls([
     ...(selectedVariant?.images?.map((img) => img.imageUrl) || []),
