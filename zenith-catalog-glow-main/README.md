@@ -30,7 +30,7 @@ Default admin login:
 
 ## Render Deployment
 
-This repo now includes a Render Blueprint at [render.yaml](../render.yaml) and a multi-stage Docker build at [Dockerfile](./Dockerfile).
+This repo now includes a Render Blueprint at [render.yaml](../render.yaml), a repo-root Dockerfile for direct Docker-based deploys, and the app's multi-stage Docker build at [Dockerfile](./Dockerfile).
 
 What it deploys:
 
@@ -63,7 +63,7 @@ Optional environment variables:
 Deploy flow:
 
 1. Push this repo to GitHub.
-2. In Render, create a new Blueprint instance from the repo.
+2. In Render, either create a new Blueprint instance from the repo or point a Docker web service at the repo root.
 3. Confirm the web service and Postgres database from [render.yaml](../render.yaml).
 4. Set `APP_ADMIN_SECRET` when Render prompts for it.
 5. Deploy.

@@ -1,0 +1,12 @@
+.git
+.tmp
+.vscode
+.zencoder
+.zenflow
+backend
+
+zenith-catalog-glow-main/node_modules
+zenith-catalog-glow-main/dist
+zenith-catalog-glow-main/backend/target
+zenith-catalog-glow-main/backend/data
+zenith-catalog-glow-main/backend/uploads

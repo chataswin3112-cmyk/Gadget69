@@ -4,8 +4,9 @@ services:
     runtime: docker
     plan: starter
     region: singapore
-    dockerfilePath: ./zenith-catalog-glow-main/Dockerfile
-    dockerContext: ./zenith-catalog-glow-main
+    rootDir: zenith-catalog-glow-main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     autoDeployTrigger: commit
     healthCheckPath: /api/health
     disk:
