@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import MediaUploadField from "@/components/admin/MediaUploadField";
+import MediaImage from "@/components/ui/media-image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Star } from "lucide-react";
@@ -16,7 +18,33 @@ const emptyReview: Partial<Review> = {
   name: "",
   rating: 5,
   comment: "",
+  avatar: "",
   date: new Date().toISOString().slice(0, 10),
+};
+
+const ReviewAvatar = ({ review }: { review: Review }) => {
+  const initials = review.name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  if (review.avatar) {
+    return (
+      <MediaImage
+        src={review.avatar}
+        alt={review.name}
+        className="h-10 w-10 flex-shrink-0 rounded-full border border-border/70 object-cover"
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold font-heading text-amber-700">
+      {initials}
+    </div>
+  );
 };
 
 const StarPicker = ({
@@ -134,15 +162,7 @@ const AdminReviews = () => {
                 key={review.id}
                 className="flex items-start gap-4 rounded-xl bg-card shadow-sm border border-border/60 p-4"
               >
-                {/* Avatar */}
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 text-xs font-bold font-heading">
-                  {review.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2)}
-                </div>
+                <ReviewAvatar review={review} />
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -218,6 +238,15 @@ const AdminReviews = () => {
                 }
               />
             </div>
+            <MediaUploadField
+              label="Reviewer Photo"
+              value={editing?.avatar || ""}
+              accept="image/*"
+              placeholder="Upload or paste a reviewer image URL"
+              onChange={(value) =>
+                setEditing((prev) => prev ? { ...prev, avatar: value } : prev)
+              }
+            />
             <div className="space-y-2">
               <Label className="font-body">Review Comment</Label>
               <Textarea

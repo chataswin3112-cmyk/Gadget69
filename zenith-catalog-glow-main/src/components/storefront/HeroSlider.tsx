@@ -54,9 +54,9 @@ const HeroSlider = () => {
           )}
           aria-hidden={i !== current}
         >
-          {/* Ken Burns zoom on active slide */}
+          {/* Hero Image — uses mobile source if available and on small screens */}
           <MediaImage
-            src={banner.desktopImageUrl}
+            src={banner.mobileImageUrl && window.innerWidth < 768 ? banner.mobileImageUrl : banner.desktopImageUrl}
             alt={banner.title || "Banner"}
             className={cn(
               "w-full h-full object-cover transition-transform ease-out",

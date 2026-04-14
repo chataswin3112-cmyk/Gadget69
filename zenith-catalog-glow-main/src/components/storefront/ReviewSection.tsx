@@ -2,6 +2,7 @@ import { Star, Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { mockReviews } from "@/data/mockData";
+import MediaImage from "@/components/ui/media-image";
 
 const AVATAR_COLORS = [
   "bg-amber-100 text-amber-700",
@@ -44,7 +45,7 @@ const ReviewSection = () => {
   ).toFixed(1);
 
   return (
-    <section className="section-padding overflow-hidden">
+    <section className="section-padding overflow-hidden group">
       <div className="section-container">
         {/* Header */}
         <div className="mb-10 flex flex-col items-center text-center">
@@ -69,7 +70,7 @@ const ReviewSection = () => {
 
         {/* Single infinite marquee row */}
         <div className="relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-          <div className="flex animate-marquee-left gap-4 will-change-transform">
+          <div className="flex animate-marquee-left gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
             {[...filled, ...filled].map((review, i) => (
               <ReviewCard
                 key={`${review.id}-${i}`}
@@ -85,18 +86,50 @@ const ReviewSection = () => {
 };
 
 interface ReviewCardProps {
-  review: { id: number; name: string; rating: number; comment: string; date: string };
+  review: { id: number; name: string; rating: number; comment: string; avatar?: string; date: string };
   index: number;
 }
 
-const ReviewCard = ({ review, index }: ReviewCardProps) => {
-  const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
-  const initials = review.name
+const ReviewAvatar = ({
+  name,
+  avatar,
+  colorClass,
+}: {
+  name: string;
+  avatar?: string;
+  colorClass: string;
+}) => {
+  const initials = name
     .split(" ")
-    .map((n) => n[0])
+    .map((part) => part[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  if (avatar) {
+    return (
+      <MediaImage
+        src={avatar}
+        alt={name}
+        className="h-10 w-10 flex-shrink-0 rounded-full border border-white/80 object-cover shadow-sm"
+      />
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold font-heading",
+        colorClass
+      )}
+    >
+      {initials}
+    </div>
+  );
+};
+
+const ReviewCard = ({ review, index }: ReviewCardProps) => {
+  const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
 
   return (
     <div className="relative w-[280px] flex-shrink-0 overflow-hidden rounded-[20px] border border-white/78 bg-white/90 p-5 shadow-[0_14px_36px_-22px_hsl(var(--surface-shadow)/0.26)] backdrop-blur-sm md:w-[320px]">
@@ -109,14 +142,7 @@ const ReviewCard = ({ review, index }: ReviewCardProps) => {
       </p>
 
       <div className="mt-4 flex items-center gap-3 border-t border-[hsl(var(--surface-line))] pt-3">
-        <div
-          className={cn(
-            "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold font-heading",
-            avatarColor
-          )}
-        >
-          {initials}
-        </div>
+        <ReviewAvatar name={review.name} avatar={review.avatar} colorClass={avatarColor} />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground font-heading">
             {review.name}

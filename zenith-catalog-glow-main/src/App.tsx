@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,26 +10,37 @@ import { AdminDataProvider } from "@/contexts/AdminDataContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 
-import Index from "./pages/Index";
-import Products from "./pages/Products";
-import ProductDetails from "./pages/ProductDetails";
-import Categories from "./pages/Categories";
-import CategoryDetails from "./pages/CategoryDetails";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import CheckoutSuccess from "./pages/CheckoutSuccess";
-import Contact from "./pages/Contact";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminCategories from "./pages/admin/AdminCategories";
-import AdminProducts from "./pages/admin/AdminProducts";
-import AdminOffers from "./pages/admin/AdminOffers";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminBanners from "./pages/admin/AdminBanners";
-import AdminMedia from "./pages/admin/AdminMedia";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminReviews from "./pages/admin/AdminReviews";
-import NotFound from "./pages/NotFound";
+// Lazy-loaded components for better mobile performance
+const Index = lazy(() => import("./pages/Index"));
+const Products = lazy(() => import("./pages/Products"));
+const ProductDetails = lazy(() => import("./pages/ProductDetails"));
+const Categories = lazy(() => import("./pages/Categories"));
+const CategoryDetails = lazy(() => import("./pages/CategoryDetails"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
+const Contact = lazy(() => import("./pages/Contact"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminOffers = lazy(() => import("./pages/admin/AdminOffers"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminBanners = lazy(() => import("./pages/admin/AdminBanners"));
+const AdminMedia = lazy(() => import("./pages/admin/AdminMedia"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
+const AdminSpeedTest = lazy(() => import("./pages/admin/AdminSpeedTest"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Premium loading fallback
+const PageLoader = () => (
+  <div className="flex h-screen w-full flex-col items-center justify-center bg-background/50 backdrop-blur-sm">
+    <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent border-t-transparent"></div>
+    <p className="mt-4 text-sm font-medium text-muted-foreground animate-pulse">Loading...</p>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -42,28 +54,32 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:id" element={<ProductDetails />} />
-                <Route path="/categories" element={<Categories />} />
-                <Route path="/categories/:id" element={<CategoryDetails />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/admin" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                <Route path="/admin/categories" element={<ProtectedRoute><AdminCategories /></ProtectedRoute>} />
-                <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
-                <Route path="/admin/offers" element={<ProtectedRoute><AdminOffers /></ProtectedRoute>} />
-                <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
-                <Route path="/admin/banners" element={<ProtectedRoute><AdminBanners /></ProtectedRoute>} />
-                <Route path="/admin/media" element={<ProtectedRoute><AdminMedia /></ProtectedRoute>} />
-                <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
-                <Route path="/admin/reviews" element={<ProtectedRoute><AdminReviews /></ProtectedRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products/:id" element={<ProductDetails />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/categories/:id" element={<CategoryDetails />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/refund-policy" element={<RefundPolicy />} />
+                  <Route path="/admin" element={<AdminLogin />} />
+                  <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                  <Route path="/admin/categories" element={<ProtectedRoute><AdminCategories /></ProtectedRoute>} />
+                  <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+                  <Route path="/admin/offers" element={<ProtectedRoute><AdminOffers /></ProtectedRoute>} />
+                  <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
+                  <Route path="/admin/banners" element={<ProtectedRoute><AdminBanners /></ProtectedRoute>} />
+                  <Route path="/admin/media" element={<ProtectedRoute><AdminMedia /></ProtectedRoute>} />
+                  <Route path="/admin/speed-test" element={<ProtectedRoute><AdminSpeedTest /></ProtectedRoute>} />
+                  <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
+                  <Route path="/admin/reviews" element={<ProtectedRoute><AdminReviews /></ProtectedRoute>} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
             </BrowserRouter>
           </CartProvider>
         </AdminDataProvider>

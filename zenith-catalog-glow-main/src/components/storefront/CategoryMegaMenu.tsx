@@ -15,7 +15,7 @@ const CategoryMegaMenu = () => {
     .slice(0, 5);
 
   return (
-    <div className="absolute top-full left-0 right-0 bg-card border-b border-border shadow-premium-hover z-50">
+    <div className="absolute top-full left-0 right-0 bg-card border-b border-border shadow-premium-hover z-50 overflow-y-auto max-h-[calc(100vh-5rem)]">
       <div className="section-container py-6">
         <div className="grid grid-cols-12 gap-6">
           {/* Category list */}

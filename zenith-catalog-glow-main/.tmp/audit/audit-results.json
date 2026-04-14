@@ -1,0 +1,698 @@
+{
+  "publicDesktop": [
+    {
+      "label": "home",
+      "route": "/",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "New Gadget Pro Max",
+        "Pure Sound, All Day",
+        "Explore Categories",
+        "Browse All Products",
+        "New Launches",
+        "Top Categories",
+        "Smartphones",
+        "Laptops"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 740,
+        "loadMs": 5655,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [
+        "GET https://www.w3schools.com/html/mov_bbb.mp4 :: net::ERR_ABORTED",
+        "GET https://images.unsplash.com/photo-1593640408182-31c228cc32d2?w=960&h=540&fit=crop :: net::ERR_BLOCKED_BY_ORB",
+        "GET https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900 :: net::ERR_BLOCKED_BY_ORB",
+        "GET https://www.w3schools.com/html/mov_bbb.mp4 :: net::ERR_ABORTED"
+      ],
+      "elapsedMs": 8610
+    },
+    {
+      "label": "products",
+      "route": "/products",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/products",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Products"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 543,
+        "loadMs": 703,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2259
+    },
+    {
+      "label": "categories",
+      "route": "/categories",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/categories",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "All Categories"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 474,
+        "loadMs": 617,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2177
+    },
+    {
+      "label": "cart",
+      "route": "/cart",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/cart",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Your Cart is Empty"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 363,
+        "loadMs": 509,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1962
+    },
+    {
+      "label": "checkout",
+      "route": "/checkout",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/checkout",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Checkout",
+        "Order Summary"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 382,
+        "loadMs": 557,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2083
+    },
+    {
+      "label": "contact",
+      "route": "/contact",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/contact",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Contact Us"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 392,
+        "loadMs": 547,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2113
+    },
+    {
+      "label": "admin-login",
+      "route": "/admin",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Sign In"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 364,
+        "loadMs": 474,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Admin Panel Sign In Email Password Sign In Default admin: admin@gadget69.com / admin123",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1980
+    },
+    {
+      "label": "product-detail",
+      "route": "/products/1",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/products/1",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Gadget Pro Max"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 330,
+        "loadMs": 379,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2290
+    },
+    {
+      "label": "category-detail",
+      "route": "/categories/3",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/categories/3",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Audio"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 363,
+        "loadMs": 525,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [
+        "GET https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900 :: net::ERR_BLOCKED_BY_ORB"
+      ],
+      "elapsedMs": 2325
+    }
+  ],
+  "publicMobile": [
+    {
+      "label": "home-mobile",
+      "route": "/",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "New Gadget Pro Max",
+        "Pure Sound, All Day",
+        "Explore Categories",
+        "Browse All Products",
+        "New Launches",
+        "Top Categories",
+        "Smartphones",
+        "Laptops"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 478,
+        "loadMs": 2445,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 398,
+        "scrollWidth": 398,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [
+        "GET https://images.unsplash.com/photo-1593640408182-31c228cc32d2?w=960&h=540&fit=crop :: net::ERR_BLOCKED_BY_ORB",
+        "GET https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900 :: net::ERR_BLOCKED_BY_ORB",
+        "GET https://www.w3schools.com/html/mov_bbb.mp4 :: net::ERR_ABORTED",
+        "GET https://www.w3schools.com/html/mov_bbb.mp4 :: net::ERR_ABORTED"
+      ],
+      "elapsedMs": 6267
+    },
+    {
+      "label": "products-mobile",
+      "route": "/products",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/products",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Products"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 317,
+        "loadMs": 461,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1846
+    },
+    {
+      "label": "categories-mobile",
+      "route": "/categories",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/categories",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "All Categories"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 336,
+        "loadMs": 468,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1878
+    },
+    {
+      "label": "contact-mobile",
+      "route": "/contact",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/contact",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Contact Us"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 326,
+        "loadMs": 487,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1829
+    },
+    {
+      "label": "admin-mobile",
+      "route": "/admin",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Sign In"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 300,
+        "loadMs": 407,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Admin Panel Sign In Email Password Sign In Default admin: admin@gadget69.com / admin123",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1743
+    },
+    {
+      "label": "product-detail-mobile",
+      "route": "/products/1",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/products/1",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Gadget Pro Max"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 279,
+        "loadMs": 327,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA ✦ FREE SHIPPING ON ORDERS OVER RS. 999 ✦ NEW ARRIVALS EVERY WEEK ✦ EASY ADMIN UPDATES FOR PRODUCTS, BAN",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2194
+    }
+  ],
+  "admin": [
+    {
+      "label": "admin-login-flow",
+      "finalUrl": "http://127.0.0.1:5173/admin/dashboard",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": []
+    },
+    {
+      "label": "admin-dashboard",
+      "route": "/admin/dashboard",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/dashboard",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Dashboard",
+        "Top Selling Products"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 394,
+        "loadMs": 685,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Dashboard Revenue, order conversion, and top-selling products in one place. Manage Products Manage Offers View ",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2251
+    },
+    {
+      "label": "admin-categories",
+      "route": "/admin/categories",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/categories",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Categories"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 336,
+        "loadMs": 1341,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Categories 3 categories Add Category IMAGE NAME ACTIVE EXPLORE TOP ACTIONS Smartphones Laptops Audio",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2673
+    },
+    {
+      "label": "admin-products",
+      "route": "/admin/products",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/products",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Products"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 654,
+        "loadMs": 791,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Products 3 products Manage Offers Add Product IMAGE NAME CATEGORY PRICE OFFER STOCK BADGES ACTIONS Gadget Pro M",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [
+        "GET https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900 :: net::ERR_BLOCKED_BY_ORB"
+      ],
+      "elapsedMs": 2421
+    },
+    {
+      "label": "admin-offers",
+      "route": "/admin/offers",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/offers",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Offers"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 337,
+        "loadMs": 519,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Offers Schedule product offers with automatic start and end dates. Back to Products PRODUCT BASE PRICE OFFER PR",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1850
+    },
+    {
+      "label": "admin-orders",
+      "route": "/admin/orders",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/orders",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Orders"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 332,
+        "loadMs": 475,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Orders Latest customer orders. This list auto-refreshes every 30 seconds. Last updated: 13:13:37 Refresh Now No",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1836
+    },
+    {
+      "label": "admin-banners",
+      "route": "/admin/banners",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/banners",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Banners"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 332,
+        "loadMs": 488,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Banners Hero slider banners Add Banner New Gadget Pro Max CTA: Shop Now - Order: 0 Pure Sound, All Day CTA: Exp",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2036
+    },
+    {
+      "label": "admin-media",
+      "route": "/admin/media",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/media",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Community Media"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 328,
+        "loadMs": 476,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Community Media Manage homepage reels, images, and videos. Add Media Premium Sound Experience IMAGE - Order 0 P",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 2086
+    },
+    {
+      "label": "admin-settings",
+      "route": "/admin/settings",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/settings",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Settings",
+        "Change Admin Password"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 388,
+        "loadMs": 576,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Settings Store configuration Change Admin Password OTP will be sent to WhatsApp +91 88256 02356 1. Request OTP ",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1923
+    },
+    {
+      "label": "admin-reviews",
+      "route": "/admin/reviews",
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:5173/admin/reviews",
+      "title": "Gadget69 — Premium Electronics",
+      "headings": [
+        "Reviews"
+      ],
+      "metrics": {
+        "domContentLoadedMs": 323,
+        "loadMs": 445,
+        "transferSize": 1367,
+        "decodedBodySize": 1067
+      },
+      "layout": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "hasHorizontalOverflow": false,
+        "bodyPreview": "Dashboard Categories Products Offers Orders Banners Media Reviews Settings Logout Toggle Sidebar Admin Panel Reviews Manage homepage customer reviews Add Review AM Arjun Mehta 2024-03-10 The Gadget Pro Max is absolutely ",
+        "notFoundLike": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "elapsedMs": 1782
+    }
+  ],
+  "detailRoutes": {
+    "productDetail": "/products/1",
+    "categoryDetail": "/categories/3"
+  }
+}

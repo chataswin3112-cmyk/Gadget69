@@ -16,7 +16,7 @@ const ProductMarqueeSection = () => {
   const rowB = [...shuffled.reverse(), ...shuffled]; // reverse order for row B
 
   return (
-    <section className="section-padding overflow-hidden">
+    <section className="section-padding overflow-hidden group">
       <div className="section-container mb-8">
         <div className="flex flex-col items-center text-center">
           <p className="mb-2 font-body text-xs font-medium uppercase tracking-[0.22em] text-accent">
@@ -33,7 +33,7 @@ const ProductMarqueeSection = () => {
 
       {/* Row 1 — scrolls left slowly */}
       <div className="mb-4 flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-        <div className="flex animate-product-left gap-4 will-change-transform">
+        <div className="flex animate-product-left gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
           {rowA.map((product, i) => (
             <ProductCard key={`a-${product.id}-${i}`} product={product} />
           ))}
@@ -42,7 +42,7 @@ const ProductMarqueeSection = () => {
 
       {/* Row 2 — scrolls right slowly */}
       <div className="flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-        <div className="flex animate-product-right gap-4 will-change-transform">
+        <div className="flex animate-product-right gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
           {rowB.map((product, i) => (
             <ProductCard key={`b-${product.id}-${i}`} product={product} />
           ))}

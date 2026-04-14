@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useAdminData } from "@/contexts/AdminDataContext";
-import { ArrowUp, Instagram, Facebook } from "lucide-react";
+import { ArrowUp, Facebook, Instagram } from "lucide-react";
 import gadget69Logo from "@/assets/gadget69-logo.png";
 import { resolveMediaUrl } from "@/lib/media";
+import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/social-links";
 
 const WhatsAppIcon = () => (
   <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
@@ -12,109 +13,99 @@ const WhatsAppIcon = () => (
 
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
+const footerLinkClass = "text-xs text-white/60 transition-colors hover:text-white font-body";
+const footerHeadingClass = "text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 font-heading";
+
 const Footer = () => {
   const { settings } = useAdminData();
 
   return (
     <footer className="bg-[#0f0f0f] text-white">
-      <div className="section-container py-12">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 md:grid-cols-4 items-start">
-
-          {/* Brand column — heading placeholder keeps logo top-aligned with sibling column headings */}
-          <div className="col-span-2 sm:col-span-1 flex flex-col">
-            {/* Matches the heading row height (11px text + line-height) + gap-3 below it */}
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-transparent select-none font-heading" aria-hidden="true">
-              Brand
-            </p>
-            {/* Logo — sits in same row as first links of other columns */}
-            <div className="mt-3">
+      <div className="section-container px-6 py-10 sm:px-8 sm:py-11">
+        <div className="grid grid-cols-1 gap-8 border-b border-white/10 pb-8 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,0.9fr))] lg:gap-x-10">
+          <div className="flex flex-col items-start text-left">
+            <div className="mb-3">
               <img
                 src={settings.logoUrl || gadget69Logo}
                 alt={settings.siteTitle || "Gadget69"}
-                style={{ width: "110px", height: "auto" }}
+                style={{ width: "120px", height: "auto" }}
                 className="brightness-0 invert"
               />
             </div>
-            {/* Description */}
             {settings.footerText && (
-              <p className="mt-3 text-xs leading-relaxed text-white/55 font-body max-w-[200px]">
+              <p className="max-w-sm text-xs leading-6 text-white/55 font-body">
                 {settings.footerText}
               </p>
             )}
-            {/* Social icons */}
-            <div className="mt-4 flex items-center gap-2">
+            <div className="mt-5 flex items-center gap-3">
               <a
-                href={settings.instagramUrl || "https://instagram.com"}
-                target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/70 transition-all duration-200 hover:bg-[#E1306C] hover:text-white hover:scale-110"
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#E1306C] hover:text-white hover:scale-110"
               >
-                <Instagram className="h-3.5 w-3.5" />
+                <Instagram className="h-4 w-4" />
               </a>
               <a
                 href={settings.facebookUrl || "https://facebook.com"}
-                target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/70 transition-all duration-200 hover:bg-[#1877F2] hover:text-white hover:scale-110"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#1877F2] hover:text-white hover:scale-110"
               >
-                <Facebook className="h-3.5 w-3.5" />
+                <Facebook className="h-4 w-4" />
               </a>
               <a
-                href={settings.whatsappNumber ? `https://wa.me/${settings.whatsappNumber}` : "https://wa.me/"}
-                target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/70 transition-all duration-200 hover:bg-[#25D366] hover:text-white hover:scale-110"
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white hover:scale-110"
               >
                 <WhatsAppIcon />
               </a>
             </div>
           </div>
 
-          {/* Shop */}
-          <div className="flex flex-col gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40 font-heading">
-              Shop
-            </p>
-            <div className="flex flex-col gap-2.5">
-              <Link to="/products" className="text-xs text-white/65 hover:text-white transition-colors font-body">All Products</Link>
-              <Link to="/categories" className="text-xs text-white/65 hover:text-white transition-colors font-body">Categories</Link>
-              <Link to="/products?filter=new" className="text-xs text-white/65 hover:text-white transition-colors font-body">New Launches</Link>
-              <Link to="/products?filter=best" className="text-xs text-white/65 hover:text-white transition-colors font-body">Best Sellers</Link>
-            </div>
+          <div className="space-y-4 text-left">
+            <p className={footerHeadingClass}>Shop</p>
+            <nav className="flex flex-col items-start gap-2.5">
+              <Link to="/products" className={footerLinkClass}>All Products</Link>
+              <Link to="/categories" className={footerLinkClass}>Categories</Link>
+              <Link to="/products?filter=new" className={footerLinkClass}>New Launches</Link>
+              <Link to="/products?filter=best" className={footerLinkClass}>Best Sellers</Link>
+            </nav>
           </div>
 
-          {/* Company */}
-          <div className="flex flex-col gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40 font-heading">
-              Company
-            </p>
-            <div className="flex flex-col gap-2.5">
-              <Link to="/contact" className="text-xs text-white/65 hover:text-white transition-colors font-body">Contact Us</Link>
+          <div className="space-y-4 text-left">
+            <p className={footerHeadingClass}>Company</p>
+            <nav className="flex flex-col items-start gap-2.5">
+              <Link to="/contact" className={footerLinkClass}>Contact Us</Link>
               {settings.catalogueUrl && (
-                <a href={resolveMediaUrl(settings.catalogueUrl)} className="text-xs text-white/65 hover:text-white transition-colors font-body">Catalogue</a>
+                <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>Catalogue</a>
               )}
-            </div>
+            </nav>
           </div>
 
-          {/* Legal */}
-          <div className="flex flex-col gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40 font-heading">
-              Legal
-            </p>
-            <div className="flex flex-col gap-2.5">
-              <span className="text-xs text-white/65 cursor-default font-body">Privacy Policy</span>
-              <span className="text-xs text-white/65 cursor-default font-body">Terms of Service</span>
-              <span className="text-xs text-white/65 cursor-default font-body">Refund Policy</span>
-            </div>
+          <div className="space-y-4 text-left">
+            <p className={footerHeadingClass}>Legal</p>
+            <nav className="flex flex-col items-start gap-2.5">
+              <span className="text-xs text-white/60 cursor-default font-body">Privacy Policy</span>
+              <span className="text-xs text-white/60 cursor-default font-body">Terms of Service</span>
+              <Link to="/refund-policy" className={footerLinkClass}>Refund Policy</Link>
+            </nav>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-6 text-[11px] font-body text-white/30 mr-16 md:mr-20">
-          <span>© {new Date().getFullYear()} {settings.siteTitle || "Gadget69"}. All rights reserved.</span>
+        <div className="flex flex-col gap-3 pt-5 text-[11px] font-body text-white/30 sm:flex-row sm:items-center sm:justify-between">
+          <span>Copyright {new Date().getFullYear()} {settings.siteTitle || "Gadget69"}. All rights reserved.</span>
           <button
             onClick={scrollToTop}
             aria-label="Back to top"
-            className="inline-flex items-center gap-1.5 text-[11px] text-white/30 font-medium transition-all duration-200 hover:text-white hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 text-[11px] font-semibold text-white/30 transition-all duration-300 hover:-translate-y-1 hover:text-white"
           >
-            Back to top <ArrowUp className="h-3 w-3" />
+            BACK TO TOP <ArrowUp className="h-3 w-3" />
           </button>
         </div>
       </div>

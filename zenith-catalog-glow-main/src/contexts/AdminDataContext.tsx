@@ -59,6 +59,45 @@ const sortBanners = (items: Banner[]) =>
 const sortCommunity = (items: CommunityMedia[]) =>
   [...items].sort((a, b) => a.displayOrder - b.displayOrder || a.id - b.id);
 
+const REVIEWS_STORAGE_KEY = "gadget69_admin_reviews";
+
+const loadStoredReviews = (): Review[] | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(REVIEWS_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return null;
+    }
+
+    return parsed.map((item, index) => ({
+      id: Number(item?.id) || index + 1,
+      name: typeof item?.name === "string" ? item.name : "Anonymous",
+      rating: typeof item?.rating === "number" ? item.rating : 5,
+      comment: typeof item?.comment === "string" ? item.comment : "",
+      avatar: typeof item?.avatar === "string" ? item.avatar : undefined,
+      date: typeof item?.date === "string" ? item.date : new Date().toISOString().slice(0, 10),
+    }));
+  } catch {
+    return null;
+  }
+};
+
+const persistReviews = (items: Review[]) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(items));
+};
+
 export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const [sections, setSections] = useState<Section[]>([]);
@@ -95,7 +134,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setBanners(sortBanners(bannersData as Banner[]));
       setSettings(settingsData as StoreSettings);
       setCommunityMedia(sortCommunity(communityData as CommunityMedia[]));
-      setReviews(mockReviews);
+      setReviews(loadStoredReviews() ?? mockReviews);
     } catch (error) {
       console.warn("Unexpected error loading data — using full mock", error);
       setSections(sortSections(mockSections));
@@ -103,7 +142,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setBanners(sortBanners(mockBanners));
       setSettings(mockSettings);
       setCommunityMedia(sortCommunity(mockCommunityMedia));
-      setReviews(mockReviews);
+      setReviews(loadStoredReviews() ?? mockReviews);
     } finally {
       setIsLoading(false);
     }
@@ -194,25 +233,36 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       name: review.name || "Anonymous",
       rating: review.rating ?? 5,
       comment: review.comment || "",
+      avatar: review.avatar,
       date: review.date || new Date().toISOString().slice(0, 10),
     };
-    setReviews((prev) => [...prev, created]);
+    setReviews((prev) => {
+      const next = [...prev, created];
+      persistReviews(next);
+      return next;
+    });
     return created;
   }, [nextReviewId]);
 
   const updateReview = useCallback(async (id: number, data: Partial<Review>): Promise<Review> => {
     let updated!: Review;
-    setReviews((prev) =>
-      prev.map((r) => {
+    setReviews((prev) => {
+      const next = prev.map((r) => {
         if (r.id === id) { updated = { ...r, ...data }; return updated; }
         return r;
-      })
-    );
+      });
+      persistReviews(next);
+      return next;
+    });
     return updated;
   }, []);
 
   const deleteReview = useCallback(async (id: number) => {
-    setReviews((prev) => prev.filter((r) => r.id !== id));
+    setReviews((prev) => {
+      const next = prev.filter((r) => r.id !== id);
+      persistReviews(next);
+      return next;
+    });
   }, []);
 
   const value = useMemo(

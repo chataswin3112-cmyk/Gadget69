@@ -1,4 +1,5 @@
 import { Section, Product, Banner, StoreSettings, Review, CommunityMedia } from "@/types";
+import { INSTAGRAM_URL, WHATSAPP_NUMBER } from "@/lib/social-links";
 
 export const mockSections: Section[] = [
   { id: 1, name: "Smartphones", description: "Premium flagship smartphones", imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600", is_active: true, show_in_explore: true, show_in_top_category: true },
@@ -79,9 +80,9 @@ export const mockSettings: StoreSettings = {
     "New arrivals every week — stay tuned!",
     "2-year warranty on all products",
   ],
-  instagramUrl: "https://instagram.com",
+  instagramUrl: INSTAGRAM_URL,
   facebookUrl: "https://facebook.com",
-  whatsappNumber: "919876543210",
+  whatsappNumber: WHATSAPP_NUMBER,
   catalogueUrl: "#",
   contactUrl: "/contact",
   footerText: "Premium electronics crafted for those who demand excellence. Experience luxury technology.",
@@ -152,4 +153,3 @@ export const mockReviews: Review[] = [
   { id: 8, name: "Ananya Patel", rating: 5, comment: "The GaN 65W charger is tiny but powerful. Charges my laptop, phone and earbuds all at once. Highly recommend.", date: "2024-02-20" },
   { id: 9, name: "Vikram Suresh", rating: 4, comment: "Gaming headset audio clarity is phenomenal. The boom mic picks up every word clearly, even in loud rooms.", date: "2024-03-08" },
 ];
-

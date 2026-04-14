@@ -27,4 +27,17 @@ export default defineConfig({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["@radix-ui/react-accordion", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "lucide-react"],
+          animations: ["framer-motion"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 });

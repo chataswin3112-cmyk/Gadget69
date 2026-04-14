@@ -11,6 +11,7 @@ interface MediaFrameProps {
   className?: string;
   padding?: string;
   objectFit?: "contain" | "cover";
+  loading?: "lazy" | "eager";
 }
 
 const MediaFrame = ({
@@ -20,6 +21,7 @@ const MediaFrame = ({
   className,
   padding = "p-4",
   objectFit = "contain",
+  loading = "lazy",
 }: MediaFrameProps) => {
   const hasVideo = isVideoUrl(src);
 
@@ -46,7 +48,7 @@ const MediaFrame = ({
         src={src}
         alt={alt}
         className={cn("w-full h-full", objectFit === "contain" ? "object-contain" : "object-cover")}
-        loading="lazy"
+        loading={loading}
       />
     )}
     </div>

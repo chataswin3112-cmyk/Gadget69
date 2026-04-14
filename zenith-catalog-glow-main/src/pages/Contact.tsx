@@ -5,6 +5,7 @@ import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import { useAdminData } from "@/contexts/AdminDataContext";
+import { INSTAGRAM_URL, WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/social-links";
 import { toast } from "sonner";
 
 const Contact = () => {
@@ -80,16 +81,14 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-heading font-semibold text-foreground">WhatsApp</h3>
-                  {settings.whatsappNumber && (
-                    <a
-                      href={`https://wa.me/${settings.whatsappNumber}`}
-                      className="text-sm text-muted-foreground hover:text-accent font-body"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      +{settings.whatsappNumber}
-                    </a>
-                  )}
+                  <a
+                    href={WHATSAPP_URL}
+                    className="text-sm text-muted-foreground hover:text-accent font-body"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {WHATSAPP_DISPLAY}
+                  </a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -99,11 +98,9 @@ const Contact = () => {
                 <div>
                   <h3 className="font-heading font-semibold text-foreground">Social</h3>
                   <div className="flex gap-3 mt-1">
-                    {settings.instagramUrl && (
-                      <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-accent font-body">
-                        Instagram
-                      </a>
-                    )}
+                    <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-accent font-body">
+                      Instagram
+                    </a>
                     {settings.facebookUrl && (
                       <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-accent font-body">
                         Facebook

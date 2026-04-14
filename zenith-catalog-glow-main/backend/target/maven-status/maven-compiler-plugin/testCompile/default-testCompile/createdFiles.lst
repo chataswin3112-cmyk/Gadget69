@@ -1,5 +1,5 @@
-com\gadget69\catalog\controller\CommunityMediaPortraitVideoTest.class
 com\gadget69\catalog\controller\AdminOfferUpdateTest.class
-com\gadget69\catalog\controller\AdminDashboardAndOrderPricingTest.class
 com\gadget69\catalog\controller\CommunityVideoUploadSignatureEndpointTest.class
+com\gadget69\catalog\controller\CommunityMediaPortraitVideoTest.class
+com\gadget69\catalog\controller\AdminDashboardAndOrderPricingTest.class
 com\gadget69\catalog\service\ProductPricingServiceTest.class

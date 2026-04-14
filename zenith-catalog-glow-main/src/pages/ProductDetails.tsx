@@ -122,6 +122,7 @@ const ProductDetails = () => {
                 aspectRatio="aspect-square"
                 padding="p-8"
                 className="bg-secondary/20"
+                loading="eager"
               />
             </div>
             {allMedia.length > 1 && (
