@@ -30,7 +30,7 @@ public class CatalogApplication {
     if (result.mode() == Mode.EMBEDDED_H2) {
       log.warn(
           "No Postgres connection env found; falling back to embedded H2 at {}. "
-              + "Set DATABASE_URL, SPRING_DATASOURCE_URL, or PG*/POSTGRES_* env vars to use Postgres.",
+              + "Set DATABASE_URL, SPRING_DATASOURCE_*, or PG*/POSTGRES_* env vars to use Postgres.",
           result.detail());
     }
   }

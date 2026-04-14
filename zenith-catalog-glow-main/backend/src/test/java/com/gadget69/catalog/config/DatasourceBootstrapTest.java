@@ -52,6 +52,28 @@ class DatasourceBootstrapTest {
   }
 
   @Test
+  void prefersExplicitSpringDatasourceSettingsOverDatabaseUrl() {
+    Properties systemProperties = new Properties();
+
+    BootstrapResult result =
+        DatasourceBootstrap.configure(
+            systemProperties,
+            Map.of(
+                "DATABASE_URL",
+                "postgresql://render_user:render_secret@render.example.com/catalog",
+                "SPRING_DATASOURCE_URL",
+                "postgres://manual_user:manual_secret@manual.example.com/manual_catalog"));
+
+    assertEquals(Mode.POSTGRES, result.mode());
+    assertEquals("spring.datasource.url/SPRING_DATASOURCE_URL", result.detail());
+    assertEquals(
+        "jdbc:postgresql://manual.example.com:5432/manual_catalog",
+        systemProperties.getProperty("spring.datasource.url"));
+    assertEquals("manual_user", systemProperties.getProperty("spring.datasource.username"));
+    assertEquals("manual_secret", systemProperties.getProperty("spring.datasource.password"));
+  }
+
+  @Test
   void configuresPostgresFromDiscretePgEnvironmentVariables() {
     Properties systemProperties = new Properties();
 
@@ -106,7 +128,7 @@ class DatasourceBootstrapTest {
 
     assertEquals(
         "Postgres is required, but no database connection settings were found. "
-            + "Set DATABASE_URL, SPRING_DATASOURCE_URL, or PG*/POSTGRES_* env vars.",
+            + "Set DATABASE_URL, SPRING_DATASOURCE_*, or PG*/POSTGRES_* env vars.",
         exception.getMessage());
   }
 

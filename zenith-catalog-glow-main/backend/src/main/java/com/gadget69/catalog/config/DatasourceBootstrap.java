@@ -62,7 +62,7 @@ public final class DatasourceBootstrap {
     if (requirePostgres) {
       throw new IllegalStateException(
           "Postgres is required, but no database connection settings were found. "
-              + "Set DATABASE_URL, SPRING_DATASOURCE_URL, or PG*/POSTGRES_* env vars.");
+              + "Set DATABASE_URL, SPRING_DATASOURCE_*, or PG*/POSTGRES_* env vars.");
     }
 
     String normalizedDataDir = normalizeDataDir(environment);
