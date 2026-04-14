@@ -4,7 +4,6 @@ services:
     runtime: docker
     plan: starter
     region: singapore
-    rootDir: zenith-catalog-glow-main
     dockerfilePath: ./Dockerfile
     dockerContext: .
     autoDeployTrigger: commit

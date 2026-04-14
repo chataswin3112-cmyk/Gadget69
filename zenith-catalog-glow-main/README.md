@@ -30,7 +30,7 @@ Default admin login:
 
 ## Render Deployment
 
-This repo now includes a Render Blueprint at [render.yaml](../render.yaml), a repo-root Dockerfile for direct Docker-based deploys, and the app's multi-stage Docker build at [Dockerfile](./Dockerfile).
+This repo now includes a Render Blueprint at [render.yaml](../render.yaml), a repo-root Dockerfile for direct Docker-based deploys, and the app's multi-stage Docker build at [Dockerfile](../Dockerfile).
 
 What it deploys:
 

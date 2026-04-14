@@ -76,7 +76,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const refreshAll = useCallback(async () => {
     setIsLoading(true);
 
-    const safeFetch = async <T>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+    const safeFetch = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
       try { return await fn(); } catch { return fallback; }
     };
 
