@@ -43,8 +43,9 @@ Core Render settings already handled in code:
 - Spring Boot binds to Render's `PORT`
 - the frontend is served by Spring Boot from the same origin
 - Render's `DATABASE_URL` is converted into a JDBC URL automatically at startup
+- Render deploys now fail fast if no Postgres env is present, instead of silently falling back to H2
 - uploaded files are stored at `APP_UPLOAD_DIR`, which the blueprint points to `/var/data/uploads`
-- if no Postgres env is present, the backend falls back to an embedded H2 file database
+- outside Render, or when `APP_REQUIRE_POSTGRES` is not enabled, the backend can still fall back to an embedded H2 file database
 
 Required environment variables:
 
