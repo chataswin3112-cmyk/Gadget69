@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -27,6 +28,13 @@ public class ApiExceptionHandler {
         .map(error -> error.getDefaultMessage() == null ? "Validation failed" : error.getDefaultMessage())
         .orElse("Validation failed"));
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<Map<String, String>> handleNoResourceFound(NoResourceFoundException exception) {
+    Map<String, String> body = new LinkedHashMap<>();
+    body.put("message", "Resource not found");
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
   }
 
   @ExceptionHandler(Exception.class)

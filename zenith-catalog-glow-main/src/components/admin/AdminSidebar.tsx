@@ -1,18 +1,29 @@
-import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, FolderOpen, Image, Settings, LogOut, Clapperboard, ShoppingBag, Tag, MessageSquare, Gauge } from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  Clapperboard,
+  FolderOpen,
+  Gauge,
+  Image,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  Package,
+  Settings,
+  ShoppingBag,
+  Tag,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import gadget69Logo from "@/assets/gadget69-logo.png";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 
@@ -43,22 +54,27 @@ const AdminSidebar = () => {
 
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader className="border-b border-sidebar-border/70 px-3 py-4">
+        {collapsed ? (
+          <div className="flex justify-center">
+            <img src={gadget69Logo} alt="Gadget69" className="h-8 w-auto" />
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <img src={gadget69Logo} alt="Gadget69" className="h-10 w-auto" />
+            <div className="flex flex-col leading-none">
+              <span className="font-heading text-xl font-bold text-foreground">Gadget69</span>
+              <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
+                Admin Panel
+              </span>
+            </div>
+          </div>
+        )}
+      </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="px-3 py-5">
-            {!collapsed && (
-              <div className="flex items-center gap-3">
-                <img src={gadget69Logo} alt="Gadget69" className="h-10 w-auto" />
-                <div className="flex flex-col leading-none">
-                  <span className="font-heading text-xl font-bold text-foreground">Gadget69</span>
-                  <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                    Admin Panel
-                  </span>
-                </div>
-              </div>
-            )}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="pt-2">
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
@@ -74,6 +90,7 @@ const AdminSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>

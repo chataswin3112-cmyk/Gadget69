@@ -66,10 +66,12 @@ public class AdminCatalogController {
   }
 
   @PostMapping("/request-password-otp")
-  public Map<String, String> requestPasswordOtp(HttpServletRequest httpRequest) {
-    authTokenService.requireAdmin(httpRequest);
-    otpService.sendPasswordOtp();
-    return Map.of("message", "OTP sent to registered WhatsApp number. Valid for 5 minutes.");
+  public ApiDtos.OtpDispatchResponse requestPasswordOtp(HttpServletRequest httpRequest) {
+    AdminUser adminUser = authTokenService.requireAdmin(httpRequest);
+    StoreSettings settings = getOrCreateSettings();
+    OtpService.OtpDispatchResult result =
+        otpService.sendPasswordOtp(adminUser, settings.getWhatsappNumber());
+    return new ApiDtos.OtpDispatchResponse(result.message(), result.recipient());
   }
 
   @PostMapping("/change-password-with-otp")
@@ -123,8 +125,7 @@ public class AdminCatalogController {
           return new TopSellingStats(
               existing.productName(),
               existing.unitsSold() + quantity,
-              existing.revenue().add(lineRevenue)
-          );
+              existing.revenue().add(lineRevenue));
         });
       }
     }
@@ -134,8 +135,7 @@ public class AdminCatalogController {
             entry.getKey(),
             entry.getValue().productName(),
             entry.getValue().unitsSold(),
-            entry.getValue().revenue()
-        ))
+            entry.getValue().revenue()))
         .sorted((left, right) -> {
           int byUnits = Integer.compare(right.unitsSold(), left.unitsSold());
           if (byUnits != 0) {
@@ -158,8 +158,7 @@ public class AdminCatalogController {
         sectionRepository.count(),
         bannerRepository.count(),
         communityMediaRepository.count(),
-        topSellingProducts
-    );
+        topSellingProducts);
   }
 
   @GetMapping("/sections")
@@ -341,8 +340,7 @@ public class AdminCatalogController {
     return new ApiDtos.UploadResponse(
         catalogMapper.toPublicMediaUrl(storedFile.path()),
         storedFile.fileName(),
-        storedFile.mediaType()
-    );
+        storedFile.mediaType());
   }
 
   private StoreSettings getOrCreateSettings() {
@@ -393,7 +391,8 @@ public class AdminCatalogController {
     product.setIsHeroFeatured(payload.is_hero_featured() == null ? false : payload.is_hero_featured());
     product.setStatus(blankToDefault(payload.status(), "ACTIVE"));
     product.setDefaultThumbnailUrl(blankToNull(payload.default_thumbnail_url()));
-    product.setGalleryImages(payload.galleryImages() == null ? new ArrayList<>() : new ArrayList<>(payload.galleryImages()));
+    product.setGalleryImages(
+        payload.galleryImages() == null ? new ArrayList<>() : new ArrayList<>(payload.galleryImages()));
   }
 
   private void applyBanner(Banner banner, ApiDtos.BannerPayload payload) {
@@ -420,7 +419,8 @@ public class AdminCatalogController {
     settings.setLogoUrl(payload.logoUrl());
     settings.setFaviconUrl(payload.faviconUrl());
     settings.setFooterText(payload.footerText());
-    settings.setAnnouncementItems(payload.announcementItems() == null ? new ArrayList<>() : new ArrayList<>(payload.announcementItems()));
+    settings.setAnnouncementItems(
+        payload.announcementItems() == null ? new ArrayList<>() : new ArrayList<>(payload.announcementItems()));
     settings.setInstagramUrl(payload.instagramUrl());
     settings.setFacebookUrl(payload.facebookUrl());
     settings.setWhatsappNumber(payload.whatsappNumber());

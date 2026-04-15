@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import { AdminLoginRequest, AdminLoginResponse, DashboardStats } from "@/types";
+import { AdminLoginRequest, AdminLoginResponse, DashboardStats, OtpDispatchResponse } from "@/types";
 
 export const adminLogin = async (data: AdminLoginRequest): Promise<AdminLoginResponse> => {
   const res = await apiClient.post("/admin/login", data);
@@ -10,7 +10,7 @@ export const changePassword = async (data: { currentPassword: string; newPasswor
   await apiClient.post("/admin/change-password", data);
 };
 
-export const requestPasswordOtp = async (): Promise<{ message: string }> => {
+export const requestPasswordOtp = async (): Promise<OtpDispatchResponse> => {
   const res = await apiClient.post("/admin/request-password-otp");
   return res.data;
 };

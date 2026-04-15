@@ -25,6 +25,7 @@ spring:
 app:
   upload-dir: ${APP_UPLOAD_DIR:./uploads}
   public-base-url: ${APP_PUBLIC_BASE_URL:}
+  frontend-dev-url: ${APP_FRONTEND_DEV_URL:http://localhost:8080}
   admin-secret: ${APP_ADMIN_SECRET:change-this-secret-before-production}
   admin-token-hours: 24
   twilio:

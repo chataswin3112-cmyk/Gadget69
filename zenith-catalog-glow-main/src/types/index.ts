@@ -97,6 +97,11 @@ export interface AdminLoginResponse {
   message: string;
 }
 
+export interface OtpDispatchResponse {
+  message: string;
+  recipient: string;
+}
+
 export interface Banner {
   id: number;
   title?: string;

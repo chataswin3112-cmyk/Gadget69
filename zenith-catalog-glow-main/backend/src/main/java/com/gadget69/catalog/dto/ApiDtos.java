@@ -13,6 +13,8 @@ public final class ApiDtos {
 
   public record AdminLoginResponse(String token, String message) {}
 
+  public record OtpDispatchResponse(String message, String recipient) {}
+
   public record ChangePasswordRequest(String currentPassword, String newPassword) {}
   public record OtpPasswordChangeRequest(String otp, String newPassword) {}
 

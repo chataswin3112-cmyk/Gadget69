@@ -1,4 +1,7 @@
+com\gadget69\catalog\config\DatasourceBootstrapTest.class
 com\gadget69\catalog\controller\AdminOfferUpdateTest.class
+com\gadget69\catalog\service\OtpServiceTest$TestOtpService.class
+com\gadget69\catalog\service\OtpServiceTest.class
 com\gadget69\catalog\controller\CommunityVideoUploadSignatureEndpointTest.class
 com\gadget69\catalog\controller\CommunityMediaPortraitVideoTest.class
 com\gadget69\catalog\controller\AdminDashboardAndOrderPricingTest.class
