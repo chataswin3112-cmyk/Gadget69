@@ -202,12 +202,32 @@ const ProductDetails = () => {
             </div>
 
             {/* Description */}
-            <p className="text-muted-foreground font-body leading-relaxed mb-8">
+            <p className="text-muted-foreground font-body leading-relaxed mb-8 whitespace-pre-wrap">
               {product.description}
             </p>
 
+            {/* Specifications */}
+            {product.specifications && Object.keys(product.specifications).length > 0 && (
+              <div className="mb-8">
+                <h3 className="font-heading font-semibold text-lg mb-4 text-foreground">Specifications</h3>
+                <div className="border border-border rounded-lg overflow-hidden flex flex-col font-body text-sm">
+                  {Object.entries(product.specifications).map(([key, value], index) => (
+                    <div
+                      key={key}
+                      className={`flex px-4 py-3 ${
+                        index % 2 === 0 ? "bg-muted/30" : "bg-card"
+                      } border-b border-border last:border-b-0`}
+                    >
+                      <span className="w-1/3 font-medium text-muted-foreground shrink-0">{key}</span>
+                      <span className="w-2/3 text-foreground break-words">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Quantity + Add to cart */}
-            <div className="flex items-center gap-4 mt-auto">
+            <div className="flex flex-wrap items-center gap-3 mt-auto">
               <div className="flex items-center border border-input rounded-lg">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -228,7 +248,7 @@ const ProductDetails = () => {
               <button
                 onClick={() => addToCart(product, quantity)}
                 disabled={stock <= 0}
-                className="flex-1 flex items-center justify-center gap-2 bg-accent text-accent-foreground px-8 py-3 rounded-lg font-medium transition-colors hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 min-w-[160px] flex items-center justify-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-medium transition-colors hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingBag className="h-5 w-5" />
                 Add to Cart

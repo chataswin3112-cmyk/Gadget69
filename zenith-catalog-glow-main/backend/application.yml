@@ -9,6 +9,10 @@ spring:
     url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:${APP_DATA_DIR:./data}/gadget69db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_ON_EXIT=FALSE}
     username: ${SPRING_DATASOURCE_USERNAME:sa}
     password: ${SPRING_DATASOURCE_PASSWORD:}
+  # Disable H2 web console — never expose in production
+  h2:
+    console:
+      enabled: false
   jpa:
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     hibernate:
@@ -19,8 +23,8 @@ spring:
         format_sql: true
   servlet:
     multipart:
-      max-file-size: 200MB
-      max-request-size: 250MB
+      max-file-size: 10MB
+      max-request-size: 12MB
 
 app:
   upload-dir: ${APP_UPLOAD_DIR:./uploads}
@@ -37,4 +41,10 @@ app:
     api-secret: ${APP_CLOUDINARY_API_SECRET:}
     community-video-folder: ${APP_CLOUDINARY_COMMUNITY_VIDEO_FOLDER:gadget69/community/videos}
     secure: ${APP_CLOUDINARY_SECURE:true}
+  razorpay:
+    enabled: ${APP_RAZORPAY_ENABLED:false}
+    key-id: ${APP_RAZORPAY_KEY_ID:}
+    key-secret: ${APP_RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${APP_RAZORPAY_WEBHOOK_SECRET:}
+    orders-api-url: ${APP_RAZORPAY_ORDERS_API_URL:https://api.razorpay.com/v1/orders}
   allowed-origins: ${APP_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8080,http://127.0.0.1:8080}

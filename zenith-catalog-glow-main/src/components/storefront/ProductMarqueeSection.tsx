@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
 import { useAdminData } from "@/contexts/AdminDataContext";
-import { mockProducts } from "@/data/mockData";
 import MediaImage from "@/components/ui/media-image";
 import { getEffectivePrice } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
+import { Product } from "@/types";
 
 const ProductMarqueeSection = () => {
-  const { products: adminProducts } = useAdminData();
-  const products = adminProducts.length ? adminProducts : mockProducts;
+  const { products } = useAdminData();
   if (!products.length) return null;
 
   // Shuffle for variety and fill two independent rows
@@ -62,7 +61,7 @@ const ProductMarqueeSection = () => {
   );
 };
 
-const ProductCard = ({ product }: { product: (typeof mockProducts)[number] }) => {
+const ProductCard = ({ product }: { product: Product }) => {
   const price = getEffectivePrice(product);
   const hasOffer = product.offer && product.offerPrice;
 

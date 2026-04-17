@@ -6,7 +6,6 @@ import { getSections, getAdminSections, createSection as createSectionApi, updat
 import { getBanners, getAdminBanners, createBanner as createBannerApi, updateBanner as updateBannerApi, deleteBanner as deleteBannerApi } from "@/api/bannerApi";
 import { getSettings, getAdminSettings, updateSettings as updateSettingsApi } from "@/api/settingsApi";
 import { getCommunityMedia, getAdminCommunityMedia, createCommunityMedia as createCommunityMediaApi, updateCommunityMedia as updateCommunityMediaApi, deleteCommunityMedia as deleteCommunityMediaApi } from "@/api/communityApi";
-import { mockBanners, mockCommunityMedia, mockProducts, mockReviews, mockSections, mockSettings } from "@/data/mockData";
 
 interface AdminDataContextType {
   sections: Section[];
@@ -122,11 +121,11 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       const [sectionsData, productsData, bannersData, settingsData, communityData] =
         await Promise.all([
-          safeFetch(isAuthenticated ? getAdminSections : getSections, mockSections),
-          safeFetch(isAuthenticated ? getAdminProducts : getProducts, mockProducts),
-          safeFetch(isAuthenticated ? getAdminBanners : getBanners, mockBanners),
-          safeFetch(isAuthenticated ? getAdminSettings : getSettings, mockSettings),
-          safeFetch(isAuthenticated ? getAdminCommunityMedia : getCommunityMedia, mockCommunityMedia),
+          safeFetch(isAuthenticated ? getAdminSections : getSections, [] as Section[]),
+          safeFetch(isAuthenticated ? getAdminProducts : getProducts, [] as Product[]),
+          safeFetch(isAuthenticated ? getAdminBanners : getBanners, [] as Banner[]),
+          safeFetch(isAuthenticated ? getAdminSettings : getSettings, defaultSettings),
+          safeFetch(isAuthenticated ? getAdminCommunityMedia : getCommunityMedia, [] as CommunityMedia[]),
         ]);
 
       setSections(sortSections(sectionsData as Section[]));
@@ -134,15 +133,15 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setBanners(sortBanners(bannersData as Banner[]));
       setSettings(settingsData as StoreSettings);
       setCommunityMedia(sortCommunity(communityData as CommunityMedia[]));
-      setReviews(loadStoredReviews() ?? mockReviews);
+      setReviews(loadStoredReviews() ?? []);
     } catch (error) {
-      console.warn("Unexpected error loading data — using full mock", error);
-      setSections(sortSections(mockSections));
-      setProducts(sortProducts(mockProducts));
-      setBanners(sortBanners(mockBanners));
-      setSettings(mockSettings);
-      setCommunityMedia(sortCommunity(mockCommunityMedia));
-      setReviews(loadStoredReviews() ?? mockReviews);
+      console.warn("Unexpected error loading catalog data", error);
+      setSections([]);
+      setProducts([]);
+      setBanners([]);
+      setSettings(defaultSettings);
+      setCommunityMedia([]);
+      setReviews(loadStoredReviews() ?? []);
     } finally {
       setIsLoading(false);
     }

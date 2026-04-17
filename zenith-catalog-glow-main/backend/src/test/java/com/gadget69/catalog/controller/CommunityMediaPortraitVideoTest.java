@@ -61,7 +61,7 @@ class CommunityMediaPortraitVideoTest {
             .content("""
                 {
                   "email": "admin@gadget69.com",
-                  "password": "admin123"
+                  "password": "Admin@123"
                 }
                 """))
         .andExpect(status().isOk())

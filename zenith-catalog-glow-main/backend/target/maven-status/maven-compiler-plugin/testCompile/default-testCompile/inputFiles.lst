@@ -1,7 +1,9 @@
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\config\DatasourceBootstrapTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\AdminDashboardAndOrderPricingTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\AdminOfferUpdateTest.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\CatalogSyncControllerTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\CommunityMediaPortraitVideoTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\CommunityVideoUploadSignatureEndpointTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\service\OtpServiceTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\service\ProductPricingServiceTest.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\service\RazorpayPaymentServiceTest.java

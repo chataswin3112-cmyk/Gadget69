@@ -1,0 +1,18 @@
+15:40:07.219 [main] WARN com.gadget69.catalog.CatalogApplication -- No Postgres connection env found; falling back to embedded H2 at ./data. Set DATABASE_URL, SPRING_DATASOURCE_*, or PG*/POSTGRES_* env vars to use Postgres.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.11)
+
+2026-04-15T15:40:08.548+05:30  INFO 11852 --- [gadget69-catalog-backend] [           main] c.gadget69.catalog.CatalogApplication    : Starting CatalogApplication v0.0.1-SNAPSHOT using Java 17.0.18 with PID 11852 (C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\target\catalog-backend-0.0.1-SNAPSHOT.jar started by Admin in C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend)
+2026-04-15T15:40:08.551+05:30  INFO 11852 --- [gadget69-catalog-backend] [           main] c.gadget69.catalog.CatalogApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-04-15T15:40:08.552+05:30 DEBUG 11852 --- [gadget69-catalog-backend] [           main] o.s.boot.SpringApplication               : Loading source class com.gadget69.catalog.CatalogApplication
+2026-04-15T15:40:08.645+05:30 DEBUG 11852 --- [gadget69-catalog-backend] [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@30b19518
+2026-04-15T15:40:09.969+05:30  INFO 11852 --- [gadget69-catalog-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-15T15:40:10.005+05:30 DEBUG 11852 --- [gadget69-catalog-backend] [           main] o.s.b.a.AutoConfigurationPackages        : @EnableAutoConfiguration was declared on a class in the package 'com.gadget69.catalog'. Automatic @Repository and @Entity scanning is enabled.
+2026-04-15T15:40:10.087+05:30  INFO 11852 --- [gadget69-catalog-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 100 ms. Found 7 JPA repository interfaces.

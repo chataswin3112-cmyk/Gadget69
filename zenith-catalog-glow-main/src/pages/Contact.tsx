@@ -6,6 +6,13 @@ import Footer from "@/components/storefront/Footer";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { INSTAGRAM_URL, WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/social-links";
+import {
+  BUSINESS_NAME,
+  BUSINESS_SUMMARY,
+  ORDER_PROCESSING_WINDOW,
+  SUPPORT_EMAIL,
+  SUPPORT_HOURS,
+} from "@/lib/store-info";
 import { toast } from "sonner";
 
 const Contact = () => {
@@ -25,7 +32,9 @@ const Contact = () => {
 
       <div className="section-container pt-8 pb-16">
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">Contact Us</h1>
-        <p className="text-muted-foreground font-body mb-10">We'd love to hear from you.</p>
+        <p className="text-muted-foreground font-body mb-10 max-w-3xl">
+          {BUSINESS_SUMMARY}
+        </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Form */}
@@ -74,13 +83,22 @@ const Contact = () => {
 
           {/* Info */}
           <div className="space-y-8">
+            <div className="bg-card rounded-xl shadow-premium p-6 space-y-4">
+              <h2 className="font-heading text-xl font-semibold text-foreground">Business Details</h2>
+              <div className="space-y-3 text-sm leading-7 text-muted-foreground font-body">
+                <p>{BUSINESS_NAME} serves customers across India.</p>
+                <p>Orders are typically processed within {ORDER_PROCESSING_WINDOW}.</p>
+                <p>For order help, delivery updates, returns, or refunds, contact our support team.</p>
+              </div>
+            </div>
+
             <div className="bg-card rounded-xl shadow-premium p-6 space-y-6">
               <div className="flex items-start gap-4">
                 <div className="p-2.5 rounded-lg bg-accent/10">
                   <Phone className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-semibold text-foreground">WhatsApp</h3>
+                  <h3 className="font-heading font-semibold text-foreground">Phone / WhatsApp</h3>
                   <a
                     href={WHATSAPP_URL}
                     className="text-sm text-muted-foreground hover:text-accent font-body"
@@ -94,6 +112,29 @@ const Contact = () => {
               <div className="flex items-start gap-4">
                 <div className="p-2.5 rounded-lg bg-accent/10">
                   <Mail className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-foreground">Email</h3>
+                  <a
+                    href={`mailto:${SUPPORT_EMAIL}`}
+                    className="text-sm text-muted-foreground hover:text-accent font-body"
+                  >
+                    {SUPPORT_EMAIL}
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 rounded-lg bg-accent/10">
+                  <Mail className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-foreground">Support Hours</h3>
+                  <p className="text-sm text-muted-foreground font-body mt-1">{SUPPORT_HOURS}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 rounded-lg bg-accent/10">
+                  <MapPin className="h-5 w-5 text-accent" />
                 </div>
                 <div>
                   <h3 className="font-heading font-semibold text-foreground">Social</h3>

@@ -45,6 +45,12 @@ public class CustomerOrder {
   @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
   private BigDecimal totalAmount;
 
+  @Column(nullable = false)
+  private String currency = "INR";
+
+  @Column(name = "amount_paise")
+  private Integer amountPaise;
+
   @Column(name = "payment_status", nullable = false)
   private String paymentStatus = "PENDING";
 
@@ -53,6 +59,12 @@ public class CustomerOrder {
 
   @Column(name = "razorpay_payment_id")
   private String razorpayPaymentId;
+
+  @Column(name = "razorpay_signature", length = 512)
+  private String razorpaySignature;
+
+  @Column(name = "last_razorpay_event_id")
+  private String lastRazorpayEventId;
 
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;

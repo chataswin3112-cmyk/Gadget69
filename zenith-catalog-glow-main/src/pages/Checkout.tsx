@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
@@ -6,9 +6,74 @@ import Footer from "@/components/storefront/Footer";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "@/hooks/use-toast";
-import { createOrder } from "@/api/orderApi";
+import { createOrder, verifyPayment } from "@/api/orderApi";
 import { getErrorMessage } from "@/lib/api-error";
 import { getEffectivePrice } from "@/lib/pricing";
+
+const RAZORPAY_SCRIPT_ID = "razorpay-checkout-js";
+const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
+
+interface RazorpayCheckoutResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill: {
+    name: string;
+    contact: string;
+  };
+  theme: {
+    color: string;
+  };
+  modal: {
+    ondismiss: () => void;
+  };
+  handler: (response: RazorpayCheckoutResponse) => void | Promise<void>;
+}
+
+interface RazorpayInstance {
+  open: () => void;
+  on: (event: "payment.failed", callback: (response: unknown) => void) => void;
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+const loadRazorpayScript = () =>
+  new Promise<void>((resolve, reject) => {
+    if (window.Razorpay) {
+      resolve();
+      return;
+    }
+
+    const existingScript = document.getElementById(RAZORPAY_SCRIPT_ID);
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve(), { once: true });
+      existingScript.addEventListener("error", () => reject(new Error("Unable to load Razorpay checkout")), {
+        once: true,
+      });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = RAZORPAY_SCRIPT_ID;
+    script.src = RAZORPAY_SCRIPT_URL;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Unable to load Razorpay checkout"));
+    document.body.appendChild(script);
+  });
 
 const Checkout = () => {
   const { items, totalAmount, totalItems, clearCart } = useCart();
@@ -22,12 +87,12 @@ const Checkout = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
     if (!form.customerName || !form.phone || !form.address || !form.pincode) {
       toast({ title: "Please fill all fields", variant: "destructive" });
       return;
@@ -39,10 +104,8 @@ const Checkout = () => {
 
     try {
       setSubmitting(true);
-      await createOrder({
+      const order = await createOrder({
         ...form,
-        totalAmount,
-        paymentStatus: "PENDING",
         items: items.map((item) => ({
           productId: item.product.id,
           productName: item.product.name,
@@ -50,12 +113,74 @@ const Checkout = () => {
           price: getEffectivePrice(item.product),
         })),
       });
-      clearCart();
-      navigate("/checkout/success");
+
+      if (!order.id || !order.razorpayOrderId || !order.razorpayKeyId) {
+        toast({
+          title: "Payment gateway is not configured",
+          description: "Your cart is still saved. Please contact support to complete this order.",
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      await loadRazorpayScript();
+      if (!window.Razorpay) {
+        throw new Error("Razorpay checkout did not load");
+      }
+
+      const checkout = new window.Razorpay({
+        key: order.razorpayKeyId,
+        amount: order.amountPaise ?? Math.round(order.totalAmount * 100),
+        currency: order.currency || "INR",
+        name: "Gadget69",
+        description: `Order #${order.id}`,
+        order_id: order.razorpayOrderId,
+        prefill: {
+          name: form.customerName,
+          contact: form.phone,
+        },
+        theme: {
+          color: "#b88a44",
+        },
+        modal: {
+          ondismiss: () => {
+            setSubmitting(false);
+            toast({ title: "Payment was not completed" });
+          },
+        },
+        handler: async (response) => {
+          try {
+            await verifyPayment({
+              orderId: order.id!,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+            clearCart();
+            navigate("/checkout/success");
+          } catch (error) {
+            setSubmitting(false);
+            toast({
+              title: getErrorMessage(error, "Payment verification failed"),
+              variant: "destructive",
+            });
+          }
+        },
+      });
+
+      checkout.on("payment.failed", () => {
+        setSubmitting(false);
+        toast({
+          title: "Payment failed",
+          description: "No amount was confirmed. Please retry from checkout.",
+          variant: "destructive",
+        });
+      });
+      checkout.open();
     } catch (error) {
-      toast({ title: getErrorMessage(error, "Failed to place order"), variant: "destructive" });
-    } finally {
       setSubmitting(false);
+      toast({ title: getErrorMessage(error, "Failed to start checkout"), variant: "destructive" });
     }
   };
 
@@ -68,7 +193,6 @@ const Checkout = () => {
         <h1 className="font-heading text-3xl font-bold mb-8">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Form */}
           <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5 font-body">Full Name</label>
@@ -120,11 +244,10 @@ const Checkout = () => {
               disabled={submitting || items.length === 0}
               className="w-full bg-accent text-accent-foreground px-8 py-3 rounded-lg font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? "Placing Order..." : "Place Order"}
+              {submitting ? "Opening Secure Checkout..." : "Pay Securely"}
             </button>
           </form>
 
-          {/* Summary */}
           <div className="lg:col-span-1">
             <div className="bg-card rounded-xl shadow-premium p-6 sticky top-24">
               <h2 className="font-heading text-lg font-bold mb-4">Order Summary</h2>
@@ -132,19 +255,17 @@ const Checkout = () => {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex justify-between">
                     <span className="text-muted-foreground truncate mr-2">
-                      {item.product.name} × {item.quantity}
+                      {item.product.name} x {item.quantity}
                     </span>
                     <span className="font-medium whitespace-nowrap">
-                      ₹{(
-                        getEffectivePrice(item.product) * item.quantity
-                      ).toLocaleString()}
+                      Rs. {(getEffectivePrice(item.product) * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
                 <div className="border-t border-border pt-3 mt-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
-                    <span className="font-medium">₹{totalAmount.toLocaleString()}</span>
+                    <span className="font-medium">Rs. {totalAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between mt-1">
                     <span className="text-muted-foreground">Shipping</span>
@@ -154,7 +275,7 @@ const Checkout = () => {
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between">
                     <span className="font-bold text-foreground text-base">Total</span>
-                    <span className="font-bold text-foreground text-base">₹{totalAmount.toLocaleString()}</span>
+                    <span className="font-bold text-foreground text-base">Rs. {totalAmount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

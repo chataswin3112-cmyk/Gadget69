@@ -23,14 +23,14 @@ const SectionHeader = ({
 }: SectionHeaderProps) => (
   <div
     className={cn(
-      "flex items-end justify-between mb-8 lg:mb-10",
+      "flex items-end justify-between mb-5 sm:mb-7 lg:mb-8",
       centered && "flex-col items-center text-center",
       className
     )}
   >
     <div>
       {label && (
-        <p className="inline-flex items-center gap-1.5 text-accent uppercase tracking-[0.2em] text-xs font-medium mb-3 font-body">
+        <p className="inline-flex items-center gap-1.5 text-accent uppercase tracking-[0.2em] text-xs font-medium mb-2 sm:mb-3 font-body">
           {/* Glow dot */}
           <span
             className="inline-block h-1.5 w-1.5 rounded-full bg-accent"
@@ -39,7 +39,7 @@ const SectionHeader = ({
           {label}
         </p>
       )}
-      <h2 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
+      <h2 className="font-heading text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
         {title}
       </h2>
       {/* Animated grow-in underline */}

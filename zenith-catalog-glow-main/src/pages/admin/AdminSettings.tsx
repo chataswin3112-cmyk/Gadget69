@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, KeyRound, Lock, MessageCircle, Plus, Shield, X } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, KeyRound, Lock, Plus, Shield, X } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import MediaUploadField from "@/components/admin/MediaUploadField";
 import { useAdminData } from "@/contexts/AdminDataContext";
-import { requestPasswordOtp, changePasswordWithOtp } from "@/api/adminApi";
+import { changePassword } from "@/api/adminApi";
 import { getErrorMessage } from "@/lib/api-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,94 +11,123 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-const formatWhatsappNumber = (value?: string) => {
-  if (!value?.trim()) {
-    return "your registered WhatsApp number";
-  }
-
-  const digitsOnly = value.replace(/[^\d]/g, "");
-  if (digitsOnly.length === 10) {
-    return `+91 ${digitsOnly.slice(0, 5)} ${digitsOnly.slice(5)}`;
-  }
-  if (digitsOnly.length === 12 && digitsOnly.startsWith("91")) {
-    return `+91 ${digitsOnly.slice(2, 7)} ${digitsOnly.slice(7)}`;
-  }
-  if (value.trim().startsWith("+")) {
-    return value.trim();
-  }
-  return digitsOnly ? `+${digitsOnly}` : value.trim();
+/* ─── Password Strength Helper ────────────────────────── */
+const checkPasswordStrength = (pwd: string) => {
+  const checks = {
+    length: pwd.length >= 8,
+    uppercase: /[A-Z]/.test(pwd),
+    lowercase: /[a-z]/.test(pwd),
+    number: /\d/.test(pwd),
+    special: /[@$!%*?&#^()_+=\-]/.test(pwd),
+  };
+  const score = Object.values(checks).filter(Boolean).length;
+  return { checks, score };
 };
 
-const OtpPasswordChange = ({ registeredWhatsappNumber }: { registeredWhatsappNumber?: string }) => {
-  const [step, setStep] = useState<"idle" | "otp-sent" | "done">("idle");
-  const [otp, setOtp] = useState("");
+const STRENGTH_LABELS = ["", "Very Weak", "Weak", "Fair", "Good", "Strong"];
+const STRENGTH_COLORS = ["", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
+const STRENGTH_TEXT = ["", "text-red-500", "text-orange-500", "text-yellow-500", "text-blue-500", "text-green-500"];
+
+const PasswordStrengthMeter = ({ password }: { password: string }) => {
+  if (!password) return null;
+  const { checks, score } = checkPasswordStrength(password);
+  return (
+    <div className="space-y-2">
+      {/* Strength bar */}
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-all ${
+              i <= score ? STRENGTH_COLORS[score] : "bg-muted"
+            }`}
+          />
+        ))}
+      </div>
+      <p className={`text-xs font-body font-semibold ${STRENGTH_TEXT[score]}`}>
+        {STRENGTH_LABELS[score]}
+      </p>
+      {/* Requirements checklist */}
+      <div className="grid grid-cols-2 gap-1 text-xs font-body text-muted-foreground">
+        {([
+          [checks.length, "8+ characters"],
+          [checks.uppercase, "Uppercase letter"],
+          [checks.lowercase, "Lowercase letter"],
+          [checks.number, "Number (0-9)"],
+          [checks.special, "Special char (@!#...)"],
+        ] as [boolean, string][]).map(([ok, label]) => (
+          <span key={label} className={ok ? "text-green-600" : ""}>
+            {ok ? "✓" : "○"} {label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ChangePasswordForm = () => {
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const [otpRecipient, setOtpRecipient] = useState(formatWhatsappNumber(registeredWhatsappNumber));
+  const [done, setDone] = useState(false);
 
-  useEffect(() => {
-    setOtpRecipient(formatWhatsappNumber(registeredWhatsappNumber));
-  }, [registeredWhatsappNumber]);
+  const { score } = checkPasswordStrength(newPassword);
+  const isPasswordStrong = score === 5;
 
-  useEffect(() => {
-    if (countdown <= 0) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!oldPassword.trim()) {
+      toast.error("Enter your current password");
       return;
     }
-    const timer = setInterval(() => setCountdown((current) => current - 1), 1000);
-    return () => clearInterval(timer);
-  }, [countdown]);
-
-  const handleRequestOtp = async () => {
-    try {
-      setLoading(true);
-      const response = await requestPasswordOtp();
-      setStep("otp-sent");
-      setCountdown(300);
-      setOtpRecipient(response.recipient || formatWhatsappNumber(registeredWhatsappNumber));
-      toast.success(response.message);
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Failed to send OTP"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChangePassword = async () => {
-    if (!otp.trim()) {
-      toast.error("Enter the OTP");
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (!isPasswordStrong) {
+      toast.error("Password does not meet security requirements");
       return;
     }
     if (newPassword !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-
     try {
       setLoading(true);
-      await changePasswordWithOtp({ otp: otp.trim(), newPassword });
-      setStep("done");
-      setOtp("");
+      await changePassword({ currentPassword: oldPassword, newPassword });
+      setDone(true);
+      setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      toast.success("Password changed successfully!");
+      toast.success("Password changed successfully! Please log in again.");
     } catch (error) {
-      toast.error(getErrorMessage(error, "Invalid OTP or OTP expired"));
+      toast.error(getErrorMessage(error, "Current password is incorrect"));
     } finally {
       setLoading(false);
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
-    return `${minutes}:${remainingSeconds}`;
-  };
+  if (done) {
+    return (
+      <div className="space-y-5 rounded-xl border border-border bg-card p-6 shadow-premium">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-accent/10 p-2">
+            <Shield className="h-5 w-5 text-accent" />
+          </div>
+          <h2 className="font-heading text-lg font-bold">Change Admin Password</h2>
+        </div>
+        <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/30">
+          <CheckCircle2 className="h-6 w-6 shrink-0 text-green-600" />
+          <div>
+            <p className="font-semibold text-green-700 dark:text-green-400">Password Changed Successfully!</p>
+            <p className="font-body text-sm text-green-600/80 dark:text-green-500/80">
+              Your previous sessions have been invalidated. Use your new password next time you log in.
+            </p>
+          </div>
+        </div>
+        <Button variant="outline" onClick={() => setDone(false)}>Change Again</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 rounded-xl border border-border bg-card p-6 shadow-premium">
@@ -109,149 +138,83 @@ const OtpPasswordChange = ({ registeredWhatsappNumber }: { registeredWhatsappNum
         <div>
           <h2 className="font-heading text-lg font-bold">Change Admin Password</h2>
           <p className="font-body text-sm text-muted-foreground">
-            OTP will be sent to WhatsApp{" "}
-            <span className="font-semibold text-foreground">
-              {formatWhatsappNumber(registeredWhatsappNumber)}
-            </span>
+            Enter your current password to set a new one.
           </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs font-body">
-        <div
-          className={`flex items-center gap-1 rounded-full px-3 py-1 transition-colors ${
-            step === "idle" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          <MessageCircle className="h-3 w-3" /> 1. Request OTP
-        </div>
-        <div className="h-px w-4 bg-border" />
-        <div
-          className={`flex items-center gap-1 rounded-full px-3 py-1 transition-colors ${
-            step === "otp-sent" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          <KeyRound className="h-3 w-3" /> 2. Verify OTP
-        </div>
-        <div className="h-px w-4 bg-border" />
-        <div
-          className={`flex items-center gap-1 rounded-full px-3 py-1 transition-colors ${
-            step === "done" ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          <CheckCircle2 className="h-3 w-3" /> 3. Done
-        </div>
-      </div>
-
-      {step === "idle" && (
-        <div className="space-y-4">
-          <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3 font-body text-sm text-muted-foreground">
-            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-            {registeredWhatsappNumber?.trim()
-              ? "An OTP will be sent to the saved WhatsApp number. Update and save the number below if it needs to change before requesting a code."
-              : "Save a WhatsApp number in Settings first. That saved number becomes the password-reset OTP destination."}
-          </div>
-          <Button
-            onClick={handleRequestOtp}
-            disabled={loading || !registeredWhatsappNumber?.trim()}
-            className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
-          >
-            <MessageCircle className="h-4 w-4" />
-            {loading ? "Sending OTP..." : "Send OTP to WhatsApp"}
-          </Button>
-        </div>
-      )}
-
-      {step === "otp-sent" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/30">
-            <span className="font-body text-sm text-green-700 dark:text-green-400">
-              OTP sent to WhatsApp {otpRecipient}
-            </span>
-            {countdown > 0 && (
-              <span className="font-mono text-xs font-bold text-orange-600">
-                Expires in {formatTime(countdown)}
-              </span>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label className="font-body font-semibold">Enter OTP</Label>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Current password */}
+        <div className="space-y-2">
+          <Label className="font-body font-semibold">Current Password</Label>
+          <div className="relative">
             <Input
-              value={otp}
-              onChange={(event) => setOtp(event.target.value)}
-              placeholder="Enter 6-digit OTP"
-              maxLength={6}
-              className="font-mono text-center text-lg tracking-widest"
+              type={showOld ? "text" : "password"}
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              placeholder="Your current password"
+              required
+              className="pr-10"
             />
+            <button type="button" tabIndex={-1}
+              onClick={() => setShowOld((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showOld ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label className="font-body font-semibold">New Password</Label>
+        {/* New password */}
+        <div className="space-y-2">
+          <Label className="font-body font-semibold">New Password</Label>
+          <div className="relative">
             <Input
-              type="password"
+              type={showNew ? "text" : "password"}
               value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
-              placeholder="Min 6 characters"
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Min 8 chars, uppercase, number, special char"
+              required
+              className="pr-10"
             />
+            <button type="button" tabIndex={-1}
+              onClick={() => setShowNew((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
-
-          <div className="space-y-2">
-            <Label className="font-body font-semibold">Confirm New Password</Label>
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              placeholder="Re-enter new password"
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={handleChangePassword}
-              disabled={loading}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
-            >
-              {loading ? "Verifying..." : "Change Password"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setStep("idle");
-                setOtp("");
-                setNewPassword("");
-                setConfirmPassword("");
-              }}
-            >
-              Cancel
-            </Button>
-            {countdown === 0 && (
-              <Button variant="ghost" onClick={handleRequestOtp} disabled={loading}>
-                Resend OTP
-              </Button>
-            )}
-          </div>
+          {/* Live strength meter */}
+          <PasswordStrengthMeter password={newPassword} />
         </div>
-      )}
 
-      {step === "done" && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/30">
-            <CheckCircle2 className="h-6 w-6 shrink-0 text-green-600" />
-            <div>
-              <p className="font-semibold text-green-700 dark:text-green-400">
-                Password Changed Successfully!
-              </p>
-              <p className="font-body text-sm text-green-600/80 dark:text-green-500/80">
-                Use your new password next time you login.
-              </p>
-            </div>
-          </div>
-          <Button variant="outline" onClick={() => setStep("idle")}>
-            Change Again
-          </Button>
+        {/* Confirm password */}
+        <div className="space-y-2">
+          <Label className="font-body font-semibold">Confirm New Password</Label>
+          <Input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Re-enter new password"
+            required
+          />
+          {confirmPassword && newPassword !== confirmPassword && (
+            <p className="text-xs text-destructive font-body">Passwords do not match</p>
+          )}
         </div>
-      )}
+
+        <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-3 font-body text-sm text-muted-foreground">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Changing your password will log out all existing sessions.</span>
+        </div>
+
+        <Button
+          type="submit"
+          disabled={loading || !isPasswordStrong || (!!confirmPassword && newPassword !== confirmPassword)}
+          className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+        >
+          <KeyRound className="h-4 w-4" />
+          {loading ? "Changing..." : "Change Password"}
+        </Button>
+      </form>
     </div>
   );
 };
@@ -304,7 +267,7 @@ const AdminSettings = () => {
           <p className="mt-1 font-body text-sm text-muted-foreground">Store configuration</p>
         </div>
 
-        <OtpPasswordChange registeredWhatsappNumber={settings.whatsappNumber} />
+        <ChangePasswordForm />
 
         <div className="space-y-6 rounded-xl bg-card p-6 shadow-premium">
           <div className="space-y-2">

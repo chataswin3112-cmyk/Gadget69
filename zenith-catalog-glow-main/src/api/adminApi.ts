@@ -6,6 +6,7 @@ export const adminLogin = async (data: AdminLoginRequest): Promise<AdminLoginRes
   return res.data;
 };
 
+/** Change password using the current (old) password — no OTP needed */
 export const changePassword = async (data: { currentPassword: string; newPassword: string }) => {
   await apiClient.post("/admin/change-password", data);
 };
@@ -17,6 +18,11 @@ export const requestPasswordOtp = async (): Promise<OtpDispatchResponse> => {
 
 export const changePasswordWithOtp = async (data: { otp: string; newPassword: string }): Promise<void> => {
   await apiClient.post("/admin/change-password-with-otp", data);
+};
+
+/** Forgot password — reset using the admin secret key (no login required) */
+export const resetPasswordWithSecretKey = async (data: { secretKey: string; newPassword: string }): Promise<void> => {
+  await apiClient.post("/admin/reset-password-with-key", data);
 };
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {

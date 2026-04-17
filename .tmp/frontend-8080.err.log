@@ -1,0 +1,235 @@
+=http://127.0.0.1:8090/api : The term '=http://127.0.0.1:8090/api' is not recognized as the name of a cmdlet, 
+function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the 
+path is correct and try again.
+At line:1 char:1
++ ='http://127.0.0.1:8090/api'; Set-Location 'C:\Users\Admin\Downloads\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (=http://127.0.0.1:8090/api:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+[1m[33mwarn[39m[22m - The class `duration-[7000ms]` is ambiguous and matches multiple utilities.
+[1m[33mwarn[39m[22m - If this is content and not a class, replace it with `duration-&lsqb;7000ms&rsqb;` to silence this warning.
+[2m4:22:50 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:22:50 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:22:50 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:22:50 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:22:50 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:23:00 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/admin/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:23:03 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/admin/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:28:27 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/admin/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:28:29 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/admin/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:42:31 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/admin/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:39 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:39 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:39 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:39 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:39 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:53 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:53 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:53 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:53 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:43:53 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:23 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:23 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:23 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:23 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:23 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:30 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:30 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:30 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:30 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:30 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:54 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:54 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:54 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:54 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:44:54 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:45:29 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:45:29 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:45:29 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:45:29 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:45:29 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:00 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:00 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:00 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:00 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:00 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:06 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:06 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:06 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:06 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:06 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:13 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/sections[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:13 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/products[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:13 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/banners[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:13 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/settings[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+[2m4:46:13 pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/community-media[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)

@@ -1,6 +1,10 @@
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\CatalogApplication.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\AppProperties.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\DatasourceBootstrap.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\InputSanitizer.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\MapStringConverter.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\RateLimitFilter.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\SecurityHeadersFilter.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\SpaForwardingController.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\StringListConverter.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\config\WebConfig.java
@@ -25,8 +29,10 @@ C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\b
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\SectionRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\StoreSettingsRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\AuthTokenService.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\CatalogSyncService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\CloudinaryCommunityVideoService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\OtpService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\ProductPricingService.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\RazorpayPaymentService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\SeedDataService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\UploadStorageService.java

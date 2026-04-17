@@ -10,8 +10,14 @@ const paymentStatusClassName = (paymentStatus: string) => {
   switch (paymentStatus.toUpperCase()) {
     case "PAID":
       return "bg-accent/20 text-accent";
+    case "AUTHORIZED":
+      return "bg-blue-100 text-blue-700";
     case "PENDING":
       return "bg-secondary text-foreground";
+    case "FAILED":
+      return "bg-destructive/10 text-destructive";
+    case "REFUNDED":
+      return "bg-amber-100 text-amber-700";
     default:
       return "bg-muted text-muted-foreground";
   }
@@ -107,6 +113,11 @@ const AdminOrders = () => {
                     <p className="text-xs text-muted-foreground">
                       {formatCreatedAt(order.createdAt)}
                     </p>
+                    {order.razorpayOrderId && (
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Razorpay: {order.razorpayOrderId}
+                      </p>
+                    )}
                   </div>
                 </div>
 

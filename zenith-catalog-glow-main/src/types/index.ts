@@ -57,6 +57,7 @@ export interface Product {
   status?: string;
   default_thumbnail_url?: string;
   galleryImages?: string[];
+  specifications?: Record<string, string>;
   variants?: ProductVariant[];
 }
 
@@ -73,6 +74,8 @@ export interface OrderItem {
   price: number;
 }
 
+export type PaymentStatus = "PENDING" | "AUTHORIZED" | "PAID" | "FAILED" | "REFUNDED" | string;
+
 export interface Order {
   id?: number;
   customerName: string;
@@ -80,9 +83,12 @@ export interface Order {
   address: string;
   pincode: string;
   totalAmount: number;
-  paymentStatus: string;
+  paymentStatus: PaymentStatus;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
+  razorpayKeyId?: string;
+  currency?: string;
+  amountPaise?: number;
   createdAt?: string;
   items: OrderItem[];
 }

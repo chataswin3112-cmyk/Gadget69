@@ -3,6 +3,7 @@ package com.gadget69.catalog.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public final class ApiDtos {
 
@@ -17,6 +18,7 @@ public final class ApiDtos {
 
   public record ChangePasswordRequest(String currentPassword, String newPassword) {}
   public record OtpPasswordChangeRequest(String otp, String newPassword) {}
+  public record ResetPasswordWithKeyRequest(String secretKey, String newPassword) {}
 
   public record UploadResponse(String url, String fileName, String mediaType) {}
 
@@ -100,7 +102,8 @@ public final class ApiDtos {
       Boolean is_hero_featured,
       String status,
       String default_thumbnail_url,
-      List<String> galleryImages
+      List<String> galleryImages,
+      Map<String, String> specifications
   ) {}
 
   public record ProductResponse(
@@ -129,7 +132,8 @@ public final class ApiDtos {
       Boolean is_hero_featured,
       String status,
       String default_thumbnail_url,
-      List<String> galleryImages
+      List<String> galleryImages,
+      Map<String, String> specifications
   ) {}
 
   public record BannerPayload(
@@ -252,6 +256,9 @@ public final class ApiDtos {
       String razorpayOrderId,
       String razorpayPaymentId,
       String createdAt,
-      List<OrderItemPayload> items
+      List<OrderItemPayload> items,
+      String currency,
+      Integer amountPaise,
+      String razorpayKeyId
   ) {}
 }

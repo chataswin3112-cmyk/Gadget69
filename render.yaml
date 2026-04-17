@@ -25,6 +25,12 @@ services:
         value: "true"
       - key: APP_ADMIN_SECRET
         sync: false
+      - key: APP_RAZORPAY_KEY_ID
+        sync: false
+      - key: APP_RAZORPAY_KEY_SECRET
+        sync: false
+      - key: APP_RAZORPAY_WEBHOOK_SECRET
+        sync: false
 
 databases:
   - name: gadget69-catalog-db

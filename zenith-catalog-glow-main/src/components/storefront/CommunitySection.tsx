@@ -1,7 +1,6 @@
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { useAdminData } from "@/contexts/AdminDataContext";
-import { mockCommunityMedia } from "@/data/mockData";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MediaImage from "@/components/ui/media-image";
 import VideoFrame from "@/components/ui/VideoFrame";
@@ -28,7 +27,7 @@ const getVideoPoster = (item: CommunityMedia, width = 1280, height = 720) => {
 
 const CommunitySection = () => {
   const { communityMedia } = useAdminData();
-  const displayMedia = communityMedia.length ? communityMedia : mockCommunityMedia;
+  const displayMedia = communityMedia;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeVideo, setActiveVideo] = useState<CommunityMedia | null>(null);
 
@@ -55,28 +54,28 @@ const CommunitySection = () => {
           <div className="home-section-panel" data-surface="mist">
             <div
               data-animate="cta-glow"
-              className="mb-8 flex items-center justify-between"
+              className="mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3"
             >
               <div>
                 <p className="mb-1 font-body text-xs font-medium uppercase tracking-[0.2em] text-accent">
                   Community
                 </p>
-                <h2 className="font-heading text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
+                <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
                   Join The Clan
                 </h2>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <button
                   onClick={() => scroll("left")}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--surface-line))] bg-white/86 transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[hsl(var(--surface-line))] bg-white/86 transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
-                  <ChevronLeft className="h-5 w-5" />
+                  <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
                 <button
                   onClick={() => scroll("right")}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--surface-line))] bg-white/86 transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[hsl(var(--surface-line))] bg-white/86 transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
             </div>

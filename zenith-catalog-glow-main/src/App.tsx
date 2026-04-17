@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminDataProvider } from "@/contexts/AdminDataContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminSessionGuard from "@/components/AdminSessionGuard";
 import ScrollToTop from "@/components/ScrollToTop";
 
 // Lazy-loaded components for better mobile performance
@@ -20,7 +21,10 @@ const Cart = lazy(() => import("./pages/Cart"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
 const Contact = lazy(() => import("./pages/Contact"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
@@ -65,18 +69,21 @@ const App = () => (
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/checkout/success" element={<CheckoutSuccess />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/refund-policy" element={<RefundPolicy />} />
+                  <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                  <Route path="/terms-and-conditions" element={<TermsOfService />} />
                   <Route path="/admin" element={<AdminLogin />} />
-                  <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                  <Route path="/admin/categories" element={<ProtectedRoute><AdminCategories /></ProtectedRoute>} />
-                  <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
-                  <Route path="/admin/offers" element={<ProtectedRoute><AdminOffers /></ProtectedRoute>} />
-                  <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
-                  <Route path="/admin/banners" element={<ProtectedRoute><AdminBanners /></ProtectedRoute>} />
-                  <Route path="/admin/media" element={<ProtectedRoute><AdminMedia /></ProtectedRoute>} />
-                  <Route path="/admin/speed-test" element={<ProtectedRoute><AdminSpeedTest /></ProtectedRoute>} />
-                  <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
-                  <Route path="/admin/reviews" element={<ProtectedRoute><AdminReviews /></ProtectedRoute>} />
+                  <Route path="/admin/dashboard" element={<ProtectedRoute><AdminSessionGuard><AdminDashboard /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/categories" element={<ProtectedRoute><AdminSessionGuard><AdminCategories /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/products" element={<ProtectedRoute><AdminSessionGuard><AdminProducts /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/offers" element={<ProtectedRoute><AdminSessionGuard><AdminOffers /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/orders" element={<ProtectedRoute><AdminSessionGuard><AdminOrders /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/banners" element={<ProtectedRoute><AdminSessionGuard><AdminBanners /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/media" element={<ProtectedRoute><AdminSessionGuard><AdminMedia /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/speed-test" element={<ProtectedRoute><AdminSessionGuard><AdminSpeedTest /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/settings" element={<ProtectedRoute><AdminSessionGuard><AdminSettings /></AdminSessionGuard></ProtectedRoute>} />
+                  <Route path="/admin/reviews" element={<ProtectedRoute><AdminSessionGuard><AdminReviews /></AdminSessionGuard></ProtectedRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

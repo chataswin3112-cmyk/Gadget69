@@ -50,9 +50,9 @@
     --sidebar-border: 20 15% 20%;
     --sidebar-ring: 38 50% 58%;
 
-    --section-py: 4.5rem;
-    --section-gap: 2.5rem;
-    --card-gap: 1.5rem;
+    --section-py: 3rem;
+    --section-gap: 2rem;
+    --card-gap: 1.25rem;
 
     --surface-paper: 42 42% 99%;
     --surface-ivory: 40 46% 97%;
@@ -89,6 +89,12 @@
   .section-padding {
     padding-top: var(--section-py);
     padding-bottom: var(--section-py);
+  }
+
+  @media (min-width: 768px) {
+    .section-padding {
+      --section-py: 4.5rem;
+    }
   }
 
   .glass {
@@ -131,9 +137,9 @@
   .home-section-panel {
     position: relative;
     overflow: hidden;
-    border-radius: 2rem;
+    border-radius: 1.25rem;
     border: 1px solid hsl(var(--surface-line) / 0.85);
-    padding: 1.5rem;
+    padding: 1rem;
     isolation: isolate;
     box-shadow:
       0 22px 52px -38px hsl(var(--surface-shadow) / 0.24),
@@ -219,7 +225,8 @@
   }
 
   .home-hero {
-    aspect-ratio: 21 / 9;
+    aspect-ratio: 4 / 3;
+    min-height: 260px;
     background: linear-gradient(180deg, hsl(var(--surface-pearl)), hsl(var(--surface-paper)));
   }
 
@@ -231,10 +238,10 @@
 
   .home-hero-content {
     max-width: 42rem;
-    border-radius: 2rem;
+    border-radius: 1.25rem;
     border: 1px solid hsl(0 0% 100% / 0.12);
     background: linear-gradient(135deg, hsl(25 22% 15% / 0.78), hsl(28 24% 20% / 0.42));
-    padding: clamp(1.5rem, 2vw, 2.5rem);
+    padding: clamp(0.875rem, 3.5vw, 2.5rem);
     box-shadow: 0 28px 60px -36px hsl(24 22% 8% / 0.48);
     backdrop-filter: blur(18px);
   }
@@ -271,13 +278,25 @@
       linear-gradient(180deg, hsl(var(--surface-paper)), hsl(var(--surface-ivory)));
   }
 
+  @media (min-width: 480px) {
+    .home-section-panel {
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .home-hero {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
   @media (min-width: 768px) {
     .home-section-panel {
+      border-radius: 2rem;
       padding: 2rem;
     }
 
     .home-hero {
-      aspect-ratio: 3 / 1;
+      aspect-ratio: 21 / 9;
     }
   }
 }

@@ -32,6 +32,10 @@ public class AdminUser {
   @Column(name = "password_hash", nullable = false, length = 500)
   private String passwordHash;
 
+  /** Incremented on every password change; invalidates all tokens issued before the change. */
+  @Column(name = "token_version", nullable = false)
+  private Integer tokenVersion = 0;
+
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 

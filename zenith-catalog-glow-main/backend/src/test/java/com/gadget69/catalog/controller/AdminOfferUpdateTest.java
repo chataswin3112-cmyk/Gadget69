@@ -102,7 +102,7 @@ class AdminOfferUpdateTest {
   }
 
   @Test
-  void seededOfferProductsExposeBackfilledDatesAndAllowVideoUrlUpdates() throws Exception {
+  void seededCatalogProductsStartWithoutFakeOffersAndAllowVideoUrlUpdates() throws Exception {
     String token = loginAndExtractToken();
 
     MvcResult productsResult = mockMvc.perform(get("/api/admin/products")
@@ -113,11 +113,12 @@ class AdminOfferUpdateTest {
     JsonNode products = objectMapper.readTree(productsResult.getResponse().getContentAsString());
     JsonNode product = products.get(0);
     long productId = product.get("id").asLong();
-    String offerStartDate = product.get("offerStartDate").asText();
-    String offerEndDate = product.get("offerEndDate").asText();
+    String today = java.time.LocalDate.now().toString();
+    String tomorrow = java.time.LocalDate.now().plusDays(1).toString();
 
-    Assertions.assertFalse(offerStartDate.isBlank(), "Seeded offer products should expose an offer start date");
-    Assertions.assertFalse(offerEndDate.isBlank(), "Seeded offer products should expose an offer end date");
+    Assertions.assertFalse(product.get("offer").asBoolean(), "Seeded catalog products should not fake offers");
+    Assertions.assertTrue(product.get("offerStartDate").isNull(), "Seeded catalog products should not fake offer dates");
+    Assertions.assertTrue(product.get("offerEndDate").isNull(), "Seeded catalog products should not fake offer dates");
 
     mockMvc.perform(put("/api/admin/products/{id}", productId)
             .header("Authorization", "Bearer " + token)
@@ -132,7 +133,7 @@ class AdminOfferUpdateTest {
                   "imageUrl": %s,
                   "videoUrl": "https://www.youtube.com/watch?v=abc123XYZ78",
                   "offer": true,
-                  "offerPrice": %s,
+                  "offerPrice": 88888,
                   "offerStartDate": %s,
                   "offerEndDate": %s,
                   "slug": %s,
@@ -155,9 +156,8 @@ class AdminOfferUpdateTest {
                 product.get("stockQuantity"),
                 product.get("sectionId"),
                 quote(product.get("imageUrl")),
-                nullableJson(product.get("offerPrice")),
-                quoteText(offerStartDate),
-                quoteText(offerEndDate),
+                quoteText(today),
+                quoteText(tomorrow),
                 nullableJson(product.get("slug")),
                 nullableJson(product.get("model_number")),
                 nullableJson(product.get("short_description")),
@@ -173,8 +173,8 @@ class AdminOfferUpdateTest {
             )))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.videoUrl").value("https://www.youtube.com/watch?v=abc123XYZ78"))
-        .andExpect(jsonPath("$.offerStartDate").value(offerStartDate))
-        .andExpect(jsonPath("$.offerEndDate").value(offerEndDate));
+        .andExpect(jsonPath("$.offerStartDate").value(today))
+        .andExpect(jsonPath("$.offerEndDate").value(tomorrow));
   }
 
   private String loginAndExtractToken() throws Exception {
@@ -183,7 +183,7 @@ class AdminOfferUpdateTest {
             .content("""
                 {
                   "email": "admin@gadget69.com",
-                  "password": "admin123"
+                  "password": "Admin@123"
                 }
                 """))
         .andExpect(status().isOk())

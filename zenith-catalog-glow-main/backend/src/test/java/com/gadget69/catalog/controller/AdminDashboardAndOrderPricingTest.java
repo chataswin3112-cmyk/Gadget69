@@ -4,13 +4,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gadget69.catalog.service.RazorpayPaymentService;
+import com.gadget69.catalog.service.RazorpayPaymentService.RazorpayOrder;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -27,8 +34,30 @@ class AdminDashboardAndOrderPricingTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @MockBean
+  private RazorpayPaymentService razorpayPaymentService;
+
   @Test
   void dashboardUsesPaidOrdersAndCreateOrderRecalculatesEffectivePrice() throws Exception {
+    when(razorpayPaymentService.createOrder(anyLong(), any(BigDecimal.class)))
+        .thenAnswer(invocation -> {
+          Long localOrderId = invocation.getArgument(0);
+          BigDecimal totalAmount = invocation.getArgument(1);
+          int amountPaise = totalAmount.multiply(BigDecimal.valueOf(100)).intValueExact();
+          return new RazorpayOrder("order_test_" + localOrderId, amountPaise, "INR", "rzp_test_key");
+        });
+    when(razorpayPaymentService.verifyPaymentSignature(
+        org.mockito.ArgumentMatchers.anyString(),
+        org.mockito.ArgumentMatchers.anyString(),
+        org.mockito.ArgumentMatchers.anyString()))
+        .thenReturn(true);
+    when(razorpayPaymentService.verifyWebhookSignature(
+        org.mockito.ArgumentMatchers.anyString(),
+        org.mockito.ArgumentMatchers.anyString()))
+        .thenReturn(true);
+    when(razorpayPaymentService.parseWebhook(org.mockito.ArgumentMatchers.anyString()))
+        .thenAnswer(invocation -> objectMapper.readTree(invocation.getArgument(0, String.class)));
+
     String token = loginAndExtractToken();
 
     String today = java.time.LocalDate.now().toString();
@@ -88,19 +117,40 @@ class AdminDashboardAndOrderPricingTest {
 
     JsonNode createdOrder = objectMapper.readTree(createOrderResult.getResponse().getContentAsString());
     long orderId = createdOrder.get("id").asLong();
+    String razorpayOrderId = createdOrder.get("razorpayOrderId").asText();
 
     mockMvc.perform(post("/api/verify-payment")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
                   "orderId": %d,
-                  "razorpayOrderId": "razor-order-1",
+                  "razorpayOrderId": "%s",
                   "razorpayPaymentId": "razor-pay-1",
                   "razorpaySignature": "signature"
                 }
-                """.formatted(orderId)))
+                """.formatted(orderId, razorpayOrderId)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.paymentStatus").value("PAID"));
+        .andExpect(jsonPath("$.paymentStatus").value("AUTHORIZED"));
+
+    mockMvc.perform(post("/api/razorpay/webhook")
+            .header("X-Razorpay-Signature", "valid-signature")
+            .header("X-Razorpay-Event-Id", "evt_capture_1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "event": "payment.captured",
+                  "payload": {
+                    "payment": {
+                      "entity": {
+                        "id": "razor-pay-1",
+                        "order_id": "%s",
+                        "status": "captured"
+                      }
+                    }
+                  }
+                }
+                """.formatted(razorpayOrderId)))
+        .andExpect(status().isOk());
 
     mockMvc.perform(get("/api/admin/dashboard")
             .header("Authorization", "Bearer " + token))
@@ -121,7 +171,7 @@ class AdminDashboardAndOrderPricingTest {
             .content("""
                 {
                   "email": "admin@gadget69.com",
-                  "password": "admin123"
+                  "password": "Admin@123"
                 }
                 """))
         .andExpect(status().isOk())

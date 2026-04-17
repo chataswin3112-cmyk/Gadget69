@@ -296,6 +296,70 @@ const AdminProducts = () => {
                   placeholder="One image URL per line"
                 />
               </div>
+              <div className="space-y-4 col-span-2">
+                <Label className="font-body">Specifications (Optional)</Label>
+                <div className="space-y-2">
+                  {Object.entries(editing?.specifications || {}).map(([key, value], index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <Input
+                        placeholder="e.g. Processor"
+                        value={key}
+                        className="w-1/3"
+                        onChange={(e) => {
+                          const newSpecs = { ...(editing?.specifications || {}) };
+                          const entries = Object.entries(newSpecs);
+                          const newKey = e.target.value;
+                          const oldVal = entries[index][1];
+                          // To preserve order, rebuild object
+                          const updatedSpecs: Record<string, string> = {};
+                          entries.forEach(([k, v], i) => {
+                            if (i === index) updatedSpecs[newKey] = oldVal;
+                            else updatedSpecs[k] = v;
+                          });
+                          setEditing((prev) => prev ? { ...prev, specifications: updatedSpecs } : prev);
+                        }}
+                      />
+                      <Input
+                        placeholder="e.g. Apple M3 Pro"
+                        value={value}
+                        className="flex-1"
+                        onChange={(e) => {
+                          const newSpecs = { ...(editing?.specifications || {}) };
+                          const entries = Object.entries(newSpecs);
+                          entries[index][1] = e.target.value;
+                          setEditing((prev) => prev ? { ...prev, specifications: Object.fromEntries(entries) } : prev);
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive h-10 w-10 shrink-0"
+                        onClick={() => {
+                          const newSpecs = { ...(editing?.specifications || {}) };
+                          const currentKey = Object.keys(newSpecs)[index];
+                          delete newSpecs[currentKey];
+                          setEditing((prev) => prev ? { ...prev, specifications: newSpecs } : prev);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-2"
+                    onClick={() => {
+                      const newSpecs = { ...(editing?.specifications || {}) };
+                      const newKey = `Specification ${Object.keys(newSpecs).length + 1}`;
+                      newSpecs[newKey] = "";
+                      setEditing((prev) => prev ? { ...prev, specifications: newSpecs } : prev);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Add Specification
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-2 col-span-2">
                 <Label className="font-body">Description</Label>
                 <Textarea value={editing?.description || ""} onChange={(event) => setEditing((prev) => prev ? { ...prev, description: event.target.value } : prev)} rows={4} />

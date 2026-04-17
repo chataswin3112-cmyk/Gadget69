@@ -57,7 +57,8 @@ public class CatalogMapper {
         toPublicMediaUrl(product.getDefaultThumbnailUrl()),
         product.getGalleryImages() == null
             ? List.of()
-            : product.getGalleryImages().stream().map(this::toPublicMediaUrl).toList()
+            : product.getGalleryImages().stream().map(this::toPublicMediaUrl).toList(),
+        product.getSpecifications()
     );
   }
 
@@ -127,7 +128,10 @@ public class CatalogMapper {
         order.getRazorpayOrderId(),
         order.getRazorpayPaymentId(),
         order.getCreatedAt() == null ? null : order.getCreatedAt().toString(),
-        items
+        items,
+        order.getCurrency(),
+        order.getAmountPaise(),
+        null
     );
   }
 

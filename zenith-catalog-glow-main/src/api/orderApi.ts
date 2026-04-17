@@ -1,7 +1,7 @@
 import apiClient from "./client";
 import { Order } from "@/types";
 
-export const createOrder = async (orderData: Partial<Order>) => {
+export const createOrder = async (orderData: Partial<Order>): Promise<Order> => {
   const res = await apiClient.post("/create-order", orderData);
   return res.data;
 };
@@ -11,7 +11,7 @@ export const verifyPayment = async (paymentData: {
   razorpayOrderId: string;
   razorpayPaymentId: string;
   razorpaySignature: string;
-}) => {
+}): Promise<Order> => {
   const res = await apiClient.post("/verify-payment", paymentData);
   return res.data;
 };

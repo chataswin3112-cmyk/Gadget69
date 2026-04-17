@@ -16,6 +16,7 @@ import com.gadget69.catalog.repository.ProductRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
 import com.gadget69.catalog.service.AuthTokenService;
+import com.gadget69.catalog.service.CatalogSyncService;
 import com.gadget69.catalog.service.CloudinaryCommunityVideoService;
 import com.gadget69.catalog.service.OtpService;
 import com.gadget69.catalog.service.UploadStorageService;
@@ -58,6 +59,7 @@ public class AdminCatalogController {
   private final CatalogMapper catalogMapper;
   private final CloudinaryCommunityVideoService cloudinaryCommunityVideoService;
   private final OtpService otpService;
+  private final CatalogSyncService catalogSyncService;
 
   @PostMapping("/login")
   public ApiDtos.AdminLoginResponse login(@RequestBody ApiDtos.AdminLoginRequest request) {
@@ -87,6 +89,14 @@ public class AdminCatalogController {
       @RequestBody ApiDtos.ChangePasswordRequest request) {
     AdminUser adminUser = authTokenService.requireAdmin(httpRequest);
     authTokenService.changePassword(adminUser, request.currentPassword(), request.newPassword());
+    return ResponseEntity.noContent().build();
+  }
+
+  /** Public endpoint — no auth token required. Validates the secret key from application config. */
+  @PostMapping("/reset-password-with-key")
+  public ResponseEntity<Void> resetPasswordWithKey(
+      @RequestBody ApiDtos.ResetPasswordWithKeyRequest request) {
+    authTokenService.resetPasswordWithSecretKey(request.secretKey(), request.newPassword());
     return ResponseEntity.noContent().build();
   }
 
@@ -159,6 +169,12 @@ public class AdminCatalogController {
         bannerRepository.count(),
         communityMediaRepository.count(),
         topSellingProducts);
+  }
+
+  @PostMapping("/catalog/replace-demo-data")
+  public CatalogSyncService.CatalogSyncResult replaceDemoCatalog(HttpServletRequest httpRequest) {
+    authTokenService.requireAdmin(httpRequest);
+    return catalogSyncService.replaceDemoData();
   }
 
   @GetMapping("/sections")
@@ -336,6 +352,43 @@ public class AdminCatalogController {
   public ApiDtos.UploadResponse upload(HttpServletRequest httpRequest,
       @RequestParam("file") MultipartFile file) {
     authTokenService.requireAdmin(httpRequest);
+
+    // Validate file is not empty
+    if (file == null || file.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file provided");
+    }
+
+    // Enforce maximum file size: 10 MB
+    long maxFileSizeBytes = 10L * 1024 * 1024;
+    if (file.getSize() > maxFileSizeBytes) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "File too large. Maximum allowed size is 10 MB.");
+    }
+
+    // Whitelist allowed file types (images only for product/banner uploads)
+    String contentType = file.getContentType();
+    java.util.Set<String> allowedTypes = java.util.Set.of(
+        "image/jpeg", "image/jpg", "image/png", "image/webp",
+        "image/gif", "image/svg+xml"
+    );
+    if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid file type. Only JPEG, PNG, WebP, GIF, or SVG images are allowed.");
+    }
+
+    // Validate filename extension as a secondary check
+    String originalFilename = file.getOriginalFilename();
+    if (originalFilename != null) {
+      String lower = originalFilename.toLowerCase();
+      boolean validExtension = lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+          || lower.endsWith(".png") || lower.endsWith(".webp")
+          || lower.endsWith(".gif") || lower.endsWith(".svg");
+      if (!validExtension) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Invalid file extension. Allowed: jpg, jpeg, png, webp, gif, svg");
+      }
+    }
+
     UploadStorageService.StoredFile storedFile = uploadStorageService.store(file);
     return new ApiDtos.UploadResponse(
         catalogMapper.toPublicMediaUrl(storedFile.path()),
@@ -393,6 +446,8 @@ public class AdminCatalogController {
     product.setDefaultThumbnailUrl(blankToNull(payload.default_thumbnail_url()));
     product.setGalleryImages(
         payload.galleryImages() == null ? new ArrayList<>() : new ArrayList<>(payload.galleryImages()));
+    product.setSpecifications(
+        payload.specifications() == null ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(payload.specifications()));
   }
 
   private void applyBanner(Banner banner, ApiDtos.BannerPayload payload) {

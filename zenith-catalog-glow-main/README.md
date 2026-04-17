@@ -21,12 +21,20 @@ Main features:
 - Admin authentication
 - CRUD APIs for categories, products, banners, settings, and community media
 - Image/video/document uploads served from `/uploads/**`
+- Curated 20-product live catalog sync with no demo fallbacks
+- Razorpay Standard Checkout order creation, checkout verification, and webhook reconciliation
 - Order creation and admin order listing
 
 Default admin login:
 
 - Email: `admin@gadget69.com`
-- Password: `admin123`
+- Password: `Admin@123`
+
+Catalog maintenance:
+
+- Fresh databases seed the curated 10-category, 20-product catalog from `backend/src/main/resources/catalog/live-catalog.json`.
+- Existing demo databases can be replaced by calling admin-only `POST /api/admin/catalog/replace-demo-data`.
+- The storefront intentionally shows API loading, empty, or error states instead of mock products, reviews, or community media.
 
 Database env contract:
 
@@ -34,6 +42,16 @@ Database env contract:
 - Manual/local Postgres: use `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`
 - Local fallback without Postgres: leave those unset and the backend falls back to embedded H2 unless `APP_REQUIRE_POSTGRES=true`
 - Unsupported datasource env aliases: `DB_URL`, `DB_USER`, `DB_PASSWORD`
+
+Razorpay env contract:
+
+- `APP_RAZORPAY_ENABLED`: set `true` only when the key id, key secret, and webhook secret are configured.
+- `APP_RAZORPAY_KEY_ID`: publishable key returned to the checkout UI. Use test keys locally and live keys only in production.
+- `APP_RAZORPAY_KEY_SECRET`: server-only secret used to create Razorpay orders and verify checkout signatures.
+- `APP_RAZORPAY_WEBHOOK_SECRET`: server-only webhook signing secret from the Razorpay dashboard.
+- `APP_RAZORPAY_ORDERS_API_URL`: optional override, defaults to `https://api.razorpay.com/v1/orders`.
+
+Do not commit Razorpay secrets. Keep local values in your shell or ignored environment files, and configure production values in Render.
 
 ## Render Deployment
 
@@ -74,6 +92,10 @@ Required environment variables:
 
 Optional environment variables:
 
+- `APP_RAZORPAY_ENABLED`
+- `APP_RAZORPAY_KEY_ID`
+- `APP_RAZORPAY_KEY_SECRET`
+- `APP_RAZORPAY_WEBHOOK_SECRET`
 - `APP_CLOUDINARY_CLOUD_NAME`
 - `APP_CLOUDINARY_API_KEY`
 - `APP_CLOUDINARY_API_SECRET`

@@ -17,6 +17,7 @@ public class AppProperties {
   private long adminTokenHours = 24;
   private List<String> allowedOrigins = new ArrayList<>();
   private Cloudinary cloudinary = new Cloudinary();
+  private Razorpay razorpay = new Razorpay();
 
   @Getter
   @Setter
@@ -26,5 +27,15 @@ public class AppProperties {
     private String apiSecret;
     private String communityVideoFolder = "gadget69/community/videos";
     private boolean secure = true;
+  }
+
+  @Getter
+  @Setter
+  public static class Razorpay {
+    private boolean enabled = false;
+    private String keyId;
+    private String keySecret;
+    private String webhookSecret;
+    private String ordersApiUrl = "https://api.razorpay.com/v1/orders";
   }
 }

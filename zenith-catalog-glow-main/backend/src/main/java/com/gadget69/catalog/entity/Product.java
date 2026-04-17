@@ -1,5 +1,6 @@
 package com.gadget69.catalog.entity;
 
+import com.gadget69.catalog.config.MapStringConverter;
 import com.gadget69.catalog.config.StringListConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -17,7 +18,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -61,6 +64,10 @@ public class Product {
   @Column(name = "gallery_images", columnDefinition = "TEXT")
   @Convert(converter = StringListConverter.class)
   private List<String> galleryImages = new ArrayList<>();
+
+  @Column(name = "specifications", columnDefinition = "TEXT")
+  @Convert(converter = MapStringConverter.class)
+  private Map<String, String> specifications = new LinkedHashMap<>();
 
   @Column(name = "offer_flag", nullable = false)
   private Boolean offer = false;

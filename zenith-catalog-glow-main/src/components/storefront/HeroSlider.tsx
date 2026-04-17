@@ -72,16 +72,16 @@ const HeroSlider = () => {
             <div className="section-container">
               <div className="home-hero-content" data-animate="hero-slide">
                 <p className="home-hero-kicker">Premium Electronics</p>
-                <div className={cn("space-y-4", i === current && "animate-hero-float")}>
+                <div className={cn("space-y-3 sm:space-y-4", i === current && "animate-hero-float")}>
                   {banner.title && (
-                    <h2 className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-sm">
+                    <h2 className="font-heading text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-sm">
                       {banner.title}
                     </h2>
                   )}
                   {banner.ctaText && banner.ctaLink && (
                     <Link
                       to={banner.ctaLink}
-                      className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--surface-soft-gold))] px-6 py-3 text-sm font-semibold text-foreground transition-all duration-300 hover:bg-[hsl(var(--surface-soft-gold))]/85 hover:scale-[1.03] hover:shadow-lg font-heading"
+                      className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--surface-soft-gold))] px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-foreground transition-all duration-300 hover:bg-[hsl(var(--surface-soft-gold))]/85 hover:scale-[1.03] hover:shadow-lg font-heading"
                     >
                       {banner.ctaText}
                     </Link>
