@@ -42,9 +42,9 @@ app:
     community-video-folder: ${APP_CLOUDINARY_COMMUNITY_VIDEO_FOLDER:gadget69/community/videos}
     secure: ${APP_CLOUDINARY_SECURE:true}
   razorpay:
-    enabled: ${APP_RAZORPAY_ENABLED:false}
-    key-id: ${APP_RAZORPAY_KEY_ID:}
-    key-secret: ${APP_RAZORPAY_KEY_SECRET:}
-    webhook-secret: ${APP_RAZORPAY_WEBHOOK_SECRET:}
-    orders-api-url: ${APP_RAZORPAY_ORDERS_API_URL:https://api.razorpay.com/v1/orders}
+    enabled: ${APP_RAZORPAY_ENABLED:${RAZORPAY_ENABLED:false}}
+    key-id: ${APP_RAZORPAY_KEY_ID:${RAZORPAY_KEY_ID:}}
+    key-secret: ${APP_RAZORPAY_KEY_SECRET:${RAZORPAY_KEY_SECRET:}}
+    webhook-secret: ${APP_RAZORPAY_WEBHOOK_SECRET:${RAZORPAY_WEBHOOK_SECRET:}}
+    orders-api-url: ${APP_RAZORPAY_ORDERS_API_URL:${RAZORPAY_ORDERS_API_URL:https://api.razorpay.com/v1/orders}}
   allowed-origins: ${APP_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8080,http://127.0.0.1:8080}

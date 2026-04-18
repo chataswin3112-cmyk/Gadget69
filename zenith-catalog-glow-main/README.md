@@ -50,6 +50,7 @@ Razorpay env contract:
 - `APP_RAZORPAY_KEY_SECRET`: server-only secret used to create Razorpay orders and verify checkout signatures.
 - `APP_RAZORPAY_WEBHOOK_SECRET`: server-only webhook signing secret from the Razorpay dashboard.
 - `APP_RAZORPAY_ORDERS_API_URL`: optional override, defaults to `https://api.razorpay.com/v1/orders`.
+- Alias env names also work: `RAZORPAY_ENABLED`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, and `RAZORPAY_ORDERS_API_URL`.
 
 Local env loading:
 
@@ -60,6 +61,7 @@ Local env loading:
 Live mode notes:
 
 - When you switch to live mode, both `APP_RAZORPAY_KEY_ID` and `APP_RAZORPAY_KEY_SECRET` must be the matching live pair from the same Razorpay account.
+- If your Render service already stores the keys as `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`, the backend now reads those too.
 - The frontend does not need a separate Razorpay env; it receives the publishable key id from the backend order response.
 - Webhook updates such as capture and refund reconciliation require a public HTTPS URL that Razorpay can reach.
 

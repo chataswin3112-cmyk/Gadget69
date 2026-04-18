@@ -3,6 +3,7 @@ package com.gadget69.catalog.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gadget69.catalog.config.AppProperties;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -37,6 +38,29 @@ public class RazorpayPaymentService {
     this.appProperties = appProperties;
     this.objectMapper = objectMapper;
     this.httpClient = HttpClient.newHttpClient();
+  }
+
+  @PostConstruct
+  void logConfigurationState() {
+    if (!appProperties.getRazorpay().isEnabled()) {
+      return;
+    }
+
+    if (hasPaymentCredentials()) {
+      log.info("Razorpay checkout is enabled and API keys are configured.");
+    } else {
+      log.warn(
+          "Razorpay checkout is enabled but API keys are missing. "
+              + "Set APP_RAZORPAY_KEY_ID/APP_RAZORPAY_KEY_SECRET or "
+              + "RAZORPAY_KEY_ID/RAZORPAY_KEY_SECRET.");
+    }
+
+    if (!hasText(webhookSecret())) {
+      log.warn(
+          "Razorpay webhook secret is missing. "
+              + "Set APP_RAZORPAY_WEBHOOK_SECRET or RAZORPAY_WEBHOOK_SECRET "
+              + "before enabling webhook verification.");
+    }
   }
 
   public RazorpayOrder createOrder(Long localOrderId, BigDecimal totalAmount) {
@@ -74,7 +98,7 @@ public class RazorpayPaymentService {
           razorpayOrderId,
           json.path("amount").asInt(amountPaise),
           json.path("currency").asText(CURRENCY),
-          appProperties.getRazorpay().getKeyId());
+          keyId());
     } catch (IOException ex) {
       log.error("Unable to parse Razorpay order response", ex);
       throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to parse Razorpay response", ex);
@@ -92,7 +116,7 @@ public class RazorpayPaymentService {
     }
     String expected = hmacSha256Hex(
         razorpayOrderId + "|" + razorpayPaymentId,
-        appProperties.getRazorpay().getKeySecret());
+        keySecret());
     return constantTimeEquals(expected, signature);
   }
 
@@ -101,18 +125,16 @@ public class RazorpayPaymentService {
     if (!hasText(payload) || !hasText(signature)) {
       return false;
     }
-    String expected = hmacSha256Hex(payload, appProperties.getRazorpay().getWebhookSecret());
+    String expected = hmacSha256Hex(payload, webhookSecret());
     return constantTimeEquals(expected, signature);
   }
 
   public String getKeyId() {
-    return appProperties.getRazorpay().isEnabled() ? appProperties.getRazorpay().getKeyId() : null;
+    return appProperties.getRazorpay().isEnabled() ? keyId() : null;
   }
 
   public boolean isGatewayReady() {
-    return appProperties.getRazorpay().isEnabled()
-        && hasText(appProperties.getRazorpay().getKeyId())
-        && hasText(appProperties.getRazorpay().getKeySecret());
+    return appProperties.getRazorpay().isEnabled() && hasPaymentCredentials();
   }
 
   public JsonNode parseWebhook(String payload) {
@@ -171,9 +193,7 @@ public class RazorpayPaymentService {
   }
 
   private String basicAuthHeader() {
-    String credentials = appProperties.getRazorpay().getKeyId()
-        + ":"
-        + appProperties.getRazorpay().getKeySecret();
+    String credentials = keyId() + ":" + keySecret();
     return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -181,8 +201,7 @@ public class RazorpayPaymentService {
     if (!appProperties.getRazorpay().isEnabled()) {
       throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Razorpay checkout is disabled");
     }
-    if (!hasText(appProperties.getRazorpay().getKeyId())
-        || !hasText(appProperties.getRazorpay().getKeySecret())) {
+    if (!hasPaymentCredentials()) {
       throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Razorpay API keys are not configured");
     }
   }
@@ -191,9 +210,25 @@ public class RazorpayPaymentService {
     if (!appProperties.getRazorpay().isEnabled()) {
       throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Razorpay webhooks are disabled");
     }
-    if (!hasText(appProperties.getRazorpay().getWebhookSecret())) {
+    if (!hasText(webhookSecret())) {
       throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Razorpay webhook secret is not configured");
     }
+  }
+
+  private boolean hasPaymentCredentials() {
+    return hasText(keyId()) && hasText(keySecret());
+  }
+
+  private String keyId() {
+    return normalize(appProperties.getRazorpay().getKeyId());
+  }
+
+  private String keySecret() {
+    return normalize(appProperties.getRazorpay().getKeySecret());
+  }
+
+  private String webhookSecret() {
+    return normalize(appProperties.getRazorpay().getWebhookSecret());
   }
 
   private boolean constantTimeEquals(String expected, String provided) {
@@ -204,6 +239,14 @@ public class RazorpayPaymentService {
 
   private boolean hasText(String value) {
     return value != null && !value.isBlank();
+  }
+
+  private String normalize(String value) {
+    if (value == null) {
+      return null;
+    }
+    String normalized = value.trim();
+    return normalized.isEmpty() ? null : normalized;
   }
 
   public record RazorpayOrder(String id, int amountPaise, String currency, String keyId) {
