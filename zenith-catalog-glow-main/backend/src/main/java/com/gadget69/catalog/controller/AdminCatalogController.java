@@ -6,6 +6,7 @@ import com.gadget69.catalog.entity.Banner;
 import com.gadget69.catalog.entity.CommunityMedia;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
 import com.gadget69.catalog.mapper.CatalogMapper;
@@ -13,6 +14,7 @@ import com.gadget69.catalog.repository.BannerRepository;
 import com.gadget69.catalog.repository.CommunityMediaRepository;
 import com.gadget69.catalog.repository.CustomerOrderRepository;
 import com.gadget69.catalog.repository.ProductRepository;
+import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
 import com.gadget69.catalog.service.AuthTokenService;
@@ -55,6 +57,7 @@ public class AdminCatalogController {
   private final BannerRepository bannerRepository;
   private final StoreSettingsRepository storeSettingsRepository;
   private final CommunityMediaRepository communityMediaRepository;
+  private final ReviewRepository reviewRepository;
   private final CustomerOrderRepository customerOrderRepository;
   private final CatalogMapper catalogMapper;
   private final CloudinaryCommunityVideoService cloudinaryCommunityVideoService;
@@ -306,6 +309,40 @@ public class AdminCatalogController {
         .toList();
   }
 
+  @GetMapping("/reviews")
+  public List<ApiDtos.ReviewResponse> adminReviews(HttpServletRequest httpRequest) {
+    authTokenService.requireAdmin(httpRequest);
+    return reviewRepository.findAllByOrderByReviewDateDescIdDesc().stream()
+        .map(catalogMapper::toReviewResponse)
+        .toList();
+  }
+
+  @PostMapping("/reviews")
+  public ApiDtos.ReviewResponse createReview(HttpServletRequest httpRequest,
+      @RequestBody ApiDtos.ReviewPayload payload) {
+    authTokenService.requireAdmin(httpRequest);
+    Review review = new Review();
+    applyReview(review, payload);
+    return catalogMapper.toReviewResponse(reviewRepository.save(review));
+  }
+
+  @PutMapping("/reviews/{id}")
+  public ApiDtos.ReviewResponse updateReview(HttpServletRequest httpRequest, @PathVariable Long id,
+      @RequestBody ApiDtos.ReviewPayload payload) {
+    authTokenService.requireAdmin(httpRequest);
+    Review review = reviewRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+    applyReview(review, payload);
+    return catalogMapper.toReviewResponse(reviewRepository.save(review));
+  }
+
+  @DeleteMapping("/reviews/{id}")
+  public ResponseEntity<Void> deleteReview(HttpServletRequest httpRequest, @PathVariable Long id) {
+    authTokenService.requireAdmin(httpRequest);
+    reviewRepository.deleteById(id);
+    return ResponseEntity.noContent().build();
+  }
+
   @PostMapping("/community-media")
   public ApiDtos.CommunityMediaResponse createCommunityMedia(HttpServletRequest httpRequest,
       @RequestBody ApiDtos.CommunityMediaPayload payload) {
@@ -510,6 +547,23 @@ public class AdminCatalogController {
     media.setActionLink(payload.actionLink());
     media.setDisplayOrder(payload.displayOrder() == null ? 0 : payload.displayOrder());
     media.setIsActive(payload.isActive() == null ? true : payload.isActive());
+  }
+
+  private void applyReview(Review review, ApiDtos.ReviewPayload payload) {
+    if (payload == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Review payload is required");
+    }
+
+    int rating = payload.rating() == null ? 5 : payload.rating();
+    if (rating < 1 || rating > 5) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5");
+    }
+
+    review.setName(requiredValue(payload.name(), "Reviewer name is required"));
+    review.setRating(rating);
+    review.setComment(requiredValue(payload.comment(), "Review comment is required"));
+    review.setAvatar(blankToNull(payload.avatar()));
+    review.setReviewDate(payload.date() == null ? LocalDate.now() : payload.date());
   }
 
   private String resolveVideoThumbnail(ApiDtos.CommunityMediaPayload payload) {

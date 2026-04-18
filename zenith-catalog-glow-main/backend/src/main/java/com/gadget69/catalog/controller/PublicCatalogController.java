@@ -11,6 +11,7 @@ import com.gadget69.catalog.repository.BannerRepository;
 import com.gadget69.catalog.repository.CommunityMediaRepository;
 import com.gadget69.catalog.repository.CustomerOrderRepository;
 import com.gadget69.catalog.repository.ProductRepository;
+import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
 import com.gadget69.catalog.service.ProductPricingService;
@@ -43,6 +44,7 @@ public class PublicCatalogController {
   private final BannerRepository bannerRepository;
   private final StoreSettingsRepository storeSettingsRepository;
   private final CommunityMediaRepository communityMediaRepository;
+  private final ReviewRepository reviewRepository;
   private final CustomerOrderRepository customerOrderRepository;
   private final CatalogMapper catalogMapper;
   private final ProductPricingService productPricingService;
@@ -94,6 +96,13 @@ public class PublicCatalogController {
   public List<ApiDtos.CommunityMediaResponse> communityMedia() {
     return communityMediaRepository.findAllByIsActiveTrueOrderByDisplayOrderAscIdAsc().stream()
         .map(catalogMapper::toCommunityMediaResponse)
+        .toList();
+  }
+
+  @GetMapping("/reviews")
+  public List<ApiDtos.ReviewResponse> reviews() {
+    return reviewRepository.findAllByOrderByReviewDateDescIdDesc().stream()
+        .map(catalogMapper::toReviewResponse)
         .toList();
   }
 

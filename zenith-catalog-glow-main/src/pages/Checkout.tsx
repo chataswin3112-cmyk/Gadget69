@@ -133,7 +133,7 @@ const Checkout = () => {
         key: order.razorpayKeyId,
         amount: order.amountPaise ?? Math.round(order.totalAmount * 100),
         currency: order.currency || "INR",
-        name: "Gadget69",
+        name: "Gadget 69",
         description: `Order #${order.id}`,
         order_id: order.razorpayOrderId,
         prefill: {

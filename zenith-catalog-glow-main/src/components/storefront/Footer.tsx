@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { useAdminData } from "@/contexts/AdminDataContext";
 import { ArrowUp, Facebook, Instagram } from "lucide-react";
+import { useAdminData } from "@/contexts/AdminDataContext";
 import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import { resolveMediaUrl } from "@/lib/media";
 import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/social-links";
+import StorefrontBrandLockup from "./StorefrontBrandLockup";
 
 const WhatsAppIcon = () => (
   <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
@@ -14,107 +15,146 @@ const WhatsAppIcon = () => (
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
 const footerLinkClass = "text-xs text-white/60 transition-colors hover:text-white font-body";
-const footerHeadingClass = "text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 font-heading";
+const footerHeadingClass =
+  "text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 font-heading";
 
 const Footer = () => {
   const { settings } = useAdminData();
+  const footerLogoSrc = settings.logoUrl || gadget69Wordmark;
 
   return (
     <footer className="bg-[#0f0f0f] text-white">
       <div className="section-container px-5 py-8 sm:px-8 sm:py-11">
-        {/* Brand row — always full width on mobile */}
         <div className="mb-7 flex flex-col items-start text-left sm:hidden">
-          <div className="mb-3">
-            <img
-              src={settings.logoUrl || gadget69Wordmark}
-              alt={settings.siteTitle || "Gadget69"}
-              style={{ width: "110px", height: "auto" }}
-              className="brightness-0 invert"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
+          <StorefrontBrandLockup
+            imageSrc={footerLogoSrc}
+            tone="light"
+            className="mb-3 overflow-visible"
+            imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
+            labelClassName="text-lg"
+          />
           {settings.footerText && (
-            <p className="max-w-sm text-xs leading-6 text-white/55 font-body">
-              {settings.footerText}
-            </p>
+            <p className="max-w-sm text-xs leading-6 text-white/55 font-body">{settings.footerText}</p>
           )}
           <div className="mt-4 flex items-center gap-3">
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#E1306C] hover:text-white">
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#E1306C] hover:text-white"
+            >
               <Instagram className="h-3.5 w-3.5" />
             </a>
-            <a href={settings.facebookUrl || "https://facebook.com"} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#1877F2] hover:text-white">
+            <a
+              href={settings.facebookUrl || "https://facebook.com"}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#1877F2] hover:text-white"
+            >
               <Facebook className="h-3.5 w-3.5" />
             </a>
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white">
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white"
+            >
               <WhatsAppIcon />
             </a>
           </div>
         </div>
 
-        {/* Link columns — 3-col on mobile, hidden brand on mobile handled above */}
         <div className="grid grid-cols-3 gap-x-4 gap-y-7 border-b border-white/10 pb-7 sm:hidden">
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Shop</p>
             <nav className="flex flex-col items-start gap-2">
-              <Link to="/products" className={footerLinkClass}>All Products</Link>
-              <Link to="/categories" className={footerLinkClass}>Categories</Link>
-              <Link to="/products?filter=new" className={footerLinkClass}>New Launches</Link>
-              <Link to="/products?filter=best" className={footerLinkClass}>Best Sellers</Link>
+              <Link to="/products" className={footerLinkClass}>
+                All Products
+              </Link>
+              <Link to="/categories" className={footerLinkClass}>
+                Categories
+              </Link>
+              <Link to="/products?filter=new" className={footerLinkClass}>
+                New Launches
+              </Link>
+              <Link to="/products?filter=best" className={footerLinkClass}>
+                Best Sellers
+              </Link>
             </nav>
           </div>
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Company</p>
             <nav className="flex flex-col items-start gap-2">
-              <Link to="/contact" className={footerLinkClass}>Contact Us</Link>
+              <Link to="/contact" className={footerLinkClass}>
+                Contact Us
+              </Link>
               {settings.catalogueUrl && (
-                <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>Catalogue</a>
+                <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>
+                  Catalogue
+                </a>
               )}
             </nav>
           </div>
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Legal</p>
             <nav className="flex flex-col items-start gap-2">
-              <Link to="/privacy-policy" className={footerLinkClass}>Privacy Policy</Link>
-              <Link to="/terms-and-conditions" className={footerLinkClass}>Terms & Conditions</Link>
-              <Link to="/shipping-policy" className={footerLinkClass}>Shipping Policy</Link>
-              <Link to="/refund-policy" className={footerLinkClass}>Refund Policy</Link>
+              <Link to="/privacy-policy" className={footerLinkClass}>
+                Privacy Policy
+              </Link>
+              <Link to="/terms-and-conditions" className={footerLinkClass}>
+                Terms & Conditions
+              </Link>
+              <Link to="/shipping-policy" className={footerLinkClass}>
+                Shipping Policy
+              </Link>
+              <Link to="/refund-policy" className={footerLinkClass}>
+                Refund Policy
+              </Link>
             </nav>
           </div>
         </div>
 
-        {/* Desktop layout (sm+) — original 4-column grid */}
-        <div className="hidden sm:grid grid-cols-2 gap-8 border-b border-white/10 pb-8 lg:grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,0.9fr))] lg:gap-x-10">
+        <div className="hidden grid-cols-2 gap-8 border-b border-white/10 pb-8 sm:grid lg:grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,0.9fr))] lg:gap-x-10">
           <div className="flex flex-col items-start text-left">
-            <div className="mb-3">
-              <img
-                src={settings.logoUrl || gadget69Wordmark}
-                alt={settings.siteTitle || "Gadget69"}
-                style={{ width: "120px", height: "auto" }}
-                className="brightness-0 invert"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+            <StorefrontBrandLockup
+              imageSrc={footerLogoSrc}
+              tone="light"
+              className="mb-4 overflow-visible"
+              imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
+              labelClassName="text-xl"
+            />
             {settings.footerText && (
-              <p className="max-w-sm text-xs leading-6 text-white/55 font-body">
-                {settings.footerText}
-              </p>
+              <p className="max-w-sm text-xs leading-6 text-white/55 font-body">{settings.footerText}</p>
             )}
             <div className="mt-5 flex items-center gap-3">
-              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#E1306C] hover:text-white hover:scale-110">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#E1306C] hover:text-white hover:scale-110"
+              >
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href={settings.facebookUrl || "https://facebook.com"} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#1877F2] hover:text-white hover:scale-110">
+              <a
+                href={settings.facebookUrl || "https://facebook.com"}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#1877F2] hover:text-white hover:scale-110"
+              >
                 <Facebook className="h-4 w-4" />
               </a>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white hover:scale-110">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white hover:scale-110"
+              >
                 <WhatsAppIcon />
               </a>
             </div>
@@ -122,35 +162,54 @@ const Footer = () => {
           <div className="space-y-4 text-left">
             <p className={footerHeadingClass}>Shop</p>
             <nav className="flex flex-col items-start gap-2.5">
-              <Link to="/products" className={footerLinkClass}>All Products</Link>
-              <Link to="/categories" className={footerLinkClass}>Categories</Link>
-              <Link to="/products?filter=new" className={footerLinkClass}>New Launches</Link>
-              <Link to="/products?filter=best" className={footerLinkClass}>Best Sellers</Link>
+              <Link to="/products" className={footerLinkClass}>
+                All Products
+              </Link>
+              <Link to="/categories" className={footerLinkClass}>
+                Categories
+              </Link>
+              <Link to="/products?filter=new" className={footerLinkClass}>
+                New Launches
+              </Link>
+              <Link to="/products?filter=best" className={footerLinkClass}>
+                Best Sellers
+              </Link>
             </nav>
           </div>
           <div className="space-y-4 text-left">
             <p className={footerHeadingClass}>Company</p>
             <nav className="flex flex-col items-start gap-2.5">
-              <Link to="/contact" className={footerLinkClass}>Contact Us</Link>
+              <Link to="/contact" className={footerLinkClass}>
+                Contact Us
+              </Link>
               {settings.catalogueUrl && (
-                <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>Catalogue</a>
+                <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>
+                  Catalogue
+                </a>
               )}
             </nav>
           </div>
           <div className="space-y-4 text-left">
             <p className={footerHeadingClass}>Legal</p>
             <nav className="flex flex-col items-start gap-2.5">
-              <Link to="/privacy-policy" className={footerLinkClass}>Privacy Policy</Link>
-              <Link to="/terms-and-conditions" className={footerLinkClass}>Terms & Conditions</Link>
-              <Link to="/shipping-policy" className={footerLinkClass}>Shipping Policy</Link>
-              <Link to="/refund-policy" className={footerLinkClass}>Refund Policy</Link>
+              <Link to="/privacy-policy" className={footerLinkClass}>
+                Privacy Policy
+              </Link>
+              <Link to="/terms-and-conditions" className={footerLinkClass}>
+                Terms & Conditions
+              </Link>
+              <Link to="/shipping-policy" className={footerLinkClass}>
+                Shipping Policy
+              </Link>
+              <Link to="/refund-policy" className={footerLinkClass}>
+                Refund Policy
+              </Link>
             </nav>
           </div>
         </div>
 
-        {/* Bottom bar */}
         <div className="flex items-center justify-between gap-3 pt-5 text-[11px] font-body text-white/30">
-          <span>© {new Date().getFullYear()} {settings.siteTitle || "Gadget69"}. All rights reserved.</span>
+          <span>Copyright {new Date().getFullYear()} Gadget 69. All rights reserved.</span>
           <button
             onClick={scrollToTop}
             aria-label="Back to top"

@@ -9,11 +9,42 @@ import React, {
 } from "react";
 import { Banner, CommunityMedia, Product, Review, Section, StoreSettings } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
-import { getProducts, getAdminProducts, createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from "@/api/productApi";
-import { getSections, getAdminSections, createSection as createSectionApi, updateSection as updateSectionApi, deleteSection as deleteSectionApi } from "@/api/sectionApi";
-import { getBanners, getAdminBanners, createBanner as createBannerApi, updateBanner as updateBannerApi, deleteBanner as deleteBannerApi } from "@/api/bannerApi";
+import {
+  getProducts,
+  getAdminProducts,
+  createProduct as createProductApi,
+  updateProduct as updateProductApi,
+  deleteProduct as deleteProductApi,
+} from "@/api/productApi";
+import {
+  getSections,
+  getAdminSections,
+  createSection as createSectionApi,
+  updateSection as updateSectionApi,
+  deleteSection as deleteSectionApi,
+} from "@/api/sectionApi";
+import {
+  getBanners,
+  getAdminBanners,
+  createBanner as createBannerApi,
+  updateBanner as updateBannerApi,
+  deleteBanner as deleteBannerApi,
+} from "@/api/bannerApi";
 import { getSettings, getAdminSettings, updateSettings as updateSettingsApi } from "@/api/settingsApi";
-import { getCommunityMedia, getAdminCommunityMedia, createCommunityMedia as createCommunityMediaApi, updateCommunityMedia as updateCommunityMediaApi, deleteCommunityMedia as deleteCommunityMediaApi } from "@/api/communityApi";
+import {
+  getCommunityMedia,
+  getAdminCommunityMedia,
+  createCommunityMedia as createCommunityMediaApi,
+  updateCommunityMedia as updateCommunityMediaApi,
+  deleteCommunityMedia as deleteCommunityMediaApi,
+} from "@/api/communityApi";
+import {
+  getReviews,
+  getAdminReviews,
+  createReview as createReviewApi,
+  updateReview as updateReviewApi,
+  deleteReview as deleteReviewApi,
+} from "@/api/reviewApi";
 
 interface AdminDataContextType {
   sections: Section[];
@@ -66,7 +97,9 @@ const sortBanners = (items: Banner[]) =>
 const sortCommunity = (items: CommunityMedia[]) =>
   [...items].sort((a, b) => a.displayOrder - b.displayOrder || a.id - b.id);
 
-const REVIEWS_STORAGE_KEY = "gadget69_admin_reviews";
+const sortReviews = (items: Review[]) =>
+  [...items].sort((a, b) => (b.date || "").localeCompare(a.date || "") || b.id - a.id);
+
 const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
 const CATALOG_CACHE_VERSION = 1;
 
@@ -83,43 +116,6 @@ interface CatalogCacheSnapshot {
 
 const getCatalogCacheKey = (isAuthenticated: boolean) =>
   `gadget69_catalog_cache_${isAuthenticated ? "admin" : "public"}`;
-
-const loadStoredReviews = (): Review[] | null => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(REVIEWS_STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return null;
-    }
-
-    return parsed.map((item, index) => ({
-      id: Number(item?.id) || index + 1,
-      name: typeof item?.name === "string" ? item.name : "Anonymous",
-      rating: typeof item?.rating === "number" ? item.rating : 5,
-      comment: typeof item?.comment === "string" ? item.comment : "",
-      avatar: typeof item?.avatar === "string" ? item.avatar : undefined,
-      date: typeof item?.date === "string" ? item.date : new Date().toISOString().slice(0, 10),
-    }));
-  } catch {
-    return null;
-  }
-};
-
-const persistReviews = (items: Review[]) => {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(items));
-};
 
 const loadCatalogCache = (isAuthenticated: boolean): CatalogCacheSnapshot | null => {
   if (typeof window === "undefined") {
@@ -186,12 +182,8 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [communityMedia, setCommunityMedia] = useState<CommunityMedia[]>(
     initialCache?.communityMedia ?? []
   );
-  const [reviews, setReviews] = useState<Review[]>(initialCache?.reviews ?? loadStoredReviews() ?? []);
+  const [reviews, setReviews] = useState<Review[]>(initialCache?.reviews ?? []);
   const [isLoading, setIsLoading] = useState(!initialCache);
-  const nextReviewId = useCallback(
-    () => Math.max(0, ...reviews.map((r) => r.id)) + 1,
-    [reviews]
-  );
 
   const applySnapshot = useCallback(
     (snapshot: Omit<CatalogCacheSnapshot, "timestamp" | "version">) => {
@@ -214,18 +206,22 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
 
     const safeFetch = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
-      try { return await fn(); } catch { return fallback; }
+      try {
+        return await fn();
+      } catch {
+        return fallback;
+      }
     };
 
     try {
-      const storedReviews = loadStoredReviews() ?? [];
-      const [sectionsData, productsData, bannersData, settingsData, communityData] =
+      const [sectionsData, productsData, bannersData, settingsData, communityData, reviewsData] =
         await Promise.all([
           safeFetch(isAuthenticated ? getAdminSections : getSections, [] as Section[]),
           safeFetch(isAuthenticated ? getAdminProducts : getProducts, [] as Product[]),
           safeFetch(isAuthenticated ? getAdminBanners : getBanners, [] as Banner[]),
           safeFetch(isAuthenticated ? getAdminSettings : getSettings, defaultSettings),
           safeFetch(isAuthenticated ? getAdminCommunityMedia : getCommunityMedia, [] as CommunityMedia[]),
+          safeFetch(isAuthenticated ? getAdminReviews : getReviews, [] as Review[]),
         ]);
 
       const snapshot = {
@@ -234,7 +230,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         banners: sortBanners(bannersData as Banner[]),
         settings: settingsData as StoreSettings,
         communityMedia: sortCommunity(communityData as CommunityMedia[]),
-        reviews: storedReviews,
+        reviews: sortReviews(reviewsData as Review[]),
       };
 
       persistCatalogCache(isAuthenticated, snapshot);
@@ -247,7 +243,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         banners: [],
         settings: defaultSettings,
         communityMedia: [],
-        reviews: loadStoredReviews() ?? [],
+        reviews: [],
       });
     } finally {
       if (!showLoader) {
@@ -396,43 +392,21 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCommunityMedia((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
-  // ── Reviews (local-only CRUD; wire to API when backend supports it) ──
   const addReview = useCallback(async (review: Partial<Review>): Promise<Review> => {
-    const created: Review = {
-      id: nextReviewId(),
-      name: review.name || "Anonymous",
-      rating: review.rating ?? 5,
-      comment: review.comment || "",
-      avatar: review.avatar,
-      date: review.date || new Date().toISOString().slice(0, 10),
-    };
-    setReviews((prev) => {
-      const next = [...prev, created];
-      persistReviews(next);
-      return next;
-    });
+    const created = await createReviewApi(review);
+    setReviews((prev) => sortReviews([...prev, created]));
     return created;
-  }, [nextReviewId]);
+  }, []);
 
   const updateReview = useCallback(async (id: number, data: Partial<Review>): Promise<Review> => {
-    let updated!: Review;
-    setReviews((prev) => {
-      const next = prev.map((r) => {
-        if (r.id === id) { updated = { ...r, ...data }; return updated; }
-        return r;
-      });
-      persistReviews(next);
-      return next;
-    });
+    const updated = await updateReviewApi(id, data);
+    setReviews((prev) => sortReviews(prev.map((item) => (item.id === id ? updated : item))));
     return updated;
   }, []);
 
   const deleteReview = useCallback(async (id: number) => {
-    setReviews((prev) => {
-      const next = prev.filter((r) => r.id !== id);
-      persistReviews(next);
-      return next;
-    });
+    await deleteReviewApi(id);
+    setReviews((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
   const value = useMemo(

@@ -6,6 +6,7 @@ import com.gadget69.catalog.entity.CommunityMedia;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.entity.OrderItem;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
 import java.util.List;
@@ -109,6 +110,17 @@ public class CatalogMapper {
         media.getActionLink(),
         media.getDisplayOrder(),
         media.getIsActive()
+    );
+  }
+
+  public ApiDtos.ReviewResponse toReviewResponse(Review review) {
+    return new ApiDtos.ReviewResponse(
+        review.getId(),
+        review.getName(),
+        review.getRating(),
+        review.getComment(),
+        toPublicMediaUrl(review.getAvatar()),
+        review.getReviewDate()
     );
   }
 

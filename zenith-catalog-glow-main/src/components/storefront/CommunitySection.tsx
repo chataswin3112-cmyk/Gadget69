@@ -101,7 +101,7 @@ const CommunitySection = () => {
                 const poster = item.thumbnailUrl || item.imageUrl || "/placeholder.svg";
                 const hasVideo = item.mediaType === "VIDEO" || isVideoUrl(item.videoUrl);
                 const videoPoster = hasVideo ? getVideoPoster(item, 960, 540) : poster;
-                const shouldAutoPlayInline = hasVideo && allowInlineAutoplay && index === 0;
+                const shouldAutoPlayInline = hasVideo && allowInlineAutoplay;
                 const motionSide = index % 2 === 0 ? "community-slide-left" : "community-slide-right";
                 const driftX = index % 2 === 0 ? -0.72 : 0.72;
 

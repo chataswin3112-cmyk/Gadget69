@@ -221,6 +221,23 @@ public final class ApiDtos {
       Boolean isActive
   ) {}
 
+  public record ReviewPayload(
+      String name,
+      Integer rating,
+      String comment,
+      String avatar,
+      LocalDate date
+  ) {}
+
+  public record ReviewResponse(
+      Long id,
+      String name,
+      Integer rating,
+      String comment,
+      String avatar,
+      LocalDate date
+  ) {}
+
   public record OrderItemPayload(
       Long productId,
       String productName,

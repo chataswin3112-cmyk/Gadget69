@@ -2,9 +2,11 @@ package com.gadget69.catalog.service;
 
 import com.gadget69.catalog.entity.AdminUser;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.StoreSettings;
 import com.gadget69.catalog.repository.AdminUserRepository;
 import com.gadget69.catalog.repository.ProductRepository;
+import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
 import java.time.LocalDate;
@@ -28,6 +30,7 @@ public class SeedDataService implements ApplicationRunner {
   private final AdminUserRepository adminUserRepository;
   private final SectionRepository sectionRepository;
   private final ProductRepository productRepository;
+  private final ReviewRepository reviewRepository;
   private final StoreSettingsRepository storeSettingsRepository;
   private final AuthTokenService authTokenService;
   private final CatalogSyncService catalogSyncService;
@@ -39,6 +42,7 @@ public class SeedDataService implements ApplicationRunner {
     seedAdmin();
     seedCatalog();
     seedSettings();
+    seedReviews();
     backfillLegacyOfferSchedules();
   }
 
@@ -100,6 +104,33 @@ public class SeedDataService implements ApplicationRunner {
     storeSettingsRepository.save(settings);
   }
 
+  private void seedReviews() {
+    if (reviewRepository.count() > 0) {
+      return;
+    }
+
+    reviewRepository.saveAll(List.of(
+        buildReview(
+            "Aarav Nair",
+            5,
+            "Quick delivery, clean packaging, and the product quality felt premium right away.",
+            LocalDate.of(2026, 4, 17)
+        ),
+        buildReview(
+            "Meera Joseph",
+            5,
+            "Support was fast, the checkout felt smooth, and the gadget matched the photos perfectly.",
+            LocalDate.of(2026, 4, 9)
+        ),
+        buildReview(
+            "Karthik Rao",
+            4,
+            "Good value for the price. Setup was simple and the after-sales response was helpful.",
+            LocalDate.of(2026, 3, 28)
+        )
+    ));
+  }
+
   private void backfillLegacyOfferSchedules() {
     LocalDate defaultStartDate = LocalDate.now().minusDays(DEFAULT_OFFER_LOOKBACK_DAYS);
     LocalDate defaultEndDate = LocalDate.now().plusDays(DEFAULT_OFFER_DURATION_DAYS);
@@ -121,5 +152,14 @@ public class SeedDataService implements ApplicationRunner {
     if (!productsToBackfill.isEmpty()) {
       productRepository.saveAll(productsToBackfill);
     }
+  }
+
+  private Review buildReview(String name, int rating, String comment, LocalDate reviewDate) {
+    Review review = new Review();
+    review.setName(name);
+    review.setRating(rating);
+    review.setComment(comment);
+    review.setReviewDate(reviewDate);
+    return review;
   }
 }

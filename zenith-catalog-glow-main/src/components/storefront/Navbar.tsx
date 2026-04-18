@@ -4,6 +4,7 @@ import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { cn } from "@/lib/utils";
 import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
+import StorefrontBrandLockup from "./StorefrontBrandLockup";
 
 const CategoryMegaMenu = lazy(() => import("./CategoryMegaMenu"));
 const CartDrawer = lazy(() => import("./CartDrawer"));
@@ -80,14 +81,15 @@ const Navbar = () => {
           scrolled ? "glass-solid" : "glass"
         )}
       >
-        <div className="section-container flex h-[4.5rem] items-center justify-between md:h-20">
+        <div className="section-container flex h-[4.5rem] items-center justify-between md:h-24">
           <div className="flex flex-shrink-0 items-center">
-            <Link to="/" aria-label="GADGET69 home" className="flex flex-shrink-0 items-center">
-              <img
-                src={gadget69Wordmark}
-                alt="GADGET69"
-                className="block h-auto w-[10.4rem] brightness-0 sm:w-[11.35rem] md:w-[12.55rem] lg:w-[13.65rem]"
-                decoding="async"
+            <Link to="/" aria-label="Gadget 69 home" className="flex min-w-0 flex-shrink-0 items-center overflow-visible">
+              <StorefrontBrandLockup
+                imageSrc={gadget69Wordmark}
+                tone="dark"
+                imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
+                labelClassName="text-base sm:text-lg md:text-xl"
+                loading="eager"
                 fetchPriority="high"
               />
             </Link>

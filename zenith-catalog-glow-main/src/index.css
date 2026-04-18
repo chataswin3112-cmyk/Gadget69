@@ -350,6 +350,11 @@
   animation: marquee-left 28s linear infinite;
 }
 
+/* Pause review marquee on mouse hover */
+.review-marquee-track:hover {
+  animation-play-state: paused;
+}
+
 .animate-marquee-right {
   animation: marquee-right 32s linear infinite;
 }

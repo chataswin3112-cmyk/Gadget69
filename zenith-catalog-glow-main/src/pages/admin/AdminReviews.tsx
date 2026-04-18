@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import MediaUploadField from "@/components/admin/MediaUploadField";
 import MediaImage from "@/components/ui/media-image";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Star } from "lucide-react";
 import { toast } from "sonner";
@@ -191,6 +191,7 @@ const AdminReviews = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    aria-label={`Edit review for ${review.name}`}
                     onClick={() => openEdit(review)}
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -198,6 +199,7 @@ const AdminReviews = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    aria-label={`Delete review for ${review.name}`}
                     className="text-destructive"
                     onClick={() => setDeleteId(review.id)}
                   >
@@ -217,6 +219,9 @@ const AdminReviews = () => {
             <DialogTitle className="font-heading">
               {isNew ? "Add Review" : "Edit Review"}
             </DialogTitle>
+            <DialogDescription className="font-body text-sm text-muted-foreground">
+              Update the customer name, rating, photo, comment, and review date shown on the homepage.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
