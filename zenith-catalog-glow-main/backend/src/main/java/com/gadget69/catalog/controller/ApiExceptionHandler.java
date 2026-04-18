@@ -2,6 +2,8 @@ package com.gadget69.catalog.controller;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+  private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
   @ExceptionHandler(ResponseStatusException.class)
   public ResponseEntity<Map<String, String>> handleResponseStatus(ResponseStatusException exception) {
@@ -39,6 +42,7 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Map<String, String>> handleUnexpected(Exception exception) {
+    log.error("Unexpected server error", exception);
     Map<String, String> body = new LinkedHashMap<>();
     body.put("message", "Unexpected server error");
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);

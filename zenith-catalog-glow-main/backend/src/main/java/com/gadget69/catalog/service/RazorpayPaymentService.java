@@ -42,6 +42,7 @@ public class RazorpayPaymentService {
   public RazorpayOrder createOrder(Long localOrderId, BigDecimal totalAmount) {
     int amountPaise = toPaise(totalAmount);
     requirePaymentCredentials();
+    URI ordersApiUri = ordersApiUri();
 
     try {
       String payload = objectMapper.writeValueAsString(Map.of(
@@ -51,7 +52,7 @@ public class RazorpayPaymentService {
           "notes", Map.of("local_order_id", String.valueOf(localOrderId))));
 
       HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create(appProperties.getRazorpay().getOrdersApiUrl()))
+          .uri(ordersApiUri)
           .header("Authorization", basicAuthHeader())
           .header("Content-Type", "application/json")
           .POST(HttpRequest.BodyPublishers.ofString(payload))
@@ -142,10 +143,31 @@ public class RazorpayPaymentService {
     if (totalAmount == null || totalAmount.signum() <= 0) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order total must be greater than zero");
     }
-    return totalAmount
-        .multiply(BigDecimal.valueOf(100))
-        .setScale(0, RoundingMode.HALF_UP)
-        .intValueExact();
+    try {
+      return totalAmount
+          .multiply(BigDecimal.valueOf(100))
+          .setScale(0, RoundingMode.HALF_UP)
+          .intValueExact();
+    } catch (ArithmeticException ex) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order total is invalid", ex);
+    }
+  }
+
+  private URI ordersApiUri() {
+    String ordersApiUrl = appProperties.getRazorpay().getOrdersApiUrl();
+    if (!hasText(ordersApiUrl)) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE,
+          "Razorpay orders API URL is not configured");
+    }
+    try {
+      return URI.create(ordersApiUrl);
+    } catch (IllegalArgumentException ex) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE,
+          "Razorpay orders API URL is not configured correctly",
+          ex);
+    }
   }
 
   private String basicAuthHeader() {

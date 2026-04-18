@@ -155,6 +155,9 @@ public class PublicCatalogController {
       }
       int quantity = normalizeQuantity(itemPayload.quantity());
       BigDecimal unitPrice = productPricingService.resolveEffectivePrice(product, LocalDate.now());
+      if (unitPrice == null || unitPrice.signum() <= 0) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product price is not configured");
+      }
 
       OrderItem orderItem = new OrderItem();
       orderItem.setOrder(order);
