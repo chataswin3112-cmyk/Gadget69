@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,6 +34,13 @@ public class ApiExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
 
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<Map<String, String>> handleUnreadableMessage(HttpMessageNotReadableException exception) {
+    Map<String, String> body = new LinkedHashMap<>();
+    body.put("message", "Invalid JSON request body");
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+  }
+
   @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<Map<String, String>> handleNoResourceFound(NoResourceFoundException exception) {
     Map<String, String> body = new LinkedHashMap<>();
@@ -44,8 +52,7 @@ public class ApiExceptionHandler {
   public ResponseEntity<Map<String, String>> handleUnexpected(Exception exception) {
     log.error("Unexpected server error", exception);
     Map<String, String> body = new LinkedHashMap<>();
-    body.put("message", "Unexpected server error: " + exception.getMessage());
-    body.put("details", java.util.Arrays.toString(exception.getStackTrace()));
+    body.put("message", "Unexpected server error");
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
   }
 }

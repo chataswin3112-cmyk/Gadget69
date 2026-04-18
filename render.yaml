@@ -21,6 +21,10 @@ services:
         value: /var/data/uploads
       - key: APP_DATA_DIR
         value: /var/data/data
+      - key: APP_PUBLIC_BASE_URL
+        value: https://www.gadget69.in
+      - key: APP_ALLOWED_ORIGINS
+        value: https://www.gadget69.in,https://gadget69.in
       - key: APP_REQUIRE_POSTGRES
         value: "true"
       - key: APP_ADMIN_SECRET
