@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { ArrowUp, Facebook, Instagram } from "lucide-react";
-import gadget69Logo from "@/assets/gadget69-logo.png";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import { resolveMediaUrl } from "@/lib/media";
 import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/social-links";
 
@@ -26,10 +26,12 @@ const Footer = () => {
         <div className="mb-7 flex flex-col items-start text-left sm:hidden">
           <div className="mb-3">
             <img
-              src={settings.logoUrl || gadget69Logo}
+              src={settings.logoUrl || gadget69Wordmark}
               alt={settings.siteTitle || "Gadget69"}
               style={{ width: "110px", height: "auto" }}
               className="brightness-0 invert"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           {settings.footerText && (
@@ -89,10 +91,12 @@ const Footer = () => {
           <div className="flex flex-col items-start text-left">
             <div className="mb-3">
               <img
-                src={settings.logoUrl || gadget69Logo}
+                src={settings.logoUrl || gadget69Wordmark}
                 alt={settings.siteTitle || "Gadget69"}
                 style={{ width: "120px", height: "auto" }}
                 className="brightness-0 invert"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             {settings.footerText && (

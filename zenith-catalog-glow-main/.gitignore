@@ -10,6 +10,10 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.env
+.env.local
+backend/.env
+backend/.env.local
 *.local
 backend/.m2repo/
 backend/target/surefire-reports/

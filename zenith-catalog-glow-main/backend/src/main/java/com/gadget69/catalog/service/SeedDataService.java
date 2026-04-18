@@ -10,14 +10,18 @@ import com.gadget69.catalog.repository.StoreSettingsRepository;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class SeedDataService implements ApplicationRunner {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(SeedDataService.class);
   private static final long DEFAULT_OFFER_LOOKBACK_DAYS = 1;
   private static final long DEFAULT_OFFER_DURATION_DAYS = 30;
 
@@ -27,13 +31,27 @@ public class SeedDataService implements ApplicationRunner {
   private final StoreSettingsRepository storeSettingsRepository;
   private final AuthTokenService authTokenService;
   private final CatalogSyncService catalogSyncService;
+  private final JdbcTemplate jdbcTemplate;
 
   @Override
   public void run(ApplicationArguments args) {
+    ensureAdminUserTokenVersionColumn();
     seedAdmin();
     seedCatalog();
     seedSettings();
     backfillLegacyOfferSchedules();
+  }
+
+  private void ensureAdminUserTokenVersionColumn() {
+    try {
+      jdbcTemplate.execute("""
+          ALTER TABLE admin_users
+          ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0 NOT NULL
+          """);
+      jdbcTemplate.update("UPDATE admin_users SET token_version = 0 WHERE token_version IS NULL");
+    } catch (Exception exception) {
+      LOGGER.debug("Skipping legacy admin_users token_version schema repair", exception);
+    }
   }
 
   private void seedAdmin() {

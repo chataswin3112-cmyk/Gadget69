@@ -204,7 +204,7 @@ public class PublicCatalogController {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Order has already been processed");
     }
     if (!razorpayPaymentService.verifyPaymentSignature(
-        request.razorpayOrderId(), request.razorpayPaymentId(), request.razorpaySignature())) {
+        order.getRazorpayOrderId(), request.razorpayPaymentId(), request.razorpaySignature())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Razorpay payment signature");
     }
 

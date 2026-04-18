@@ -4,6 +4,8 @@ import com.gadget69.catalog.config.AppProperties;
 import com.gadget69.catalog.config.DatasourceBootstrap;
 import com.gadget69.catalog.config.DatasourceBootstrap.BootstrapResult;
 import com.gadget69.catalog.config.DatasourceBootstrap.Mode;
+import com.gadget69.catalog.config.LocalEnvLoader;
+import com.gadget69.catalog.config.LocalEnvLoader.LoadResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -21,7 +23,12 @@ public class CatalogApplication {
   }
 
   private static void configureDatasourceFromDatabaseUrl() {
-    BootstrapResult result = DatasourceBootstrap.configure(System.getProperties(), System.getenv());
+    LoadResult env = LocalEnvLoader.load(System.getProperties(), System.getenv());
+    if (!env.loadedFiles().isEmpty()) {
+      log.info("Loaded local env overrides from {}", env.loadedFiles());
+    }
+
+    BootstrapResult result = DatasourceBootstrap.configure(System.getProperties(), env.environment());
     if (result.mode() == Mode.POSTGRES) {
       log.info("Configured datasource from {}", result.detail());
       return;

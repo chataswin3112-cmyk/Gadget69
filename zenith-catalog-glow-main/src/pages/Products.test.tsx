@@ -1,3 +1,4 @@
+import type { ComponentPropsWithoutRef, PropsWithChildren } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import Products from "@/pages/Products";
@@ -44,7 +45,12 @@ vi.mock("@/components/storefront/ProductCard", () => ({
 
 vi.mock("framer-motion", () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    div: ({
+      children,
+      ...props
+    }: PropsWithChildren<ComponentPropsWithoutRef<"div"> & Record<string, unknown>>) => (
+      <div {...props}>{children}</div>
+    ),
   },
 }));
 

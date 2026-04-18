@@ -1,7 +1,9 @@
 package com.gadget69.catalog.config;
 
+import java.time.Duration;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -30,6 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     Path uploadPath = Path.of(appProperties.getUploadDir()).toAbsolutePath().normalize();
     registry.addResourceHandler("/uploads/**")
-        .addResourceLocations(uploadPath.toUri().toString());
+        .addResourceLocations(uploadPath.toUri().toString())
+        .setCacheControl(CacheControl.maxAge(Duration.ofDays(30)).cachePublic());
   }
 }

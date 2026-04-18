@@ -66,9 +66,19 @@ const ReviewSection = () => {
           </div>
         </div>
 
+        <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 md:hidden">
+          {reviews.map((review, i) => (
+            <ReviewCard
+              key={`${review.id}-mobile-${i}`}
+              review={review}
+              index={i}
+            />
+          ))}
+        </div>
+
         {/* Single infinite marquee row */}
-        <div className="relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)] sm:[mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-          <div className="flex flex-nowrap animate-marquee-left gap-3 sm:gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
+        <div className="relative hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] md:flex">
+          <div className="flex flex-nowrap animate-marquee-left gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
             {[...filled, ...filled].map((review, i) => (
               <ReviewCard
                 key={`${review.id}-${i}`}

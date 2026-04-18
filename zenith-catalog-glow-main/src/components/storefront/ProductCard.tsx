@@ -22,7 +22,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, animationPreset, className, drift }: ProductCardProps) => {
   const { addToCart } = useCart();
-  const variants = product.variants || [];
+  const variants = useMemo(() => product.variants || [], [product.variants]);
   const defaultVariant = variants.find((v) => v.isDefault) || variants[0];
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
     defaultVariant?.id ?? null

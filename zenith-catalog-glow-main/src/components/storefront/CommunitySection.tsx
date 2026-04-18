@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MediaImage from "@/components/ui/media-image";
@@ -30,7 +30,19 @@ const CommunitySection = () => {
   const displayMedia = communityMedia;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeVideo, setActiveVideo] = useState<CommunityMedia | null>(null);
+  const [allowInlineAutoplay, setAllowInlineAutoplay] = useState(false);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px) and (prefers-reduced-motion: no-preference)");
+    const updateInlineAutoplay = () => setAllowInlineAutoplay(mediaQuery.matches);
+
+    updateInlineAutoplay();
+    mediaQuery.addEventListener("change", updateInlineAutoplay);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateInlineAutoplay);
+    };
+  }, []);
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -89,7 +101,7 @@ const CommunitySection = () => {
                 const poster = item.thumbnailUrl || item.imageUrl || "/placeholder.svg";
                 const hasVideo = item.mediaType === "VIDEO" || isVideoUrl(item.videoUrl);
                 const videoPoster = hasVideo ? getVideoPoster(item, 960, 540) : poster;
-                const shouldAutoPlayInline = hasVideo;
+                const shouldAutoPlayInline = hasVideo && allowInlineAutoplay && index === 0;
                 const motionSide = index % 2 === 0 ? "community-slide-left" : "community-slide-right";
                 const driftX = index % 2 === 0 ? -0.72 : 0.72;
 
@@ -133,6 +145,7 @@ const CommunitySection = () => {
                                 src={videoPoster}
                                 alt={item.title || item.caption || "Community video"}
                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                loading={index < 2 ? "eager" : "lazy"}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-foreground/38 via-foreground/6 to-transparent" />
                               <div className="absolute inset-0 flex items-center justify-center">
@@ -181,6 +194,7 @@ const CommunitySection = () => {
                           src={poster}
                           alt={item.title || item.caption || "Community media"}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading={index < 2 ? "eager" : "lazy"}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-foreground/18 via-transparent to-transparent" />
                       </div>

@@ -73,7 +73,7 @@ const Products = () => {
     }
 
     return products;
-  }, [search, activeFilter, sortBy, categoryFilter]);
+  }, [allProducts, search, activeFilter, sortBy, categoryFilter]);
 
   const handleFilterChange = (key: string) => {
     const nextSearchParams = new URLSearchParams(searchParams);

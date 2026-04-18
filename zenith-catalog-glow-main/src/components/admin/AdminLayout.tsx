@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-import gadget69Logo from "@/assets/gadget69-logo.png";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
 
@@ -27,7 +27,7 @@ const AdminHeader = () => {
         </div>
         {isMobile && (
           <div className="flex items-center gap-2">
-            <img src={gadget69Logo} alt="Gadget69" className="h-8 w-auto" />
+            <img src={gadget69Wordmark} alt="Gadget69" className="h-7 w-auto" decoding="async" />
             <span className="font-heading text-sm font-bold text-foreground">Gadget69</span>
           </div>
         )}

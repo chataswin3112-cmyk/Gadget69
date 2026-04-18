@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import MediaImage from "@/components/ui/media-image";
@@ -7,12 +8,21 @@ import { Product } from "@/types";
 
 const ProductMarqueeSection = () => {
   const { products } = useAdminData();
-  if (!products.length) return null;
 
-  // Shuffle for variety and fill two independent rows
-  const shuffled = [...products].sort(() => Math.random() - 0.5);
-  const rowA = [...shuffled, ...shuffled]; // duplicate for seamless loop
-  const rowB = [...shuffled.reverse(), ...shuffled]; // reverse order for row B
+  const marqueeProducts = useMemo(
+    () => products.slice(0, Math.min(products.length, 8)),
+    [products]
+  );
+  const mobileProducts = useMemo(() => marqueeProducts.slice(0, 6), [marqueeProducts]);
+  const rowA = useMemo(() => [...marqueeProducts, ...marqueeProducts], [marqueeProducts]);
+  const rowB = useMemo(() => {
+    const reversed = [...marqueeProducts].reverse();
+    return [...reversed, ...reversed];
+  }, [marqueeProducts]);
+
+  if (!marqueeProducts.length) {
+    return null;
+  }
 
   return (
     <section className="section-padding overflow-hidden group">
@@ -30,29 +40,32 @@ const ProductMarqueeSection = () => {
         </div>
       </div>
 
-      {/* Row 1 — scrolls left slowly */}
-      <div className="mb-4 flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+      <div className="grid grid-cols-2 gap-4 px-4 sm:hidden">
+        {mobileProducts.map((product) => (
+          <CompactProductCard key={`mobile-${product.id}`} product={product} />
+        ))}
+      </div>
+
+      <div className="mb-4 hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] sm:flex">
         <div className="flex animate-product-left gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
-          {rowA.map((product, i) => (
-            <ProductCard key={`a-${product.id}-${i}`} product={product} />
+          {rowA.map((product, index) => (
+            <CompactProductCard key={`a-${product.id}-${index}`} product={product} />
           ))}
         </div>
       </div>
 
-      {/* Row 2 — scrolls right slowly */}
-      <div className="flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+      <div className="hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] sm:flex">
         <div className="flex animate-product-right gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
-          {rowB.map((product, i) => (
-            <ProductCard key={`b-${product.id}-${i}`} product={product} />
+          {rowB.map((product, index) => (
+            <CompactProductCard key={`b-${product.id}-${index}`} product={product} />
           ))}
         </div>
       </div>
 
-      {/* CTA */}
       <div className="mt-10 flex justify-center">
         <Link
           to="/products"
-          className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background transition-all duration-300 hover:bg-foreground/85 hover:scale-[1.03] hover:shadow-lg font-heading"
+          className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background transition-all duration-300 hover:scale-[1.03] hover:bg-foreground/85 hover:shadow-lg font-heading"
         >
           View All Products →
         </Link>
@@ -61,7 +74,7 @@ const ProductMarqueeSection = () => {
   );
 };
 
-const ProductCard = ({ product }: { product: Product }) => {
+const CompactProductCard = ({ product }: { product: Product }) => {
   const price = getEffectivePrice(product);
   const hasOffer = product.offer && product.offerPrice;
 
@@ -69,17 +82,17 @@ const ProductCard = ({ product }: { product: Product }) => {
     <Link
       to={`/products/${product.id}`}
       className={cn(
-        "group flex-shrink-0 w-[200px] md:w-[220px] overflow-hidden rounded-[20px]",
+        "group w-full flex-shrink-0 overflow-hidden rounded-[20px]",
         "border border-white/70 bg-white/90 shadow-[0_12px_32px_-18px_hsl(var(--surface-shadow)/0.22)]",
-        "transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_20px_44px_-20px_hsl(var(--surface-shadow)/0.30)]"
+        "transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_20px_44px_-20px_hsl(var(--surface-shadow)/0.30)] sm:w-[200px] md:w-[220px]"
       )}
     >
-      {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-secondary/10">
         <MediaImage
           src={product.imageUrl}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
         />
         {hasOffer && (
           <span className="absolute left-2 top-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-foreground">
@@ -87,12 +100,11 @@ const ProductCard = ({ product }: { product: Product }) => {
           </span>
         )}
       </div>
-      {/* Info */}
       <div className="p-3">
         <p className="truncate text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground font-body">
           {product.sectionName}
         </p>
-        <p className="mt-0.5 truncate text-sm font-semibold text-foreground font-heading leading-tight">
+        <p className="mt-0.5 truncate text-sm font-semibold leading-tight text-foreground font-heading">
           {product.name}
         </p>
         <div className="mt-1.5 flex items-baseline gap-1.5">
@@ -100,7 +112,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             ₹{price.toLocaleString()}
           </span>
           {product.mrp && product.mrp > price && (
-            <span className="text-xs text-muted-foreground line-through font-body">
+            <span className="text-xs line-through text-muted-foreground font-body">
               ₹{product.mrp.toLocaleString()}
             </span>
           )}

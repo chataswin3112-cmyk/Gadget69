@@ -18,7 +18,7 @@ const checkPasswordStrength = (pwd: string) => {
     uppercase: /[A-Z]/.test(pwd),
     lowercase: /[a-z]/.test(pwd),
     number: /\d/.test(pwd),
-    special: /[@$!%*?&#^()_+=\-]/.test(pwd),
+    special: /[@$!%*?&#^()_+=-]/.test(pwd),
   };
   const score = Object.values(checks).filter(Boolean).length;
   return { checks, score };

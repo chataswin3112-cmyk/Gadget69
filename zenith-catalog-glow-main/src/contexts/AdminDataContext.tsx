@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  startTransition,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Banner, CommunityMedia, Product, Review, Section, StoreSettings } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { getProducts, getAdminProducts, createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from "@/api/productApi";
@@ -59,6 +67,22 @@ const sortCommunity = (items: CommunityMedia[]) =>
   [...items].sort((a, b) => a.displayOrder - b.displayOrder || a.id - b.id);
 
 const REVIEWS_STORAGE_KEY = "gadget69_admin_reviews";
+const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
+const CATALOG_CACHE_VERSION = 1;
+
+interface CatalogCacheSnapshot {
+  banners: Banner[];
+  communityMedia: CommunityMedia[];
+  products: Product[];
+  reviews: Review[];
+  sections: Section[];
+  settings: StoreSettings;
+  timestamp: number;
+  version: number;
+}
+
+const getCatalogCacheKey = (isAuthenticated: boolean) =>
+  `gadget69_catalog_cache_${isAuthenticated ? "admin" : "public"}`;
 
 const loadStoredReviews = (): Review[] | null => {
   if (typeof window === "undefined") {
@@ -97,28 +121,104 @@ const persistReviews = (items: Review[]) => {
   window.localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(items));
 };
 
+const loadCatalogCache = (isAuthenticated: boolean): CatalogCacheSnapshot | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(getCatalogCacheKey(isAuthenticated));
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<CatalogCacheSnapshot>;
+    if (
+      parsed.version !== CATALOG_CACHE_VERSION ||
+      typeof parsed.timestamp !== "number" ||
+      Date.now() - parsed.timestamp > CATALOG_CACHE_TTL_MS
+    ) {
+      return null;
+    }
+
+    return {
+      banners: Array.isArray(parsed.banners) ? parsed.banners : [],
+      communityMedia: Array.isArray(parsed.communityMedia) ? parsed.communityMedia : [],
+      products: Array.isArray(parsed.products) ? parsed.products : [],
+      reviews: Array.isArray(parsed.reviews) ? parsed.reviews : [],
+      sections: Array.isArray(parsed.sections) ? parsed.sections : [],
+      settings:
+        parsed.settings && typeof parsed.settings === "object"
+          ? ({ ...defaultSettings, ...parsed.settings } as StoreSettings)
+          : defaultSettings,
+      timestamp: parsed.timestamp,
+      version: CATALOG_CACHE_VERSION,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const persistCatalogCache = (
+  isAuthenticated: boolean,
+  snapshot: Omit<CatalogCacheSnapshot, "timestamp" | "version">
+) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const payload: CatalogCacheSnapshot = {
+    ...snapshot,
+    timestamp: Date.now(),
+    version: CATALOG_CACHE_VERSION,
+  };
+
+  window.localStorage.setItem(getCatalogCacheKey(isAuthenticated), JSON.stringify(payload));
+};
+
 export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  const [sections, setSections] = useState<Section[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
-  const [communityMedia, setCommunityMedia] = useState<CommunityMedia[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const initialCache = useMemo(() => loadCatalogCache(isAuthenticated), [isAuthenticated]);
+  const [sections, setSections] = useState<Section[]>(initialCache?.sections ?? []);
+  const [products, setProducts] = useState<Product[]>(initialCache?.products ?? []);
+  const [banners, setBanners] = useState<Banner[]>(initialCache?.banners ?? []);
+  const [settings, setSettings] = useState<StoreSettings>(initialCache?.settings ?? defaultSettings);
+  const [communityMedia, setCommunityMedia] = useState<CommunityMedia[]>(
+    initialCache?.communityMedia ?? []
+  );
+  const [reviews, setReviews] = useState<Review[]>(initialCache?.reviews ?? loadStoredReviews() ?? []);
+  const [isLoading, setIsLoading] = useState(!initialCache);
   const nextReviewId = useCallback(
     () => Math.max(0, ...reviews.map((r) => r.id)) + 1,
     [reviews]
   );
 
-  const refreshAll = useCallback(async () => {
-    setIsLoading(true);
+  const applySnapshot = useCallback(
+    (snapshot: Omit<CatalogCacheSnapshot, "timestamp" | "version">) => {
+      startTransition(() => {
+        setSections(snapshot.sections);
+        setProducts(snapshot.products);
+        setBanners(snapshot.banners);
+        setSettings(snapshot.settings);
+        setCommunityMedia(snapshot.communityMedia);
+        setReviews(snapshot.reviews);
+        setIsLoading(false);
+      });
+    },
+    []
+  );
+
+  const loadAll = useCallback(async (showLoader: boolean) => {
+    if (showLoader) {
+      setIsLoading(true);
+    }
 
     const safeFetch = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
       try { return await fn(); } catch { return fallback; }
     };
 
     try {
+      const storedReviews = loadStoredReviews() ?? [];
       const [sectionsData, productsData, bannersData, settingsData, communityData] =
         await Promise.all([
           safeFetch(isAuthenticated ? getAdminSections : getSections, [] as Section[]),
@@ -128,28 +228,99 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           safeFetch(isAuthenticated ? getAdminCommunityMedia : getCommunityMedia, [] as CommunityMedia[]),
         ]);
 
-      setSections(sortSections(sectionsData as Section[]));
-      setProducts(sortProducts(productsData as Product[]));
-      setBanners(sortBanners(bannersData as Banner[]));
-      setSettings(settingsData as StoreSettings);
-      setCommunityMedia(sortCommunity(communityData as CommunityMedia[]));
-      setReviews(loadStoredReviews() ?? []);
+      const snapshot = {
+        sections: sortSections(sectionsData as Section[]),
+        products: sortProducts(productsData as Product[]),
+        banners: sortBanners(bannersData as Banner[]),
+        settings: settingsData as StoreSettings,
+        communityMedia: sortCommunity(communityData as CommunityMedia[]),
+        reviews: storedReviews,
+      };
+
+      persistCatalogCache(isAuthenticated, snapshot);
+      applySnapshot(snapshot);
     } catch (error) {
       console.warn("Unexpected error loading catalog data", error);
-      setSections([]);
-      setProducts([]);
-      setBanners([]);
-      setSettings(defaultSettings);
-      setCommunityMedia([]);
-      setReviews(loadStoredReviews() ?? []);
+      applySnapshot({
+        sections: [],
+        products: [],
+        banners: [],
+        settings: defaultSettings,
+        communityMedia: [],
+        reviews: loadStoredReviews() ?? [],
+      });
     } finally {
-      setIsLoading(false);
+      if (!showLoader) {
+        setIsLoading(false);
+      }
     }
-  }, [isAuthenticated]);
+  }, [applySnapshot, isAuthenticated]);
+
+  const refreshAll = useCallback(async () => {
+    await loadAll(true);
+  }, [loadAll]);
 
   useEffect(() => {
-    refreshAll();
-  }, [refreshAll]);
+    const cached = loadCatalogCache(isAuthenticated);
+    if (cached) {
+      applySnapshot({
+        sections: cached.sections,
+        products: cached.products,
+        banners: cached.banners,
+        settings: cached.settings,
+        communityMedia: cached.communityMedia,
+        reviews: cached.reviews,
+      });
+      void loadAll(false);
+      return;
+    }
+
+    setIsLoading(true);
+    void loadAll(true);
+  }, [applySnapshot, isAuthenticated, loadAll]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    document.title = `${settings.siteTitle || "Gadget69"} - Premium Electronics`;
+
+    const description = document.querySelector('meta[name="description"]');
+    description?.setAttribute(
+      "content",
+      settings.metaDescription ||
+        "Premium electronics crafted for those who demand excellence. Experience luxury technology at Gadget69."
+    );
+
+    const iconHref = settings.faviconUrl || "/favicon.svg";
+    const iconSelectors = ['link[rel="icon"]', 'link[rel="apple-touch-icon"]'] as const;
+
+    iconSelectors.forEach((selector) => {
+      let link = document.querySelector(selector) as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = selector.includes("apple-touch-icon") ? "apple-touch-icon" : "icon";
+        document.head.appendChild(link);
+      }
+      link.href = iconHref;
+    });
+  }, [settings.faviconUrl, settings.metaDescription, settings.siteTitle]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    persistCatalogCache(isAuthenticated, {
+      sections,
+      products,
+      banners,
+      settings,
+      communityMedia,
+      reviews,
+    });
+  }, [banners, communityMedia, isAuthenticated, isLoading, products, reviews, sections, settings]);
 
   const addSection = useCallback(async (section: Partial<Section>) => {
     const created = await createSectionApi(section);

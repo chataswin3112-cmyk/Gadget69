@@ -19,6 +19,19 @@ export function useScrollAnimations(dependencies: DependencyList = []) {
     const cardTargets = new Set<HTMLElement>();
     const driftTargets = new Set<HTMLElement>();
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isDesktop = window.innerWidth >= 768;
+    const enableDrift = !prefersReducedMotion && isDesktop;
+
+    if (!isDesktop || prefersReducedMotion) {
+      document
+        .querySelectorAll<HTMLElement>("[data-animate], [data-animate-card]")
+        .forEach((el) => el.classList.add("is-visible"));
+      document.querySelectorAll<HTMLElement>("[data-drift]").forEach((el) => {
+        el.style.setProperty("--drift-x", "0px");
+        el.style.setProperty("--drift-y", "0px");
+      });
+      return;
+    }
 
     let observeFrameId = 0;
     let scrollFrameId = 0;
@@ -66,6 +79,11 @@ export function useScrollAnimations(dependencies: DependencyList = []) {
     };
 
     const syncDriftTargets = () => {
+      if (!enableDrift) {
+        driftTargets.forEach((el) => setDrift(el, 0));
+        return;
+      }
+
       driftTargets.forEach((el) => {
         if (!el.isConnected || !el.classList.contains("is-visible")) {
           setDrift(el, 0);
@@ -97,7 +115,7 @@ export function useScrollAnimations(dependencies: DependencyList = []) {
     };
 
     const startDriftLoop = () => {
-      if (prefersReducedMotion) {
+      if (!enableDrift) {
         return;
       }
 
@@ -114,7 +132,7 @@ export function useScrollAnimations(dependencies: DependencyList = []) {
         el.style.setProperty("--stagger-delay", `${delayMs}ms`);
       }
 
-      if (el.dataset.drift !== undefined) {
+      if (enableDrift && el.dataset.drift !== undefined) {
         driftTargets.add(el);
         setDrift(el, currentDrift);
       }
@@ -146,9 +164,11 @@ export function useScrollAnimations(dependencies: DependencyList = []) {
     );
 
     const observeAll = () => {
-      document
-        .querySelectorAll<HTMLElement>("[data-drift].is-visible")
-        .forEach((el) => driftTargets.add(el));
+      if (enableDrift) {
+        document
+          .querySelectorAll<HTMLElement>("[data-drift].is-visible")
+          .forEach((el) => driftTargets.add(el));
+      }
       syncDriftTargets();
 
       document
@@ -209,7 +229,7 @@ export function useScrollAnimations(dependencies: DependencyList = []) {
 
       handleViewportChange();
 
-      if (prefersReducedMotion || delta === 0) {
+      if (!enableDrift || delta === 0) {
         return;
       }
 

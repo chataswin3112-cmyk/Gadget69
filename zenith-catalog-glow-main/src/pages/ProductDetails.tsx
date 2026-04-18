@@ -1,4 +1,4 @@
-import { useState, useMemo, type CSSProperties } from "react";
+import { useEffect, useState, useMemo, type CSSProperties } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Minus, Plus, ShoppingBag, ChevronRight } from "lucide-react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
@@ -20,20 +20,32 @@ const ProductDetails = () => {
   const { products: allProducts, isLoading } = useAdminData();
   const product = allProducts.find((p) => p.id === Number(id));
 
-  const variants = product?.variants || [];
-  const defaultVariant = variants.find((v) => v.isDefault) || variants[0];
+  const variants = useMemo(() => product?.variants || [], [product?.variants]);
+  const defaultVariant = useMemo(
+    () => variants.find((variant) => variant.isDefault) || variants[0],
+    [variants]
+  );
 
-  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
-    defaultVariant?.id ?? null
-  );
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [mainMedia, setMainMedia] = useState(
-    defaultVariant?.images?.[0]?.imageUrl ||
-    product?.galleryImages?.[0] ||
-    product?.videoUrl ||
-    product?.imageUrl ||
-    ""
-  );
+  const [mainMedia, setMainMedia] = useState("");
+
+  useEffect(() => {
+    if (!product) {
+      setSelectedVariantId(null);
+      setMainMedia("");
+      return;
+    }
+
+    setSelectedVariantId(defaultVariant?.id ?? null);
+    setMainMedia(
+      defaultVariant?.images?.[0]?.imageUrl ||
+      product.galleryImages?.[0] ||
+      product.videoUrl ||
+      product.imageUrl ||
+      ""
+    );
+  }, [defaultVariant, product]);
 
   const selectedVariant = useMemo(
     () => variants.find((v) => v.id === selectedVariantId),

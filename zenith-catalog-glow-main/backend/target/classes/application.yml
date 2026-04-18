@@ -1,5 +1,16 @@
 server:
   port: ${PORT:8081}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,application/javascript,text/javascript,image/svg+xml
+    min-response-size: 1024
+  http2:
+    enabled: true
+  tomcat:
+    threads:
+      max: ${SERVER_TOMCAT_MAX_THREADS:200}
+      min-spare: ${SERVER_TOMCAT_MIN_SPARE_THREADS:20}
+    accept-count: ${SERVER_TOMCAT_ACCEPT_COUNT:100}
 
 spring:
   application:
@@ -9,6 +20,10 @@ spring:
     url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:${APP_DATA_DIR:./data}/gadget69db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_ON_EXIT=FALSE}
     username: ${SPRING_DATASOURCE_USERNAME:sa}
     password: ${SPRING_DATASOURCE_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:5}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
   jpa:
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     hibernate:

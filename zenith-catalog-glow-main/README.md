@@ -51,6 +51,18 @@ Razorpay env contract:
 - `APP_RAZORPAY_WEBHOOK_SECRET`: server-only webhook signing secret from the Razorpay dashboard.
 - `APP_RAZORPAY_ORDERS_API_URL`: optional override, defaults to `https://api.razorpay.com/v1/orders`.
 
+Local env loading:
+
+- For local runs, the backend auto-loads `.env`, `.env.local`, `backend/.env`, and `backend/.env.local` if present.
+- Process environment variables still win over values from env files.
+- Keep real Razorpay secrets in ignored env files only. Do not commit them.
+
+Live mode notes:
+
+- When you switch to live mode, both `APP_RAZORPAY_KEY_ID` and `APP_RAZORPAY_KEY_SECRET` must be the matching live pair from the same Razorpay account.
+- The frontend does not need a separate Razorpay env; it receives the publishable key id from the backend order response.
+- Webhook updates such as capture and refund reconciliation require a public HTTPS URL that Razorpay can reach.
+
 Do not commit Razorpay secrets. Keep local values in your shell or ignored environment files, and configure production values in Render.
 
 ## Render Deployment

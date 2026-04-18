@@ -71,6 +71,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     filterChain.doFilter(request, response);
+    if (response.getStatus() < HttpServletResponse.SC_BAD_REQUEST) {
+      attempts.remove(ip);
+    }
   }
 
   private String resolveClientIp(HttpServletRequest request) {

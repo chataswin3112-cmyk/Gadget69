@@ -1,3 +1,4 @@
+import type { ComponentPropsWithoutRef, PropsWithChildren } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import CommunitySection from "@/components/storefront/CommunitySection";
 import { CommunityMedia } from "@/types";
@@ -12,9 +13,36 @@ vi.mock("@/contexts/AdminDataContext", () => ({
 
 vi.mock("framer-motion", () => ({
   motion: {
-    div: ({ children, initial, whileInView, transition, viewport, ...props }: any) => <div {...props}>{children}</div>,
-    a: ({ children, initial, whileInView, transition, viewport, ...props }: any) => <a {...props}>{children}</a>,
-    button: ({ children, initial, whileInView, transition, viewport, ...props }: any) => <button {...props}>{children}</button>,
+    div: ({
+      children,
+      initial,
+      whileInView,
+      transition,
+      viewport,
+      ...props
+    }: PropsWithChildren<ComponentPropsWithoutRef<"div"> & Record<string, unknown>>) => (
+      <div {...props}>{children}</div>
+    ),
+    a: ({
+      children,
+      initial,
+      whileInView,
+      transition,
+      viewport,
+      ...props
+    }: PropsWithChildren<ComponentPropsWithoutRef<"a"> & Record<string, unknown>>) => (
+      <a {...props}>{children}</a>
+    ),
+    button: ({
+      children,
+      initial,
+      whileInView,
+      transition,
+      viewport,
+      ...props
+    }: PropsWithChildren<ComponentPropsWithoutRef<"button"> & Record<string, unknown>>) => (
+      <button {...props}>{children}</button>
+    ),
   },
 }));
 
@@ -50,6 +78,16 @@ describe("CommunitySection", () => {
     mockUseAdminData.mockReturnValue({
       communityMedia,
     });
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query === "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
   });
 
   it("autoplays the first community video inline on page load", () => {

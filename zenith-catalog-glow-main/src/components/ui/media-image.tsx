@@ -4,10 +4,12 @@ import { FALLBACK_IMAGE_SRC, resolveMediaUrl } from "@/lib/media";
 interface MediaImageProps extends Omit<ComponentPropsWithoutRef<"img">, "src"> {
   src?: string | null;
   fallbackSrc?: string;
+  /** Set eager=true for hero/above-the-fold images to skip lazy loading */
+  eager?: boolean;
 }
 
 const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
-  ({ src, fallbackSrc = FALLBACK_IMAGE_SRC, onError, ...props }, ref) => {
+  ({ src, fallbackSrc = FALLBACK_IMAGE_SRC, onError, eager = false, loading, decoding, ...props }, ref) => {
     const resolvedFallbackSrc = useMemo(
       () => resolveMediaUrl(fallbackSrc) || FALLBACK_IMAGE_SRC,
       [fallbackSrc]
@@ -27,6 +29,8 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
         {...props}
         ref={ref}
         src={currentSrc}
+        loading={loading ?? (eager ? "eager" : "lazy")}
+        decoding={decoding ?? (eager ? "sync" : "async")}
         onError={(event) => {
           onError?.(event);
 

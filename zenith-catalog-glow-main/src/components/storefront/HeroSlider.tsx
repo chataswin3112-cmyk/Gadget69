@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAdminData } from "@/contexts/AdminDataContext";
+import { resolveMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import MediaImage from "@/components/ui/media-image";
 
@@ -9,89 +10,109 @@ const AUTO_PLAY_MS = 3000;
 
 const HeroSlider = () => {
   const { banners: allBanners } = useAdminData();
-  const banners = allBanners.filter((b) => b.isActive);
+  const banners = useMemo(() => allBanners.filter((banner) => banner.isActive), [allBanners]);
   const [current, setCurrent] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [progressActive, setProgressActive] = useState(false);
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % banners.length);
-    setProgress(0);
   }, [banners.length]);
 
   const prev = useCallback(() => {
-    setCurrent((p) => (p - 1 + banners.length) % banners.length);
-    setProgress(0);
+    setCurrent((prevIndex) => (prevIndex - 1 + banners.length) % banners.length);
   }, [banners.length]);
 
-  // Smooth progress timer
   useEffect(() => {
-    if (banners.length <= 1) return;
-    setProgress(0);
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          next();
-          return 0;
-        }
-        return p + 100 / (AUTO_PLAY_MS / 50);
-      });
-    }, 50);
-    return () => clearInterval(interval);
+    if (!banners.length) {
+      setCurrent(0);
+      return;
+    }
+
+    if (current >= banners.length) {
+      setCurrent(0);
+    }
+  }, [banners.length, current]);
+
+  useEffect(() => {
+    if (banners.length <= 1) {
+      setProgressActive(false);
+      return;
+    }
+
+    setProgressActive(false);
+    const animationFrameId = window.requestAnimationFrame(() => {
+      setProgressActive(true);
+    });
+    const timeoutId = window.setTimeout(() => {
+      next();
+    }, AUTO_PLAY_MS);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      window.clearTimeout(timeoutId);
+    };
   }, [current, banners.length, next]);
 
-  if (!banners.length) return null;
+  if (!banners.length) {
+    return null;
+  }
 
   return (
     <section className="home-hero relative w-full overflow-hidden bg-muted">
-      {banners.map((banner, i) => (
-        <div
-          key={banner.id}
-          className={cn(
-            "absolute inset-0 transition-opacity duration-700",
-            i === current
-              ? "z-10 opacity-100"
-              : "pointer-events-none z-0 opacity-0"
-          )}
-          aria-hidden={i !== current}
-        >
-          {/* Hero Image — uses mobile source if available and on small screens */}
-          <MediaImage
-            src={banner.mobileImageUrl && window.innerWidth < 768 ? banner.mobileImageUrl : banner.desktopImageUrl}
-            alt={banner.title || "Banner"}
+      {banners.map((banner, index) => {
+        const mobileSrc = resolveMediaUrl(banner.mobileImageUrl);
+
+        return (
+          <div
+            key={banner.id}
             className={cn(
-              "w-full h-full object-cover transition-transform ease-out",
-              i === current
-                ? "scale-110 duration-[7000ms]"
-                : "scale-100 duration-700"
+              "absolute inset-0 transition-opacity duration-700",
+              index === current ? "z-10 opacity-100" : "pointer-events-none z-0 opacity-0"
             )}
-            loading={i === current ? "eager" : "lazy"}
-            decoding="async"
-          />
-          <div className="home-hero-overlay absolute inset-0" />
-          <div className="absolute inset-0 flex items-center">
-            <div className="section-container">
-              <div className="home-hero-content" data-animate="hero-slide">
-                <p className="home-hero-kicker">Premium Electronics</p>
-                <div className={cn("space-y-3 sm:space-y-4", i === current && "animate-hero-float")}>
-                  {banner.title && (
-                    <h2 className="font-heading text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-sm">
-                      {banner.title}
-                    </h2>
-                  )}
-                  {banner.ctaText && banner.ctaLink && (
-                    <Link
-                      to={banner.ctaLink}
-                      className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--surface-soft-gold))] px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-foreground transition-all duration-300 hover:bg-[hsl(var(--surface-soft-gold))]/85 hover:scale-[1.03] hover:shadow-lg font-heading"
-                    >
-                      {banner.ctaText}
-                    </Link>
-                  )}
+            aria-hidden={index !== current}
+          >
+            <picture>
+              {mobileSrc && <source media="(max-width: 767px)" srcSet={mobileSrc} />}
+              <MediaImage
+                src={banner.desktopImageUrl}
+                alt={banner.title || "Banner"}
+                className={cn(
+                  "h-full w-full object-cover transition-transform ease-out",
+                  index === current ? "scale-110" : "scale-100"
+                )}
+                style={{ transitionDuration: index === current ? "7000ms" : "700ms" }}
+                loading={index === current ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={index === current ? "high" : undefined}
+                sizes="100vw"
+              />
+            </picture>
+            <div className="home-hero-overlay absolute inset-0" />
+            <div className="absolute inset-0 flex items-center">
+              <div className="section-container">
+                <div className="home-hero-content" data-animate="hero-slide">
+                  <p className="home-hero-kicker">Premium Electronics</p>
+                  <div className={cn("space-y-3 sm:space-y-4", index === current && "animate-hero-float")}>
+                    {banner.title && (
+                      <h2 className="font-heading text-xl font-bold leading-tight text-white drop-shadow-sm sm:text-3xl md:text-5xl lg:text-6xl">
+                        {banner.title}
+                      </h2>
+                    )}
+                    {banner.ctaText && banner.ctaLink && (
+                      <Link
+                        to={banner.ctaLink}
+                        className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--surface-soft-gold))] px-4 py-2 text-xs font-semibold text-foreground transition-all duration-300 hover:scale-[1.03] hover:bg-[hsl(var(--surface-soft-gold))]/85 hover:shadow-lg sm:px-6 sm:py-3 sm:text-sm font-heading"
+                      >
+                        {banner.ctaText}
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {banners.length > 1 && (
         <>
@@ -110,28 +131,29 @@ const HeroSlider = () => {
             <ChevronRight className="h-5 w-5 text-foreground" />
           </button>
 
-          {/* Animated progress bar — replaces vanilla dot indicators */}
           <div className="absolute bottom-0 left-0 right-0 z-20 flex">
-            {banners.map((_, i) => (
+            {banners.map((_, index) => (
               <button
-                key={i}
-                onClick={() => {
-                  setCurrent(i);
-                  setProgress(0);
-                }}
-                aria-label={`Go to banner ${i + 1}`}
-                className="relative flex-1 h-[3px] bg-white/20 overflow-hidden"
+                key={index}
+                onClick={() => setCurrent(index)}
+                aria-label={`Go to banner ${index + 1}`}
+                className="relative h-[3px] flex-1 overflow-hidden bg-white/20"
               >
                 <span
                   className="absolute inset-y-0 left-0 bg-[hsl(var(--surface-soft-gold))]"
                   style={{
                     width:
-                      i === current
-                        ? `${progress}%`
-                        : i < current
+                      index === current
+                        ? progressActive
+                          ? "100%"
+                          : "0%"
+                        : index < current
                         ? "100%"
                         : "0%",
-                    transition: i === current ? "none" : "width 0.3s ease",
+                    transition:
+                      index === current
+                        ? `width ${AUTO_PLAY_MS}ms linear`
+                        : "width 0.3s ease",
                   }}
                 />
               </button>

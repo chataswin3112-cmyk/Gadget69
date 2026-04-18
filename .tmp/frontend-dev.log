@@ -1,52 +1,8 @@
 
 > vite_react_shadcn_ts@0.0.0 dev
-> vite --host 127.0.0.1 --port 4173
+> vite --host 127.0.0.1 --port 8080
 
 
-  [32m[1mVITE[22m v5.4.19[39m  [2mready in [0m[1m523[22m[2m[0m ms[22m
+  [32m[1mVITE[22m v5.4.19[39m  [2mready in [0m[1m1287[22m[2m[0m ms[22m
 
-  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4173[22m/[39m
-[2m10:35:48 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css, /src/components/storefront/CommunitySection.tsx[22m
-[2m10:36:03 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/storefront/CommunitySection.tsx, /src/index.css[22m
-[2m10:41:45 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/storefront/HeroSlider.tsx, /src/index.css[22m
-[2m10:41:58 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Index.tsx, /src/index.css[22m
-[2m10:42:10 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css[22m
-[2m10:42:34 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css, /src/components/storefront/CommunitySection.tsx[22m
-[2m10:42:58 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css, /src/components/storefront/CommunitySection.tsx[22m
-[2m11:29:57 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css[22m
-[2m11:30:48 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/storefront/Footer.tsx, /src/index.css[22m
-[2m11:31:18 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
-[2m11:31:35 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/AdminSidebar.tsx, /src/index.css[22m
-[2m11:32:38 am[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
-[2m11:32:40 am[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
-[2m11:32:40 am[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
-[2m11:45:47 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css[22m
-[2m11:48:55 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css, /src/components/storefront/CommunitySection.tsx[22m
-[2m12:31:15 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/storefront/Footer.tsx, /src/index.css[22m
-[2m12:31:54 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css[22m
-[2m12:32:34 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Index.tsx, /src/index.css[22m
-[2m12:33:10 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
-[2m12:50:23 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Index.tsx, /src/index.css[22m
-[2m12:51:34 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Index.tsx, /src/index.css[22m
-[2m12:52:14 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css[22m
-[2m12:52:46 pm[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
-[2m12:52:48 pm[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
-[2m12:58:39 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css[22m
-[2m12:58:40 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Index.tsx, /src/index.css[22m
-[2m12:58:40 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Index.tsx, /src/index.css[22m
-[2m12:58:58 pm[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/AdminDataContext.tsx[22m Could not Fast Refresh ("useAdminData" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc#consistent-components-exports
-[2m12:58:58 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css, /src/pages/Products.tsx, /src/pages/Categories.tsx, /src/pages/ProductDetails.tsx, /src/pages/CategoryDetails.tsx, /src/pages/Contact.tsx, /src/pages/admin/AdminCategories.tsx, /src/pages/admin/AdminOffers.tsx, /src/pages/admin/AdminBanners.tsx, /src/pages/admin/AdminProducts.tsx, /src/pages/admin/AdminMedia.tsx, /src/pages/admin/AdminSettings.tsx, /src/components/storefront/AnnouncementBar.tsx, /src/components/storefront/HeroSlider.tsx, /src/components/storefront/Footer.tsx, /src/components/storefront/CommunitySection.tsx, /src/components/storefront/FloatingContactActions.tsx, /src/components/storefront/CategoryMegaMenu.tsx, /src/pages/admin/AdminReviews.tsx, /src/components/storefront/ReviewSection.tsx, /src/components/storefront/ProductMarqueeSection.tsx, /src/pages/Index.tsx[22m
-[2m1:04:22 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Index.tsx, /src/index.css[22m
-[2m2:58:54 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css, /src/components/storefront/CommunitySection.tsx, /src/components/storefront/ReviewSection.tsx, /src/components/storefront/ProductMarqueeSection.tsx[22m
-[2m2:58:54 pm[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/AdminDataContext.tsx[22m Could not Fast Refresh ("useAdminData" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc#consistent-components-exports
-[2m2:58:54 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css, /src/pages/Products.tsx, /src/pages/Categories.tsx, /src/pages/ProductDetails.tsx, /src/pages/CategoryDetails.tsx, /src/pages/Contact.tsx, /src/pages/admin/AdminCategories.tsx, /src/pages/admin/AdminOffers.tsx, /src/pages/admin/AdminBanners.tsx, /src/pages/admin/AdminProducts.tsx, /src/pages/admin/AdminMedia.tsx, /src/pages/admin/AdminSettings.tsx, /src/components/storefront/AnnouncementBar.tsx, /src/components/storefront/HeroSlider.tsx, /src/components/storefront/Footer.tsx, /src/components/storefront/CommunitySection.tsx, /src/components/storefront/FloatingContactActions.tsx, /src/components/storefront/CategoryMegaMenu.tsx, /src/pages/admin/AdminReviews.tsx, /src/components/storefront/ReviewSection.tsx, /src/components/storefront/ProductMarqueeSection.tsx, /src/pages/Index.tsx[22m
-[2m3:19:46 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css, /src/components/storefront/CommunitySection.tsx, /src/components/storefront/ReviewSection.tsx, /src/components/storefront/ProductMarqueeSection.tsx[22m
-[2m3:19:47 pm[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/AdminDataContext.tsx[22m Could not Fast Refresh ("useAdminData" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc#consistent-components-exports
-[2m3:19:47 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css, /src/pages/Products.tsx, /src/pages/Categories.tsx, /src/pages/ProductDetails.tsx, /src/pages/CategoryDetails.tsx, /src/pages/Contact.tsx, /src/pages/admin/AdminCategories.tsx, /src/pages/admin/AdminOffers.tsx, /src/pages/admin/AdminBanners.tsx, /src/pages/admin/AdminProducts.tsx, /src/pages/admin/AdminMedia.tsx, /src/pages/admin/AdminSettings.tsx, /src/components/storefront/AnnouncementBar.tsx, /src/components/storefront/HeroSlider.tsx, /src/components/storefront/Footer.tsx, /src/components/storefront/CommunitySection.tsx, /src/components/storefront/FloatingContactActions.tsx, /src/components/storefront/CategoryMegaMenu.tsx, /src/pages/admin/AdminReviews.tsx, /src/components/storefront/ReviewSection.tsx, /src/components/storefront/ProductMarqueeSection.tsx, /src/pages/Index.tsx[22m
-[2m3:36:49 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/contexts/AdminDataContext.tsx, /src/index.css, /src/components/storefront/CommunitySection.tsx, /src/components/storefront/ReviewSection.tsx, /src/components/storefront/ProductMarqueeSection.tsx[22m
-[2m3:37:12 pm[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/contexts/AdminDataContext.tsx[22m Could not Fast Refresh ("useAdminData" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc#consistent-components-exports
-[2m3:37:12 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css, /src/pages/Products.tsx, /src/pages/Categories.tsx, /src/pages/ProductDetails.tsx, /src/pages/CategoryDetails.tsx, /src/pages/Contact.tsx, /src/pages/admin/AdminCategories.tsx, /src/pages/admin/AdminOffers.tsx, /src/pages/admin/AdminBanners.tsx, /src/pages/admin/AdminProducts.tsx, /src/pages/admin/AdminMedia.tsx, /src/pages/admin/AdminSettings.tsx, /src/components/storefront/AnnouncementBar.tsx, /src/components/storefront/HeroSlider.tsx, /src/components/storefront/Footer.tsx, /src/components/storefront/CommunitySection.tsx, /src/components/storefront/FloatingContactActions.tsx, /src/components/storefront/CategoryMegaMenu.tsx, /src/pages/admin/AdminReviews.tsx, /src/components/storefront/ReviewSection.tsx, /src/components/storefront/ProductMarqueeSection.tsx, /src/pages/Index.tsx[22m
-[2m5:04:04 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
-[2m5:11:36 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Products.tsx, /src/index.css[22m
-[2m5:29:29 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProductDetails.tsx, /src/index.css[22m
-[2m5:31:03 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/ProductDetails.tsx, /src/index.css[22m
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m8080[22m/[39m

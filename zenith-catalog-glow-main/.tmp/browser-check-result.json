@@ -1,0 +1,167 @@
+{
+  "issues": [],
+  "summaries": [
+    {
+      "viewport": "desktop",
+      "route": "home",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 6803,
+      "headerText": "New Gadget Pro Max",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-home.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "products",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1173,
+      "headerText": "Products",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-products.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "product-details",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1286,
+      "headerText": "Gadget Pro Max",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-product-details.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "categories",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 900,
+      "headerText": "All Categories",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-categories.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "category-details",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1197,
+      "headerText": "Smartphones",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-category-details.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "contact",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1326,
+      "headerText": "Contact Us",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-contact.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "cart",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 900,
+      "headerText": "Your Cart is Empty",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-cart.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "admin-login",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 900,
+      "headerText": "Sign In",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-admin-login.png"
+    },
+    {
+      "viewport": "desktop",
+      "route": "admin-dashboard",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 900,
+      "headerText": "Dashboard",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/desktop-admin-dashboard.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "home",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 5770,
+      "headerText": "New Gadget Pro Max",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-home.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "products",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1595,
+      "headerText": "Products",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-products.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "product-details",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1481,
+      "headerText": "Gadget Pro Max",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-product-details.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "categories",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 983,
+      "headerText": "All Categories",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-categories.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "category-details",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1150,
+      "headerText": "Smartphones",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-category-details.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "contact",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 2061,
+      "headerText": "Contact Us",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-contact.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "cart",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 844,
+      "headerText": "Your Cart is Empty",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-cart.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "admin-login",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 844,
+      "headerText": "Sign In",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-admin-login.png"
+    },
+    {
+      "viewport": "mobile",
+      "route": "admin-dashboard",
+      "title": "Gadget69 — Premium Electronics",
+      "horizontalOverflow": 0,
+      "bodyHeight": 1285,
+      "headerText": "Dashboard",
+      "screenshotPath": "C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/browser-check/mobile-admin-dashboard.png"
+    }
+  ]
+}

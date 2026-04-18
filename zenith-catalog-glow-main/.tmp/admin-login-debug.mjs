@@ -1,0 +1,14 @@
+import { chromium } from "playwright";
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage();
+const consoleIssues = [];
+page.on('console', msg => consoleIssues.push(`${msg.type()}: ${msg.text()}`));
+page.on('pageerror', err => consoleIssues.push(`pageerror: ${err.message}`));
+await page.goto('http://127.0.0.1:8080/admin', { waitUntil: 'networkidle', timeout: 30000 });
+await page.getByLabel('Email').fill('admin@gadget69.com');
+await page.getByLabel('Password').fill('Admin@123');
+await page.getByRole('button', { name: /sign in/i }).click();
+await page.waitForTimeout(5000);
+console.log(JSON.stringify({ url: page.url(), body: await page.locator('body').innerText(), consoleIssues }, null, 2));
+await page.screenshot({ path: 'C:/Users/Admin/Downloads/zenith-catalog-glow-main (1)/zenith-catalog-glow-main/.tmp/admin-login-debug.png', fullPage: true });
+await browser.close();

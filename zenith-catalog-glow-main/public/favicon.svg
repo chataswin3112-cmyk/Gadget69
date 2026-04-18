@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gadget69 favicon">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f2d38a" />
+      <stop offset="100%" stop-color="#b98a32" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#1f1610" />
+  <path
+    d="M45 22.5c-2.8-4.2-7.5-6.7-13-6.7-9 0-15.5 6.7-15.5 16.2S23 48.2 32 48.2c7.2 0 12.9-4.4 14.6-11.1H33.8v-6.4H53c.1.7.2 1.5.2 2.3 0 9.9-8 17.8-18 17.8S17 42.9 17 33 25 15.2 35 15.2c5.5 0 10.4 2.1 13.8 5.8L45 22.5Z"
+    fill="url(#gold)"
+  />
+</svg>

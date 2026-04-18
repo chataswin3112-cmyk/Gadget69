@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import gadget69Logo from "@/assets/gadget69-logo.png";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import { adminLogin, resetPasswordWithSecretKey } from "@/api/adminApi";
 import { getErrorMessage } from "@/lib/api-error";
 import { CheckCircle2, Eye, EyeOff, KeyRound, Lock, ShieldCheck, X } from "lucide-react";
@@ -222,7 +222,13 @@ const AdminLogin = () => {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-2">
-              <img src={gadget69Logo} alt="Gadget69" className="h-14 w-auto" />
+              <img
+                src={gadget69Wordmark}
+                alt="Gadget69"
+                className="h-10 w-auto"
+                decoding="async"
+                fetchPriority="high"
+              />
             </div>
             <p className="text-muted-foreground font-body text-sm">Admin Panel</p>
           </div>
