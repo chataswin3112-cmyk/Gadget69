@@ -183,7 +183,19 @@ const Checkout = () => {
     } catch (error) {
       console.error("Failed to start Razorpay checkout", error);
       setSubmitting(false);
-      toast({ title: getErrorMessage(error, "Failed to start checkout"), variant: "destructive" });
+      
+      const errMsg = getErrorMessage(error, "Failed to start checkout");
+      if (errMsg.includes("Product not found") || errMsg.includes("not available")) {
+        toast({
+          title: "Product Unavailable",
+          description: "One or more items in your cart are no longer available. Your cart will be refreshed.",
+          variant: "destructive",
+        });
+        // We trigger a page reload after a short delay so CartContext can re-validate against fresh product data
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        toast({ title: errMsg, variant: "destructive" });
+      }
     }
   };
 

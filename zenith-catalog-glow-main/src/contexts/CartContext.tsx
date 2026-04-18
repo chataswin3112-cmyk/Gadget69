@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { CartItem, Product } from "@/types";
 import { getEffectivePrice } from "@/lib/pricing";
+import { useAdminData } from "@/contexts/AdminDataContext";
 
 interface CartContextType {
   items: CartItem[];
@@ -57,6 +58,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       prev.map((i) => (i.product.id === productId ? { ...i, quantity: qty } : i))
     );
   }, []);
+
+  const { products, isLoading } = useAdminData();
+
+  useEffect(() => {
+    if (!isLoading && items.length > 0) {
+      setItems((prev) => {
+        const validItems = prev.filter((item) =>
+          products.some((p) => p.id === item.product.id && p.status !== "INACTIVE")
+        );
+        if (validItems.length !== prev.length) {
+          console.warn("Removed unavailable or deleted products from cart");
+          return validItems;
+        }
+        return prev;
+      });
+    }
+  }, [products, isLoading]);
 
   const clearCart = useCallback(() => setItems([]), []);
 

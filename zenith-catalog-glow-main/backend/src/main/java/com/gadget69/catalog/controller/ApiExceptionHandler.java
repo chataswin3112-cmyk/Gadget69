@@ -44,7 +44,8 @@ public class ApiExceptionHandler {
   public ResponseEntity<Map<String, String>> handleUnexpected(Exception exception) {
     log.error("Unexpected server error", exception);
     Map<String, String> body = new LinkedHashMap<>();
-    body.put("message", "Unexpected server error");
+    body.put("message", "Unexpected server error: " + exception.getMessage());
+    body.put("details", java.util.Arrays.toString(exception.getStackTrace()));
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
   }
 }
