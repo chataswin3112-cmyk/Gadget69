@@ -17,12 +17,15 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class RazorpayPaymentService {
 
+  private static final Logger log = LoggerFactory.getLogger(RazorpayPaymentService.class);
   private static final String CURRENCY = "INR";
   private static final String HMAC_SHA256 = "HmacSHA256";
 
@@ -56,6 +59,7 @@ public class RazorpayPaymentService {
 
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        log.error("Razorpay order creation failed. status={}, body={}", response.statusCode(), response.body());
         throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to create Razorpay order");
       }
 
@@ -71,9 +75,11 @@ public class RazorpayPaymentService {
           json.path("currency").asText(CURRENCY),
           appProperties.getRazorpay().getKeyId());
     } catch (IOException ex) {
+      log.error("Unable to parse Razorpay order response", ex);
       throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to parse Razorpay response", ex);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
+      log.error("Razorpay order request was interrupted", ex);
       throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Razorpay order request was interrupted", ex);
     }
   }
@@ -112,6 +118,7 @@ public class RazorpayPaymentService {
     try {
       return objectMapper.readTree(payload);
     } catch (IOException ex) {
+      log.error("Invalid Razorpay webhook payload", ex);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Razorpay webhook payload", ex);
     }
   }

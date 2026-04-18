@@ -160,6 +160,7 @@ const Checkout = () => {
             clearCart();
             navigate("/checkout/success");
           } catch (error) {
+            console.error("Razorpay payment verification failed", error);
             setSubmitting(false);
             toast({
               title: getErrorMessage(error, "Payment verification failed"),
@@ -169,7 +170,8 @@ const Checkout = () => {
         },
       });
 
-      checkout.on("payment.failed", () => {
+      checkout.on("payment.failed", (response) => {
+        console.error("Razorpay payment failed", response);
         setSubmitting(false);
         toast({
           title: "Payment failed",
@@ -179,6 +181,7 @@ const Checkout = () => {
       });
       checkout.open();
     } catch (error) {
+      console.error("Failed to start Razorpay checkout", error);
       setSubmitting(false);
       toast({ title: getErrorMessage(error, "Failed to start checkout"), variant: "destructive" });
     }
