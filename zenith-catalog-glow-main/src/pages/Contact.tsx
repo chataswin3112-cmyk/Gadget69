@@ -13,10 +13,12 @@ import {
   SUPPORT_EMAIL,
   SUPPORT_HOURS,
 } from "@/lib/store-info";
+import { resolveMediaUrl } from "@/lib/media";
 import { toast } from "sonner";
 
 const Contact = () => {
   const { settings } = useAdminData();
+  const catalogueUrl = resolveMediaUrl(settings.catalogueUrl);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -150,14 +152,14 @@ const Contact = () => {
                   </div>
                 </div>
               </div>
-              {settings.catalogueUrl && (
+              {catalogueUrl && (
                 <div className="flex items-start gap-4">
                   <div className="p-2.5 rounded-lg bg-accent/10">
                     <MapPin className="h-5 w-5 text-accent" />
                   </div>
                   <div>
                     <h3 className="font-heading font-semibold text-foreground">Catalogue</h3>
-                    <a href={settings.catalogueUrl} className="text-sm text-accent hover:underline font-body">
+                    <a href={catalogueUrl} className="text-sm text-accent hover:underline font-body">
                       Download our catalogue
                     </a>
                   </div>

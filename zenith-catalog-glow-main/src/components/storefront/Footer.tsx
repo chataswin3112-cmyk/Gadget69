@@ -20,7 +20,8 @@ const footerHeadingClass =
 
 const Footer = () => {
   const { settings } = useAdminData();
-  const footerLogoSrc = settings.logoUrl || gadget69Wordmark;
+  const footerLogoSrc = resolveMediaUrl(settings.logoUrl) || gadget69Wordmark;
+  const catalogueUrl = resolveMediaUrl(settings.catalogueUrl);
 
   return (
     <footer className="bg-[#0f0f0f] text-white [content-visibility:auto] [contain-intrinsic-size:560px]">
@@ -95,8 +96,8 @@ const Footer = () => {
               <Link to="/track-order" className={footerLinkClass}>
                 Track Order
               </Link>
-              {settings.catalogueUrl && (
-                <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>
+              {catalogueUrl && (
+                <a href={catalogueUrl} className={footerLinkClass}>
                   Catalogue
                 </a>
               )}
@@ -191,8 +192,8 @@ const Footer = () => {
                 <Link to="/track-order" className={footerLinkClass}>
                   Track Order
                 </Link>
-                {settings.catalogueUrl && (
-                  <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>
+                {catalogueUrl && (
+                  <a href={catalogueUrl} className={footerLinkClass}>
                     Catalogue
                   </a>
                 )}

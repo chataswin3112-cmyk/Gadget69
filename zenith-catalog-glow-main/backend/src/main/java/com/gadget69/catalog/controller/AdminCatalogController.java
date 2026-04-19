@@ -29,6 +29,7 @@ import com.gadget69.catalog.service.UploadStorageService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -539,15 +540,15 @@ public class AdminCatalogController {
   private void applySettings(StoreSettings settings, ApiDtos.SettingsPayload payload) {
     settings.setSiteTitle(requiredValue(payload.siteTitle(), "Site title is required"));
     settings.setMetaDescription(payload.metaDescription());
-    settings.setLogoUrl(payload.logoUrl());
-    settings.setFaviconUrl(payload.faviconUrl());
+    settings.setLogoUrl(normalizePublicAssetUrl(payload.logoUrl(), "Logo URL"));
+    settings.setFaviconUrl(normalizePublicAssetUrl(payload.faviconUrl(), "Favicon URL"));
     settings.setFooterText(payload.footerText());
     settings.setAnnouncementItems(
         payload.announcementItems() == null ? new ArrayList<>() : new ArrayList<>(payload.announcementItems()));
     settings.setInstagramUrl(payload.instagramUrl());
     settings.setFacebookUrl(payload.facebookUrl());
     settings.setWhatsappNumber(payload.whatsappNumber());
-    settings.setCatalogueUrl(payload.catalogueUrl());
+    settings.setCatalogueUrl(normalizePublicAssetUrl(payload.catalogueUrl(), "Catalogue URL"));
     settings.setContactUrl(payload.contactUrl());
   }
 
@@ -648,6 +649,70 @@ public class AdminCatalogController {
 
   private String blankToDefault(String value, String defaultValue) {
     return value == null || value.isBlank() ? defaultValue : value.trim();
+  }
+
+  private String normalizePublicAssetUrl(String value, String fieldName) {
+    String normalized = blankToNull(value);
+    if (normalized == null) {
+      return null;
+    }
+    if (normalized.startsWith("/uploads/")) {
+      return normalized;
+    }
+
+    URI uri;
+    try {
+      uri = URI.create(normalized);
+    } catch (IllegalArgumentException ex) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, fieldName + " must be a valid URL");
+    }
+
+    String scheme = blankToNull(uri.getScheme());
+    String host = blankToNull(uri.getHost());
+    if (!"https".equalsIgnoreCase(scheme) || host == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          fieldName + " must use HTTPS or an uploaded /uploads/... file");
+    }
+    if (isPrivateNetworkHost(host)) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          fieldName + " cannot point to localhost or a private network address");
+    }
+
+    return normalized;
+  }
+
+  private boolean isPrivateNetworkHost(String hostname) {
+    String normalized = hostname == null ? "" : hostname.trim().toLowerCase();
+    if (normalized.isBlank()) {
+      return false;
+    }
+    if ("localhost".equals(normalized) || "::1".equals(normalized) || normalized.endsWith(".local")) {
+      return true;
+    }
+
+    String[] octets = normalized.split("\\.");
+    if (octets.length != 4) {
+      return false;
+    }
+
+    try {
+      int first = Integer.parseInt(octets[0]);
+      int second = Integer.parseInt(octets[1]);
+      if (first == 10 || first == 127) {
+        return true;
+      }
+      if (first == 169 && second == 254) {
+        return true;
+      }
+      if (first == 172 && second >= 16 && second <= 31) {
+        return true;
+      }
+      return first == 192 && second == 168;
+    } catch (NumberFormatException ex) {
+      return false;
+    }
   }
 
   private record TopSellingStats(String productName, int unitsSold, BigDecimal revenue) {

@@ -12,4 +12,16 @@ describe("resolveMediaUrl", () => {
       `${window.location.origin}/uploads/images/sample.png`
     );
   });
+
+  it("drops loopback media URLs on public https pages", () => {
+    expect(
+      resolveMediaUrl("http://localhost:7070/preview.png", "https://www.gadget69.in")
+    ).toBe("");
+  });
+
+  it("drops insecure http media URLs on public https pages", () => {
+    expect(
+      resolveMediaUrl("http://cdn.example.com/preview.png", "https://www.gadget69.in")
+    ).toBe("");
+  });
 });

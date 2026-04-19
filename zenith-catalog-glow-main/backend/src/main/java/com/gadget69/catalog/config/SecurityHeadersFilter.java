@@ -33,19 +33,23 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
     // Control referrer information leaked to external sites
     response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
-    // Restrict browser feature access
+    // Allow the minimal browser features Razorpay uses inside its checkout frame.
     response.setHeader("Permissions-Policy",
-        "camera=(), microphone=(), geolocation=(), payment=()");
+        "camera=(), microphone=(), geolocation=(), "
+            + "accelerometer=(self \"https://checkout.razorpay.com\" \"https://api.razorpay.com\"), "
+            + "gyroscope=(self \"https://checkout.razorpay.com\" \"https://api.razorpay.com\"), "
+            + "magnetometer=(self \"https://checkout.razorpay.com\" \"https://api.razorpay.com\"), "
+            + "payment=(self \"https://checkout.razorpay.com\" \"https://api.razorpay.com\")");
 
-    // Content Security Policy — restricts resource loading origins
+    // Keep a tight policy, but include the current Razorpay asset hosts used by checkout.
     response.setHeader("Content-Security-Policy",
         "default-src 'self'; "
             + "img-src 'self' data: https: blob:; "
             + "media-src 'self' https: blob:; "
-            + "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com; "
+            + "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://cdn.razorpay.com; "
             + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; "
             + "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com https://cdn.fontshare.com data:; "
-            + "connect-src 'self' https:; "
+            + "connect-src 'self' https: wss://*.sardine.ai; "
             + "frame-src https://api.razorpay.com https://checkout.razorpay.com; "
             + "object-src 'none'; "
             + "base-uri 'self';");

@@ -45,6 +45,7 @@ import {
   updateReview as updateReviewApi,
   deleteReview as deleteReviewApi,
 } from "@/api/reviewApi";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface AdminDataContextType {
   sections: Section[];
@@ -289,7 +290,7 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         "Premium electronics crafted for those who demand excellence. Experience luxury technology at Gadget69."
     );
 
-    const iconHref = settings.faviconUrl || "/favicon.svg";
+    const iconHref = resolveMediaUrl(settings.faviconUrl) || "/favicon.svg";
     const iconSelectors = ['link[rel="icon"]', 'link[rel="apple-touch-icon"]'] as const;
 
     iconSelectors.forEach((selector) => {

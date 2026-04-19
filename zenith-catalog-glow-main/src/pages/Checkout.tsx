@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { createOrder, verifyPayment } from "@/api/orderApi";
 import { getErrorMessage } from "@/lib/api-error";
 import { getEffectivePrice } from "@/lib/pricing";
+import { resolveMediaUrl } from "@/lib/media";
 
 const RAZORPAY_SCRIPT_ID = "razorpay-checkout-js";
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
@@ -26,6 +27,7 @@ interface RazorpayOptions {
   currency: string;
   name: string;
   description: string;
+  image?: string;
   order_id: string;
   prefill: {
     name: string;
@@ -76,6 +78,20 @@ const loadRazorpayScript = () =>
     script.onerror = () => reject(new Error("Unable to load Razorpay checkout"));
     document.body.appendChild(script);
   });
+
+const resolveRazorpayBrandImage = () => {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  try {
+    const candidate = new URL("/favicon.svg", window.location.origin).toString();
+    const resolved = resolveMediaUrl(candidate);
+    return resolved.startsWith("https://") ? resolved : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const Checkout = () => {
   const { items, totalAmount, totalItems, clearCart } = useCart();
@@ -138,6 +154,7 @@ const Checkout = () => {
         currency: order.currency || "INR",
         name: "Gadget69",
         description: `Order #${order.id}`,
+        image: resolveRazorpayBrandImage(),
         order_id: order.razorpayOrderId,
         prefill: {
           name: form.customerName,
