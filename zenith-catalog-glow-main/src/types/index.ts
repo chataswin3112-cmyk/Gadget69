@@ -96,6 +96,7 @@ export interface Order {
   id?: number;
   customerName: string;
   phone: string;
+  email: string;
   address: string;
   pincode: string;
   totalAmount: number;

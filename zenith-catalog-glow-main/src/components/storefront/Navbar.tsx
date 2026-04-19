@@ -14,6 +14,7 @@ const navLinks = [
   { label: "Categories", to: "/categories", hasMegaMenu: true },
   { label: "New Launches", to: "/products?filter=new" },
   { label: "Best Sellers", to: "/products?filter=best" },
+  { label: "Track Order", to: "/track-order" },
   { label: "Contact Us", to: "/contact" },
 ];
 

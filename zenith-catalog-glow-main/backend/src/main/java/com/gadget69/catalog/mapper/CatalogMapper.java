@@ -140,6 +140,7 @@ public class CatalogMapper {
         order.getId(),
         order.getCustomerName(),
         order.getPhone(),
+        order.getEmail(),
         order.getAddress(),
         order.getPincode(),
         order.getTotalAmount(),

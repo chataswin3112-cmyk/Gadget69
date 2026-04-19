@@ -15,6 +15,20 @@ server:
 spring:
   application:
     name: gadget69-catalog-backend
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
   datasource:
     # Official datasource envs: Render `DATABASE_URL`, or manual `SPRING_DATASOURCE_*`.
     url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:${APP_DATA_DIR:./data}/gadget69db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_ON_EXIT=FALSE}
@@ -59,4 +73,7 @@ app:
     key-secret: ${APP_RAZORPAY_KEY_SECRET:${RAZORPAY_KEY_SECRET:}}
     webhook-secret: ${APP_RAZORPAY_WEBHOOK_SECRET:${RAZORPAY_WEBHOOK_SECRET:}}
     orders-api-url: ${APP_RAZORPAY_ORDERS_API_URL:${RAZORPAY_ORDERS_API_URL:https://api.razorpay.com/v1/orders}}
+  mail:
+    enabled: ${APP_MAIL_ENABLED:true}
+    from: ${APP_MAIL_FROM:${SPRING_MAIL_USERNAME:noreply@gadget69.in}}
   allowed-origins: ${APP_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8080,http://127.0.0.1:8080}

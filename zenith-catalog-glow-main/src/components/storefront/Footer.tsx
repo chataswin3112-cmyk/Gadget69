@@ -92,6 +92,9 @@ const Footer = () => {
               <Link to="/contact" className={footerLinkClass}>
                 Contact Us
               </Link>
+              <Link to="/track-order" className={footerLinkClass}>
+                Track Order
+              </Link>
               {settings.catalogueUrl && (
                 <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>
                   Catalogue
@@ -184,6 +187,9 @@ const Footer = () => {
               <nav className="flex flex-col items-start gap-2.5">
                 <Link to="/contact" className={footerLinkClass}>
                   Contact Us
+                </Link>
+                <Link to="/track-order" className={footerLinkClass}>
+                  Track Order
                 </Link>
                 {settings.catalogueUrl && (
                   <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>

@@ -24,6 +24,9 @@ public final class InputSanitizer {
   private static final Pattern PHONE_PATTERN =
       Pattern.compile("^[\\d\\s\\-\\+\\(\\)]{7,20}$");
 
+  private static final Pattern EMAIL_PATTERN =
+      Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$", Pattern.CASE_INSENSITIVE);
+
   // Indian pincode: exactly 6 digits
   private static final Pattern PINCODE_PATTERN =
       Pattern.compile("^\\d{6}$");
@@ -65,6 +68,12 @@ public final class InputSanitizer {
     if (phone == null || !PHONE_PATTERN.matcher(phone.trim()).matches()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Invalid phone number format. Use digits, spaces, hyphens, or + prefix.");
+    }
+  }
+
+  public static void validateEmail(String email) {
+    if (email == null || !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email address.");
     }
   }
 

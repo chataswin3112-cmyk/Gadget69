@@ -249,6 +249,7 @@ public final class ApiDtos {
   public record CreateOrderRequest(
       String customerName,
       String phone,
+      String email,
       String address,
       String pincode,
       BigDecimal totalAmount,
@@ -267,6 +268,7 @@ public final class ApiDtos {
       Long id,
       String customerName,
       String phone,
+      String email,
       String address,
       String pincode,
       BigDecimal totalAmount,

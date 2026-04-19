@@ -15,15 +15,18 @@ import com.gadget69.catalog.repository.ProductVariantRepository;
 import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
+import com.gadget69.catalog.service.AuthTokenService;
 import com.gadget69.catalog.service.ProductPricingService;
 import com.gadget69.catalog.service.RazorpayPaymentService;
 import com.gadget69.catalog.service.RazorpayPaymentService.RazorpayOrder;
 import com.gadget69.catalog.service.EmailNotificationService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -54,6 +58,7 @@ public class PublicCatalogController {
   private final RazorpayPaymentService razorpayPaymentService;
   private final EmailNotificationService emailNotificationService;
   private final ProductVariantRepository productVariantRepository;
+  private final AuthTokenService authTokenService;
 
   @GetMapping("/health")
   public Map<String, Object> health() {
@@ -122,6 +127,38 @@ public class PublicCatalogController {
 
   @PostMapping("/create-order")
   public ApiDtos.OrderResponse createOrder(@RequestBody ApiDtos.CreateOrderRequest request) {
+    return createOrderInternal(request);
+  }
+
+  @PostMapping("/orders")
+  public ApiDtos.OrderResponse createOrderAlias(@RequestBody ApiDtos.CreateOrderRequest request) {
+    return createOrderInternal(request);
+  }
+
+  @GetMapping("/orders/{id}")
+  public ApiDtos.OrderResponse getOrderById(
+      HttpServletRequest request,
+      @PathVariable Long id,
+      @RequestParam(value = "phone", required = false) String phone) {
+    CustomerOrder order = customerOrderRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+    String authorization = request.getHeader("Authorization");
+    if (authorization != null && !authorization.isBlank()) {
+      authTokenService.requireAdmin(request);
+      return catalogMapper.toOrderResponse(order);
+    }
+
+    String sanitizedPhone = requiredValue(InputSanitizer.sanitize(phone), "Phone number is required");
+    InputSanitizer.validatePhone(sanitizedPhone);
+    if (!normalizePhoneForComparison(order.getPhone()).equals(normalizePhoneForComparison(sanitizedPhone))) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found");
+    }
+
+    return catalogMapper.toOrderResponse(order);
+  }
+
+  private ApiDtos.OrderResponse createOrderInternal(ApiDtos.CreateOrderRequest request) {
     if (request == null || request.items() == null || request.items().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order items are required");
     }
@@ -138,6 +175,10 @@ public class PublicCatalogController {
         InputSanitizer.sanitize(request.phone()), "Phone number is required");
     InputSanitizer.validatePhone(phone);
 
+    String email = requiredValue(
+        InputSanitizer.sanitizeAndValidate(request.email(), "email"), "Email is required");
+    InputSanitizer.validateEmail(email);
+
     String address = requiredValue(
         InputSanitizer.sanitizeAndValidate(request.address(), "address"), "Address is required");
     if (address.length() > 500) {
@@ -151,6 +192,7 @@ public class PublicCatalogController {
     CustomerOrder order = new CustomerOrder();
     order.setCustomerName(customerName);
     order.setPhone(phone);
+    order.setEmail(email.toLowerCase(Locale.ROOT));
     order.setAddress(address);
     order.setPincode(pincode);
     order.setPaymentStatus("PENDING");
@@ -221,8 +263,7 @@ public class PublicCatalogController {
     if (!request.razorpayOrderId().equals(order.getRazorpayOrderId())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Razorpay order ID does not match this order");
     }
-    if (("AUTHORIZED".equalsIgnoreCase(order.getPaymentStatus())
-        || "PAID".equalsIgnoreCase(order.getPaymentStatus()))
+    if ("PAID".equalsIgnoreCase(order.getPaymentStatus())
         && request.razorpayPaymentId().equals(order.getRazorpayPaymentId())) {
       return catalogMapper.toOrderResponse(order);
     }
@@ -234,7 +275,7 @@ public class PublicCatalogController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Razorpay payment signature");
     }
 
-    order.setPaymentStatus("AUTHORIZED");
+    order.setPaymentStatus("PAID");
     order.setOrderStatus("CONFIRMED");
     order.setRazorpayPaymentId(request.razorpayPaymentId());
     order.setRazorpaySignature(request.razorpaySignature());
@@ -313,11 +354,14 @@ public class PublicCatalogController {
 
     String paymentStatus = payment.path("status").asText("");
     if ("payment.captured".equals(event) || "captured".equalsIgnoreCase(paymentStatus)) {
+      boolean shouldSendConfirmation = !"PAID".equalsIgnoreCase(order.getPaymentStatus());
       order.setPaymentStatus("PAID");
       order.setOrderStatus("CONFIRMED");
       order.setLastRazorpayEventId(eventId);
       CustomerOrder saved = customerOrderRepository.save(order);
-      emailNotificationService.sendOrderConfirmation(saved);
+      if (shouldSendConfirmation) {
+        emailNotificationService.sendOrderConfirmation(saved);
+      }
       return;
     } else if ("payment.authorized".equals(event) || "authorized".equalsIgnoreCase(paymentStatus)) {
       if ("PENDING".equalsIgnoreCase(order.getPaymentStatus())) {
@@ -344,6 +388,7 @@ public class PublicCatalogController {
         response.id(),
         response.customerName(),
         response.phone(),
+        response.email(),
         response.address(),
         response.pincode(),
         response.totalAmount(),
@@ -374,5 +419,16 @@ public class PublicCatalogController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be at least 1");
     }
     return quantity;
+  }
+
+  private String normalizePhoneForComparison(String phone) {
+    if (phone == null) {
+      return "";
+    }
+    String digits = phone.replaceAll("[^\\d]", "");
+    if (digits.length() == 12 && digits.startsWith("91")) {
+      return digits.substring(2);
+    }
+    return digits;
   }
 }

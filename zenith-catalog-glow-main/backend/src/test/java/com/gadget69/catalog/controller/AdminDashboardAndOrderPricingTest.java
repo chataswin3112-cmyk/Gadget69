@@ -95,6 +95,7 @@ class AdminDashboardAndOrderPricingTest {
                 {
                   "customerName": "Asha",
                   "phone": "9876543210",
+                  "email": "asha@example.com",
                   "address": "42 Market Street",
                   "pincode": "600001",
                   "totalAmount": 2.00,
@@ -130,7 +131,8 @@ class AdminDashboardAndOrderPricingTest {
                 }
                 """.formatted(orderId, razorpayOrderId)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.paymentStatus").value("AUTHORIZED"));
+        .andExpect(jsonPath("$.paymentStatus").value("PAID"))
+        .andExpect(jsonPath("$.orderStatus").value("CONFIRMED"));
 
     mockMvc.perform(post("/api/razorpay/webhook")
             .header("X-Razorpay-Signature", "valid-signature")

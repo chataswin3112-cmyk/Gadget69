@@ -36,6 +36,9 @@ public class CustomerOrder {
   @Column(nullable = false)
   private String phone;
 
+  @Column(length = 255)
+  private String email;
+
   @Column(nullable = false, length = 3000)
   private String address;
 

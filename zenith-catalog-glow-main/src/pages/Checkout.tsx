@@ -12,6 +12,7 @@ import { getEffectivePrice } from "@/lib/pricing";
 
 const RAZORPAY_SCRIPT_ID = "razorpay-checkout-js";
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
+const LAST_ORDER_STORAGE_KEY = "gadget69:last-order";
 
 interface RazorpayCheckoutResponse {
   razorpay_order_id: string;
@@ -29,6 +30,7 @@ interface RazorpayOptions {
   prefill: {
     name: string;
     contact: string;
+    email: string;
   };
   theme: {
     color: string;
@@ -82,18 +84,19 @@ const Checkout = () => {
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
+    email: "",
     address: "",
     pincode: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [event.target.name]: event.target.value });
+    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
   };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!form.customerName || !form.phone || !form.address || !form.pincode) {
+    if (!form.customerName || !form.phone || !form.email || !form.address || !form.pincode) {
       toast({ title: "Please fill all fields", variant: "destructive" });
       return;
     }
@@ -133,12 +136,13 @@ const Checkout = () => {
         key: order.razorpayKeyId,
         amount: order.amountPaise ?? Math.round(order.totalAmount * 100),
         currency: order.currency || "INR",
-        name: "Gadget 69",
+        name: "Gadget69",
         description: `Order #${order.id}`,
         order_id: order.razorpayOrderId,
         prefill: {
           name: form.customerName,
           contact: form.phone,
+          email: form.email,
         },
         theme: {
           color: "#b88a44",
@@ -151,16 +155,19 @@ const Checkout = () => {
         },
         handler: async (response) => {
           try {
-            await verifyPayment({
+            const verifiedOrder = await verifyPayment({
               orderId: order.id!,
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
             });
+
+            sessionStorage.setItem(LAST_ORDER_STORAGE_KEY, JSON.stringify(verifiedOrder));
             clearCart();
-            navigate(`/checkout/success?orderId=${order.id}`);
+            navigate(`/checkout/success?orderId=${verifiedOrder.id}`, {
+              state: { order: verifiedOrder },
+            });
           } catch (error) {
-            console.error("Razorpay payment verification failed", error);
             setSubmitting(false);
             toast({
               title: getErrorMessage(error, "Payment verification failed"),
@@ -170,24 +177,21 @@ const Checkout = () => {
         },
       });
 
-      checkout.on("payment.failed", (response) => {
-        console.error("Razorpay payment failed", response);
+      checkout.on("payment.failed", () => {
         setSubmitting(false);
         navigate(`/checkout/failure${order.id ? `?orderId=${order.id}` : ""}`);
       });
       checkout.open();
     } catch (error) {
-      console.error("Failed to start Razorpay checkout", error);
       setSubmitting(false);
-      
+
       const errMsg = getErrorMessage(error, "Failed to start checkout");
       if (errMsg.includes("Product not found") || errMsg.includes("not available")) {
         toast({
-          title: "Product Unavailable",
+          title: "Product unavailable",
           description: "One or more items in your cart are no longer available. Your cart will be refreshed.",
           variant: "destructive",
         });
-        // We trigger a page reload after a short delay so CartContext can re-validate against fresh product data
         setTimeout(() => window.location.reload(), 1500);
       } else {
         toast({ title: errMsg, variant: "destructive" });
@@ -201,51 +205,68 @@ const Checkout = () => {
       <Navbar />
 
       <div className="section-container pt-8 pb-16">
-        <h1 className="font-heading text-3xl font-bold mb-8">Checkout</h1>
+        <h1 className="mb-8 font-heading text-3xl font-bold">Checkout</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+          <form onSubmit={handleSubmit} className="space-y-5 lg:col-span-2">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5 font-body">Full Name</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground font-body">Full Name</label>
               <input
                 type="text"
                 name="customerName"
                 value={form.customerName}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring font-body"
+                className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="John Doe"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5 font-body">Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring font-body"
-                placeholder="+91 98765 43210"
-              />
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground font-body">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="+91 98765 43210"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground font-body">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="you@example.com"
+                />
+              </div>
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5 font-body">Delivery Address</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground font-body">Delivery Address</label>
               <textarea
                 name="address"
                 value={form.address}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring font-body resize-none"
+                className="w-full resize-none rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="Street address, apartment, city, state"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5 font-body">Pincode</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground font-body">Pincode</label>
               <input
                 type="text"
                 name="pincode"
                 value={form.pincode}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring font-body"
+                className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="560001"
               />
             </div>
@@ -253,40 +274,42 @@ const Checkout = () => {
             <button
               type="submit"
               disabled={submitting || items.length === 0}
-              className="w-full bg-accent text-accent-foreground px-8 py-3 rounded-lg font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg bg-accent px-8 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? "Opening Secure Checkout..." : "Pay Securely"}
             </button>
           </form>
 
           <div className="lg:col-span-1">
-            <div className="bg-card rounded-xl shadow-premium p-6 sticky top-24">
-              <h2 className="font-heading text-lg font-bold mb-4">Order Summary</h2>
+            <div className="sticky top-24 rounded-xl bg-card p-6 shadow-premium">
+              <h2 className="mb-4 font-heading text-lg font-bold">Order Summary</h2>
               <div className="space-y-3 text-sm font-body">
                 {items.map((item) => (
                   <div key={item.product.id} className="flex justify-between">
-                    <span className="text-muted-foreground truncate mr-2">
+                    <span className="mr-2 truncate text-muted-foreground">
                       {item.product.name} x {item.quantity}
                     </span>
-                    <span className="font-medium whitespace-nowrap">
+                    <span className="whitespace-nowrap font-medium">
                       Rs. {(getEffectivePrice(item.product) * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
-                <div className="border-t border-border pt-3 mt-3">
+
+                <div className="mt-3 border-t border-border pt-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
                     <span className="font-medium">Rs. {totalAmount.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between mt-1">
+                  <div className="mt-1 flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="font-medium text-green-600">Free</span>
                   </div>
                 </div>
+
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between">
-                    <span className="font-bold text-foreground text-base">Total</span>
-                    <span className="font-bold text-foreground text-base">Rs. {totalAmount.toLocaleString()}</span>
+                    <span className="text-base font-bold text-foreground">Total</span>
+                    <span className="text-base font-bold text-foreground">Rs. {totalAmount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
