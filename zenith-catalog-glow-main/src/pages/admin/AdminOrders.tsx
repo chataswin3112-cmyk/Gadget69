@@ -845,6 +845,7 @@ const AdminOrders = () => {
               <div className="h-20 animate-pulse rounded-2xl bg-secondary/40" />
               <div className="h-20 animate-pulse rounded-2xl bg-secondary/40" />
             </div>
+          ) : selectedOrder ? (
             <div className="grid gap-4">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-bold">Order Details</h3>
