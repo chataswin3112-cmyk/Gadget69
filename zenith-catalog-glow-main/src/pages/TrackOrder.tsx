@@ -9,16 +9,29 @@ import { getErrorMessage } from "@/lib/api-error";
 import { toast } from "@/hooks/use-toast";
 import type { Order } from "@/types";
 
-const statusSteps = ["CONFIRMED", "SHIPPED", "DELIVERED"] as const;
+const statusSteps = ["CONFIRMED", "PROCESSING", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED"] as const;
+
+const normalizeOrderStatus = (status?: string) => {
+  const normalized = status?.trim().replace(/-/g, "_").replace(/\s+/g, "_").toUpperCase() || "CONFIRMED";
+  return normalized === "PLACED" ? "PENDING" : normalized;
+};
 
 const statusLabel = (status: string) => {
   switch (status) {
+    case "PENDING":
+      return "PENDING";
     case "CONFIRMED":
-      return "CONFIRMED ✅";
+      return "CONFIRMED";
+    case "PROCESSING":
+      return "PROCESSING";
     case "SHIPPED":
-      return "SHIPPED 🚚";
+      return "SHIPPED";
+    case "OUT_FOR_DELIVERY":
+      return "OUT FOR DELIVERY";
     case "DELIVERED":
-      return "DELIVERED 🎉";
+      return "DELIVERED";
+    case "CANCELLED":
+      return "CANCELLED";
     default:
       return status;
   }
@@ -26,12 +39,20 @@ const statusLabel = (status: string) => {
 
 const statusClassName = (status: string) => {
   switch (status) {
+    case "PENDING":
+      return "bg-amber-100 text-amber-700";
     case "CONFIRMED":
       return "bg-blue-100 text-blue-700";
+    case "PROCESSING":
+      return "bg-cyan-100 text-cyan-700";
     case "SHIPPED":
       return "bg-violet-100 text-violet-700";
+    case "OUT_FOR_DELIVERY":
+      return "bg-fuchsia-100 text-fuchsia-700";
     case "DELIVERED":
       return "bg-emerald-100 text-emerald-700";
+    case "CANCELLED":
+      return "bg-red-100 text-red-700";
     default:
       return "bg-secondary text-foreground";
   }
@@ -42,10 +63,11 @@ const TrackOrder = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const normalizedStatus = normalizeOrderStatus(order?.orderStatus);
   const currentStep = useMemo(() => {
-    const index = statusSteps.indexOf((order?.orderStatus || "CONFIRMED") as (typeof statusSteps)[number]);
-    return index === -1 ? 0 : index;
-  }, [order?.orderStatus]);
+    const index = statusSteps.indexOf(normalizedStatus as (typeof statusSteps)[number]);
+    return index;
+  }, [normalizedStatus]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -138,21 +160,26 @@ const TrackOrder = () => {
                   </div>
                   <div className="rounded-3xl border border-border/60 bg-background/80 p-6 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Current Status</p>
-                    <div className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${statusClassName(order.orderStatus || "CONFIRMED")}`}>
-                      {statusLabel(order.orderStatus || "CONFIRMED")}
+                    <div className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${statusClassName(normalizedStatus)}`}>
+                      {statusLabel(normalizedStatus)}
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-3xl border border-border/60 bg-secondary/20 p-6">
                   <p className="text-sm font-semibold text-foreground font-heading">Order timeline</p>
-                  <div className="mt-5 grid gap-4 md:grid-cols-3">
+                  {normalizedStatus === "CANCELLED" && (
+                    <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                      This order was cancelled. If you need help, please contact support with your order ID.
+                    </div>
+                  )}
+                  <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                     {statusSteps.map((step, index) => {
-                      const active = index <= currentStep;
+                      const active = normalizedStatus !== "CANCELLED" && currentStep >= 0 && index <= currentStep;
                       const icon =
-                        step === "CONFIRMED"
+                        step === "CONFIRMED" || step === "PROCESSING"
                           ? <PackageCheck className="h-5 w-5" />
-                          : step === "SHIPPED"
+                          : step === "SHIPPED" || step === "OUT_FOR_DELIVERY"
                             ? <Truck className="h-5 w-5" />
                             : <CheckCircle2 className="h-5 w-5" />;
 
@@ -171,7 +198,9 @@ const TrackOrder = () => {
                           </div>
                           <p className="mt-2 text-sm">
                             {step === "CONFIRMED" && "Your payment is successful and the order is confirmed."}
+                            {step === "PROCESSING" && "Our team is reviewing and packing your order."}
                             {step === "SHIPPED" && "Your package has left our facility and is on the way."}
+                            {step === "OUT_FOR_DELIVERY" && "Your package is with the delivery partner for final drop-off."}
                             {step === "DELIVERED" && "Your order has been completed successfully."}
                           </p>
                         </div>

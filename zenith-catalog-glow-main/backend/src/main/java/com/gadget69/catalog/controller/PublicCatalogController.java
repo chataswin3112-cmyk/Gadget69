@@ -16,6 +16,7 @@ import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
 import com.gadget69.catalog.service.AuthTokenService;
+import com.gadget69.catalog.service.OrderStateSupport;
 import com.gadget69.catalog.service.ProductPricingService;
 import com.gadget69.catalog.service.RazorpayPaymentService;
 import com.gadget69.catalog.service.RazorpayPaymentService.RazorpayOrder;
@@ -23,6 +24,7 @@ import com.gadget69.catalog.service.EmailNotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +142,7 @@ public class PublicCatalogController {
       HttpServletRequest request,
       @PathVariable Long id,
       @RequestParam(value = "phone", required = false) String phone) {
-    CustomerOrder order = customerOrderRepository.findById(id)
+    CustomerOrder order = customerOrderRepository.findByIdAndIsDeletedFalse(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 
     String authorization = request.getHeader("Authorization");
@@ -196,16 +198,26 @@ public class PublicCatalogController {
     order.setAddress(address);
     order.setPincode(pincode);
     order.setPaymentStatus("PENDING");
+    order.setOrderStatus("PENDING");
     order.setCurrency("INR");
 
-    BigDecimal totalAmount = BigDecimal.ZERO;
+    HashSet<Long> productIds = new HashSet<>();
     for (ApiDtos.OrderItemPayload itemPayload : request.items()) {
       if (itemPayload.productId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product id is required");
       }
+      productIds.add(itemPayload.productId());
+    }
 
-      Product product = productRepository.findById(itemPayload.productId())
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found"));
+    Map<Long, Product> productsById = productRepository.findAllById(productIds).stream()
+        .collect(java.util.stream.Collectors.toMap(Product::getId, product -> product));
+
+    BigDecimal totalAmount = BigDecimal.ZERO;
+    for (ApiDtos.OrderItemPayload itemPayload : request.items()) {
+      Product product = productsById.get(itemPayload.productId());
+      if (product == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found");
+      }
       if (!"ACTIVE".equalsIgnoreCase(product.getStatus())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product is not available");
       }
@@ -229,6 +241,10 @@ public class PublicCatalogController {
     order.setTotalAmount(totalAmount);
     CustomerOrder savedOrder = customerOrderRepository.save(order);
 
+    if (!razorpayPaymentService.isGatewayReady()) {
+      return catalogMapper.toOrderResponse(savedOrder);
+    }
+
     try {
       RazorpayOrder razorpayOrder = razorpayPaymentService.createOrder(savedOrder.getId(), totalAmount);
       savedOrder.setRazorpayOrderId(razorpayOrder.id());
@@ -238,7 +254,11 @@ public class PublicCatalogController {
       return withRazorpayKey(catalogMapper.toOrderResponse(savedOrder), razorpayOrder.keyId());
     } catch (ResponseStatusException ex) {
       savedOrder.setPaymentStatus("FAILED");
-      customerOrderRepository.save(savedOrder);
+      try {
+        customerOrderRepository.save(savedOrder);
+      } catch (RuntimeException ignored) {
+        // Preserve the original gateway failure response when the status update cannot be saved.
+      }
       throw ex;
     }
   }
@@ -263,11 +283,11 @@ public class PublicCatalogController {
     if (!request.razorpayOrderId().equals(order.getRazorpayOrderId())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Razorpay order ID does not match this order");
     }
-    if ("PAID".equalsIgnoreCase(order.getPaymentStatus())
+    if (OrderStateSupport.isSuccessfulPayment(order.getPaymentStatus())
         && request.razorpayPaymentId().equals(order.getRazorpayPaymentId())) {
       return catalogMapper.toOrderResponse(order);
     }
-    if (!"PENDING".equalsIgnoreCase(order.getPaymentStatus())) {
+    if (!OrderStateSupport.isPendingPayment(order.getPaymentStatus())) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Order has already been processed");
     }
     if (!razorpayPaymentService.verifyPaymentSignature(
@@ -275,7 +295,7 @@ public class PublicCatalogController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Razorpay payment signature");
     }
 
-    order.setPaymentStatus("PAID");
+    order.setPaymentStatus("SUCCESS");
     order.setOrderStatus("CONFIRMED");
     order.setRazorpayPaymentId(request.razorpayPaymentId());
     order.setRazorpaySignature(request.razorpaySignature());
@@ -354,8 +374,8 @@ public class PublicCatalogController {
 
     String paymentStatus = payment.path("status").asText("");
     if ("payment.captured".equals(event) || "captured".equalsIgnoreCase(paymentStatus)) {
-      boolean shouldSendConfirmation = !"PAID".equalsIgnoreCase(order.getPaymentStatus());
-      order.setPaymentStatus("PAID");
+      boolean shouldSendConfirmation = !OrderStateSupport.isSuccessfulPayment(order.getPaymentStatus());
+      order.setPaymentStatus("SUCCESS");
       order.setOrderStatus("CONFIRMED");
       order.setLastRazorpayEventId(eventId);
       CustomerOrder saved = customerOrderRepository.save(order);
@@ -364,12 +384,11 @@ public class PublicCatalogController {
       }
       return;
     } else if ("payment.authorized".equals(event) || "authorized".equalsIgnoreCase(paymentStatus)) {
-      if ("PENDING".equalsIgnoreCase(order.getPaymentStatus())) {
-        order.setPaymentStatus("AUTHORIZED");
-        order.setOrderStatus("CONFIRMED");
+      if (OrderStateSupport.isPendingPayment(order.getPaymentStatus())) {
+        order.setPaymentStatus("PENDING");
       }
     } else if ("payment.failed".equals(event) || "failed".equalsIgnoreCase(paymentStatus)) {
-      if (!"PAID".equalsIgnoreCase(order.getPaymentStatus())
+      if (!OrderStateSupport.isSuccessfulPayment(order.getPaymentStatus())
           && !"REFUNDED".equalsIgnoreCase(order.getPaymentStatus())) {
         order.setPaymentStatus("FAILED");
       }
@@ -397,10 +416,12 @@ public class PublicCatalogController {
         response.razorpayOrderId(),
         response.razorpayPaymentId(),
         response.createdAt(),
+        response.updatedAt(),
         response.items(),
         response.currency(),
         response.amountPaise(),
-        razorpayKeyId
+        razorpayKeyId,
+        response.isDeleted()
     );
   }
 

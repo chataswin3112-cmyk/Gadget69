@@ -32,6 +32,53 @@ class DatasourceBootstrapTest {
   }
 
   @Test
+  void configuresMySqlFromSpringDatasourceUrl() {
+    Properties systemProperties = new Properties();
+
+    BootstrapResult result =
+        DatasourceBootstrap.configure(
+            systemProperties,
+            Map.of(
+                "SPRING_DATASOURCE_URL",
+                "jdbc:mysql://mysql.example.com:3306/gadget69?useSSL=false",
+                "SPRING_DATASOURCE_USERNAME",
+                "mysql_user",
+                "SPRING_DATASOURCE_PASSWORD",
+                "mysql_secret"));
+
+    assertEquals(Mode.MYSQL, result.mode());
+    assertEquals("spring.datasource.url/SPRING_DATASOURCE_URL", result.detail());
+    assertEquals(
+        "jdbc:mysql://mysql.example.com:3306/gadget69?useSSL=false",
+        systemProperties.getProperty("spring.datasource.url"));
+    assertEquals("mysql_user", systemProperties.getProperty("spring.datasource.username"));
+    assertEquals("mysql_secret", systemProperties.getProperty("spring.datasource.password"));
+  }
+
+  @Test
+  void configuresMySqlFromMysqlEnvironmentVariables() {
+    Properties systemProperties = new Properties();
+
+    BootstrapResult result =
+        DatasourceBootstrap.configure(
+            systemProperties,
+            Map.of(
+                "MYSQL_HOST", "mysql.internal",
+                "MYSQL_PORT", "3307",
+                "MYSQL_DATABASE", "catalog",
+                "MYSQL_USER", "catalog_user",
+                "MYSQL_PASSWORD", "catalog_secret"));
+
+    assertEquals(Mode.MYSQL, result.mode());
+    assertEquals("MYSQL_* environment variables", result.detail());
+    assertEquals(
+        "jdbc:mysql://mysql.internal:3307/catalog",
+        systemProperties.getProperty("spring.datasource.url"));
+    assertEquals("catalog_user", systemProperties.getProperty("spring.datasource.username"));
+    assertEquals("catalog_secret", systemProperties.getProperty("spring.datasource.password"));
+  }
+
+  @Test
   void normalizesSpringDatasourceUrlWhenItUsesRenderStylePostgresScheme() {
     Properties systemProperties = new Properties();
 
@@ -106,7 +153,7 @@ class DatasourceBootstrapTest {
     assertEquals(Mode.EMBEDDED_H2, result.mode());
     assertEquals("/var/data/data", result.detail());
     assertEquals(
-        "jdbc:h2:file:/var/data/data/gadget69db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_ON_EXIT=FALSE",
+        "jdbc:h2:file:/var/data/data/gadget69db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE",
         systemProperties.getProperty("spring.datasource.url"));
     assertEquals("sa", systemProperties.getProperty("spring.datasource.username"));
     assertEquals("", systemProperties.getProperty("spring.datasource.password"));
@@ -144,7 +191,7 @@ class DatasourceBootstrapTest {
                     systemProperties,
                     Map.of(
                         "APP_REQUIRE_POSTGRES", "true",
-                        "SPRING_DATASOURCE_URL", "jdbc:h2:mem:catalog")));
+                        "SPRING_DATASOURCE_URL", "jdbc:mysql://mysql.example.com/catalog")));
 
     assertEquals(
         "Postgres is required, but spring.datasource.url/SPRING_DATASOURCE_URL is not a Postgres URL.",

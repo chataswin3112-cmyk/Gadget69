@@ -17,7 +17,7 @@ The Spring Boot backend lives in [backend](./backend).
 
 Main features:
 
-- H2 file database for local persistence
+- H2 file database for local persistence, plus MySQL/Postgres deployment support
 - Admin authentication
 - CRUD APIs for categories, products, banners, settings, and community media
 - Image/video/document uploads served from `/uploads/**`
@@ -39,8 +39,9 @@ Catalog maintenance:
 Database env contract:
 
 - Render production: use the managed Postgres connection injected as `DATABASE_URL`
-- Manual/local Postgres: use `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`
-- Local fallback without Postgres: leave those unset and the backend falls back to embedded H2 unless `APP_REQUIRE_POSTGRES=true`
+- Manual/local MySQL or Postgres: use `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`
+- MySQL shortcut envs are also supported: `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`
+- Local fallback without MySQL/Postgres: leave those unset and the backend falls back to embedded H2 unless `APP_REQUIRE_POSTGRES=true`
 - Unsupported datasource env aliases: `DB_URL`, `DB_USER`, `DB_PASSWORD`
 
 Razorpay env contract:
@@ -82,6 +83,7 @@ Core Render settings already handled in code:
 - Spring Boot binds to Render's `PORT`
 - the frontend is served by Spring Boot from the same origin
 - Render's `DATABASE_URL` is the primary production datasource input and is converted into a JDBC URL automatically at startup
+- MySQL deployments can use `SPRING_DATASOURCE_*` directly or the `MYSQL_*` shortcut envs
 - Render deploys now fail fast if no Postgres env is present, instead of silently falling back to H2
 - uploaded files are stored at `APP_UPLOAD_DIR`, which the blueprint points to `/var/data/uploads`
 - outside Render, or when `APP_REQUIRE_POSTGRES` is not enabled, the backend can still fall back to an embedded H2 file database
@@ -92,6 +94,11 @@ Supported datasource env names:
 - `SPRING_DATASOURCE_URL`
 - `SPRING_DATASOURCE_USERNAME`
 - `SPRING_DATASOURCE_PASSWORD`
+- `MYSQL_HOST`
+- `MYSQL_PORT`
+- `MYSQL_DATABASE`
+- `MYSQL_USER`
+- `MYSQL_PASSWORD`
 - existing `PG*/POSTGRES_*` compatibility envs
 
 Unsupported datasource env names:

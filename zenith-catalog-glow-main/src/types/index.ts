@@ -89,8 +89,23 @@ export interface OrderItem {
   price: number;
 }
 
-export type PaymentStatus = "PENDING" | "AUTHORIZED" | "PAID" | "FAILED" | "REFUNDED" | string;
-export type OrderStatus = "PLACED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | string;
+export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED" | string;
+export type OrderStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "OUT_FOR_DELIVERY"
+  | "DELIVERED"
+  | "CANCELLED"
+  | string;
+
+export interface OrderFilters {
+  orderStatus?: string;
+  paymentStatus?: string;
+  fromDate?: string;
+  toDate?: string;
+}
 
 export interface Order {
   id?: number;
@@ -108,6 +123,8 @@ export interface Order {
   currency?: string;
   amountPaise?: number;
   createdAt?: string;
+  updatedAt?: string;
+  isDeleted?: boolean;
   items: OrderItem[];
 }
 

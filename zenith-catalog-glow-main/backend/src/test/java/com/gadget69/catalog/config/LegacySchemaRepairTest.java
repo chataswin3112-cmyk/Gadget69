@@ -61,13 +61,19 @@ class LegacySchemaRepairTest {
 
     assertTrue(columns.contains("CURRENCY"));
     assertTrue(columns.contains("AMOUNT_PAISE"));
+    assertTrue(columns.contains("CUSTOMER_PHONE"));
     assertTrue(columns.contains("ORDER_STATUS"));
+    assertTrue(columns.contains("UPDATED_AT"));
+    assertTrue(columns.contains("IS_DELETED"));
     assertTrue(columns.contains("RAZORPAY_SIGNATURE"));
     assertTrue(columns.contains("LAST_RAZORPAY_EVENT_ID"));
     assertEquals("INR", jdbcTemplate.queryForObject(
         "SELECT currency FROM customer_orders WHERE id = 1",
         String.class));
-    assertEquals("PLACED", jdbcTemplate.queryForObject(
+    assertEquals("9876543210", jdbcTemplate.queryForObject(
+        "SELECT customer_phone FROM customer_orders WHERE id = 1",
+        String.class));
+    assertEquals("PENDING", jdbcTemplate.queryForObject(
         "SELECT order_status FROM customer_orders WHERE id = 1",
         String.class));
   }

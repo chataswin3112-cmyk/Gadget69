@@ -30,8 +30,9 @@ spring:
           timeout: 5000
           writetimeout: 5000
   datasource:
-    # Official datasource envs: Render `DATABASE_URL`, or manual `SPRING_DATASOURCE_*`.
-    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:${APP_DATA_DIR:./data}/gadget69db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_ON_EXIT=FALSE}
+    # Supported datasource envs: `SPRING_DATASOURCE_*` for MySQL/Postgres,
+    # `DATABASE_URL` for managed Postgres, or local H2 fallback when unset.
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:${APP_DATA_DIR:./data}/gadget69db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE}
     username: ${SPRING_DATASOURCE_USERNAME:sa}
     password: ${SPRING_DATASOURCE_PASSWORD:}
     hikari:

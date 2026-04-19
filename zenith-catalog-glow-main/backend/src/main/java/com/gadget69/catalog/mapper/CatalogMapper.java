@@ -11,6 +11,7 @@ import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
 import com.gadget69.catalog.entity.VariantMedia;
+import com.gadget69.catalog.service.OrderStateSupport;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -144,15 +145,17 @@ public class CatalogMapper {
         order.getAddress(),
         order.getPincode(),
         order.getTotalAmount(),
-        order.getPaymentStatus(),
-        order.getOrderStatus(),
+        OrderStateSupport.normalizePaymentStatus(order.getPaymentStatus()),
+        OrderStateSupport.normalizeOrderStatus(order.getOrderStatus()),
         order.getRazorpayOrderId(),
         order.getRazorpayPaymentId(),
         order.getCreatedAt() == null ? null : order.getCreatedAt().toString(),
+        order.getUpdatedAt() == null ? null : order.getUpdatedAt().toString(),
         items,
         order.getCurrency(),
         order.getAmountPaise(),
-        null
+        null,
+        order.isDeleted()
     );
   }
 

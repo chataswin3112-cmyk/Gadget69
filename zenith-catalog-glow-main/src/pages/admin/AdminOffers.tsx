@@ -4,13 +4,21 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/api-error";
 import { getEffectivePrice, getOfferStatus, type OfferStatus } from "@/lib/pricing";
+import MediaImage from "@/components/ui/media-image";
+import { cn } from "@/lib/utils";
 
 type OfferFormState = {
   enabled: boolean;
@@ -18,6 +26,9 @@ type OfferFormState = {
   offerStartDate: string;
   offerEndDate: string;
 };
+
+const PRODUCT_NAME_CLAMP_CLASS =
+  "overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]";
 
 const offerStatusLabel: Record<OfferStatus, string> = {
   active: "Active",
@@ -27,10 +38,10 @@ const offerStatusLabel: Record<OfferStatus, string> = {
 };
 
 const offerStatusClassName: Record<OfferStatus, string> = {
-  active: "bg-accent/20 text-accent",
-  upcoming: "bg-secondary text-foreground",
-  expired: "bg-muted text-muted-foreground",
-  "no-offer": "bg-muted text-muted-foreground",
+  active: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200/80",
+  upcoming: "bg-sky-100 text-sky-700 ring-1 ring-sky-200/80",
+  expired: "bg-rose-100 text-rose-700 ring-1 ring-rose-200/80",
+  "no-offer": "bg-muted text-muted-foreground ring-1 ring-border/70",
 };
 
 const buildFormState = (product: Product): OfferFormState => ({
@@ -39,6 +50,11 @@ const buildFormState = (product: Product): OfferFormState => ({
   offerStartDate: product.offerStartDate || "",
   offerEndDate: product.offerEndDate || "",
 });
+
+const getProductMeta = (product: Product) => {
+  const metaParts = [product.sectionName || "Uncategorized", product.model_number].filter(Boolean);
+  return metaParts.join(" - ");
+};
 
 const AdminOffers = () => {
   const { products, updateProduct, isLoading } = useAdminData();
@@ -49,10 +65,11 @@ const AdminOffers = () => {
 
   const filteredProducts = useMemo(
     () =>
-      products.filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-        || product.sectionName?.toLowerCase().includes(search.toLowerCase())
-        || product.model_number?.toLowerCase().includes(search.toLowerCase())
+      products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(search.toLowerCase()) ||
+          product.sectionName?.toLowerCase().includes(search.toLowerCase()) ||
+          product.model_number?.toLowerCase().includes(search.toLowerCase())
       ),
     [products, search]
   );
@@ -128,17 +145,29 @@ const AdminOffers = () => {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl bg-card shadow-premium">
+        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-premium">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
+              <thead className="bg-secondary/40">
                 <tr className="border-b border-border text-left">
-                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">Product</th>
-                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">Base Price</th>
-                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">Offer Price</th>
-                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">Schedule</th>
-                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">Status</th>
-                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">Actions</th>
+                  <th className="min-w-[20rem] p-4 text-xs font-body uppercase text-muted-foreground">
+                    Product
+                  </th>
+                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">
+                    Base Price
+                  </th>
+                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">
+                    Offer Price
+                  </th>
+                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">
+                    Schedule
+                  </th>
+                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">
+                    Status
+                  </th>
+                  <th className="p-4 text-xs font-body uppercase text-muted-foreground">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -147,13 +176,31 @@ const AdminOffers = () => {
                   return (
                     <tr key={product.id} className="hover:bg-muted/30">
                       <td className="p-4">
-                        <p className="text-sm font-medium font-body">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {product.sectionName || "Uncategorized"}
-                          {product.model_number ? ` · ${product.model_number}` : ""}
-                        </p>
+                        <div className="flex min-w-0 items-center gap-3">
+                          <MediaImage
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="h-12 w-12 shrink-0 rounded-xl object-cover bg-muted/40"
+                          />
+                          <div className="min-w-0">
+                            <p
+                              data-clamp="2"
+                              className={cn(
+                                "text-sm font-medium font-body text-foreground",
+                                PRODUCT_NAME_CLAMP_CLASS
+                              )}
+                            >
+                              {product.name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {getProductMeta(product)}
+                            </p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="p-4 text-sm font-body">Rs. {product.price.toLocaleString()}</td>
+                      <td className="p-4 text-sm font-body">
+                        Rs. {product.price.toLocaleString()}
+                      </td>
                       <td className="p-4 text-sm font-body">
                         {typeof product.offerPrice === "number"
                           ? `Rs. ${product.offerPrice.toLocaleString()}`
@@ -165,13 +212,22 @@ const AdminOffers = () => {
                           : "-"}
                       </td>
                       <td className="p-4">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${offerStatusClassName[offerStatus]}`}>
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                            offerStatusClassName[offerStatus]
+                          )}
+                        >
                           {offerStatusLabel[offerStatus]}
                         </span>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <Button size="sm" variant="outline" onClick={() => openEditor(product)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditor(product)}
+                          >
                             Edit Offer
                           </Button>
                           <span className="text-xs text-muted-foreground">
@@ -200,7 +256,7 @@ const AdminOffers = () => {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading">
-              {selectedProduct ? `Edit Offer · ${selectedProduct.name}` : "Edit Offer"}
+              {selectedProduct ? `Edit Offer - ${selectedProduct.name}` : "Edit Offer"}
             </DialogTitle>
           </DialogHeader>
 
@@ -215,7 +271,9 @@ const AdminOffers = () => {
                 </div>
                 <Switch
                   checked={form.enabled}
-                  onCheckedChange={(checked) => setForm((prev) => (prev ? { ...prev, enabled: checked } : prev))}
+                  onCheckedChange={(checked) =>
+                    setForm((prev) => (prev ? { ...prev, enabled: checked } : prev))
+                  }
                 />
               </div>
 
@@ -230,7 +288,11 @@ const AdminOffers = () => {
                     type="number"
                     value={form.offerPrice}
                     disabled={!form.enabled}
-                    onChange={(event) => setForm((prev) => (prev ? { ...prev, offerPrice: event.target.value } : prev))}
+                    onChange={(event) =>
+                      setForm((prev) =>
+                        prev ? { ...prev, offerPrice: event.target.value } : prev
+                      )
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -239,7 +301,11 @@ const AdminOffers = () => {
                     type="date"
                     value={form.offerStartDate}
                     disabled={!form.enabled}
-                    onChange={(event) => setForm((prev) => (prev ? { ...prev, offerStartDate: event.target.value } : prev))}
+                    onChange={(event) =>
+                      setForm((prev) =>
+                        prev ? { ...prev, offerStartDate: event.target.value } : prev
+                      )
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -248,7 +314,11 @@ const AdminOffers = () => {
                     type="date"
                     value={form.offerEndDate}
                     disabled={!form.enabled}
-                    onChange={(event) => setForm((prev) => (prev ? { ...prev, offerEndDate: event.target.value } : prev))}
+                    onChange={(event) =>
+                      setForm((prev) =>
+                        prev ? { ...prev, offerEndDate: event.target.value } : prev
+                      )
+                    }
                   />
                 </div>
               </div>
@@ -256,7 +326,9 @@ const AdminOffers = () => {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={closeEditor}>Cancel</Button>
+            <Button variant="outline" onClick={closeEditor}>
+              Cancel
+            </Button>
             <Button
               onClick={saveOffer}
               disabled={saving}

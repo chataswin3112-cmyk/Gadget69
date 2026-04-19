@@ -31,15 +31,15 @@ public class CatalogApplication {
     }
 
     BootstrapResult result = DatasourceBootstrap.configure(System.getProperties(), env.environment());
-    if (result.mode() == Mode.POSTGRES) {
-      log.info("Configured datasource from {}", result.detail());
+    if (result.mode() == Mode.POSTGRES || result.mode() == Mode.MYSQL) {
+      log.info("Configured {} datasource from {}", result.mode().name().toLowerCase(), result.detail());
       return;
     }
 
     if (result.mode() == Mode.EMBEDDED_H2) {
       log.warn(
-          "No Postgres connection env found; falling back to embedded H2 at {}. "
-              + "Set DATABASE_URL, SPRING_DATASOURCE_*, or PG*/POSTGRES_* env vars to use Postgres.",
+          "No external SQL connection env found; falling back to embedded H2 at {}. "
+              + "Set SPRING_DATASOURCE_* for MySQL/Postgres, DATABASE_URL for Postgres, or MYSQL_* env vars to use a managed database.",
           result.detail());
     }
   }

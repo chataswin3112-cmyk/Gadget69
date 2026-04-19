@@ -29,8 +29,12 @@ public final class DatasourceBootstrap {
               "spring.datasource.url/SPRING_DATASOURCE_URL");
 
       if (explicitSettings != null) {
+        if (requirePostgres && explicitSettings.databaseMode() != Mode.POSTGRES) {
+          throw new IllegalStateException(
+              "Postgres is required, but spring.datasource.url/SPRING_DATASOURCE_URL is not a Postgres URL.");
+        }
         applyConnectionSettings(systemProperties, explicitSettings);
-        return BootstrapResult.postgres(explicitSettings.source());
+        return BootstrapResult.externalSql(explicitSettings.databaseMode(), explicitSettings.source());
       }
 
       if (requirePostgres) {
@@ -47,16 +51,25 @@ public final class DatasourceBootstrap {
             "DATABASE_URL",
             "RENDER_DATABASE_URL",
             "JDBC_DATABASE_URL",
-            "POSTGRES_URL");
+            "POSTGRES_URL",
+            "MYSQL_URL");
     if (urlSettings != null) {
+      if (requirePostgres && urlSettings.databaseMode() != Mode.POSTGRES) {
+        throw new IllegalStateException(
+            "Postgres is required, but the detected database URL is not a Postgres URL.");
+      }
       applyConnectionSettings(systemProperties, urlSettings);
-      return BootstrapResult.postgres(urlSettings.source());
+      return BootstrapResult.externalSql(urlSettings.databaseMode(), urlSettings.source());
     }
 
     ConnectionSettings componentSettings = connectionSettingsFromComponents(environment);
     if (componentSettings != null) {
+      if (requirePostgres && componentSettings.databaseMode() != Mode.POSTGRES) {
+        throw new IllegalStateException(
+            "Postgres is required, but the detected database component settings are not Postgres.");
+      }
       applyConnectionSettings(systemProperties, componentSettings);
-      return BootstrapResult.postgres(componentSettings.source());
+      return BootstrapResult.externalSql(componentSettings.databaseMode(), componentSettings.source());
     }
 
     if (requirePostgres) {
@@ -70,7 +83,7 @@ public final class DatasourceBootstrap {
         "spring.datasource.url",
         "jdbc:h2:file:"
             + normalizedDataDir
-            + "/gadget69db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_ON_EXIT=FALSE");
+            + "/gadget69db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE");
 
     if (!hasText(systemProperties.getProperty("spring.datasource.username"))
         && !hasText(environment.get("SPRING_DATASOURCE_USERNAME"))) {
@@ -106,32 +119,48 @@ public final class DatasourceBootstrap {
             firstNonBlank(environment.get("PGDATABASE"), environment.get("POSTGRES_DB"), environment.get("POSTGRES_DATABASE")),
             firstNonBlank(environment.get("PGUSER"), environment.get("POSTGRES_USER")),
             firstNonBlank(environment.get("PGPASSWORD"), environment.get("POSTGRES_PASSWORD")),
-            "PG*/POSTGRES_* environment variables");
+            "PG*/POSTGRES_* environment variables",
+            Mode.POSTGRES);
     if (pgSettings != null) {
       return pgSettings;
     }
 
-    return connectionSettingsFromComponents(
-        environment.get("DATABASE_HOST"),
-        environment.get("DATABASE_PORT"),
-        firstNonBlank(environment.get("DATABASE_NAME"), environment.get("DATABASE_DB")),
-        environment.get("DATABASE_USER"),
-        environment.get("DATABASE_PASSWORD"),
-        "DATABASE_* environment variables");
+    ConnectionSettings mysqlSettings =
+        connectionSettingsFromComponents(
+            firstNonBlank(environment.get("MYSQL_HOST"), environment.get("MYSQLHOST")),
+            firstNonBlank(environment.get("MYSQL_PORT"), environment.get("MYSQLPORT")),
+            firstNonBlank(environment.get("MYSQL_DATABASE"), environment.get("MYSQL_DB")),
+            firstNonBlank(environment.get("MYSQL_USER"), environment.get("MYSQL_USERNAME")),
+            firstNonBlank(environment.get("MYSQL_PASSWORD")),
+            "MYSQL_* environment variables",
+            Mode.MYSQL);
+    if (mysqlSettings != null) {
+      return mysqlSettings;
+    }
+
+    return null;
   }
 
   private static ConnectionSettings connectionSettingsFromComponents(
-      String host, String port, String database, String username, String password, String source) {
+      String host,
+      String port,
+      String database,
+      String username,
+      String password,
+      String source,
+      Mode databaseMode) {
     if (!hasText(host) || !hasText(database)) {
       return null;
     }
 
-    String jdbcPort = hasText(port) ? port : "5432";
+    String jdbcPort = hasText(port) ? port : defaultPort(databaseMode);
+    String jdbcPrefix = databaseMode == Mode.MYSQL ? "jdbc:mysql://" : "jdbc:postgresql://";
     return new ConnectionSettings(
-        "jdbc:postgresql://" + host + ":" + jdbcPort + "/" + stripLeadingSlash(database),
+        jdbcPrefix + host + ":" + jdbcPort + "/" + stripLeadingSlash(database),
         username,
         password,
-        source);
+        source,
+        databaseMode);
   }
 
   private static ConnectionSettings connectionSettingsFromUrl(
@@ -141,7 +170,11 @@ public final class DatasourceBootstrap {
     }
 
     if (candidateUrl.regionMatches(true, 0, "jdbc:postgresql:", 0, "jdbc:postgresql:".length())) {
-      return new ConnectionSettings(candidateUrl, explicitUsername, explicitPassword, source);
+      return new ConnectionSettings(candidateUrl, explicitUsername, explicitPassword, source, Mode.POSTGRES);
+    }
+
+    if (candidateUrl.regionMatches(true, 0, "jdbc:mysql:", 0, "jdbc:mysql:".length())) {
+      return new ConnectionSettings(candidateUrl, explicitUsername, explicitPassword, source, Mode.MYSQL);
     }
 
     if (candidateUrl.regionMatches(true, 0, "jdbc:", 0, "jdbc:".length())) {
@@ -150,8 +183,12 @@ public final class DatasourceBootstrap {
 
     URI uri = URI.create(candidateUrl);
     String scheme = uri.getScheme();
-    if (!hasText(scheme)
-        || (!"postgres".equalsIgnoreCase(scheme) && !"postgresql".equalsIgnoreCase(scheme))) {
+    if (!hasText(scheme)) {
+      return null;
+    }
+
+    Mode databaseMode = modeFromScheme(scheme);
+    if (databaseMode == null) {
       return null;
     }
 
@@ -159,8 +196,9 @@ public final class DatasourceBootstrap {
       throw new IllegalStateException(source + " must include a host and database name");
     }
 
-    int port = uri.getPort() > 0 ? uri.getPort() : 5432;
-    String jdbcUrl = "jdbc:postgresql://" + uri.getHost() + ":" + port + uri.getPath();
+    int port = uri.getPort() > 0 ? uri.getPort() : Integer.parseInt(defaultPort(databaseMode));
+    String jdbcPrefix = databaseMode == Mode.MYSQL ? "jdbc:mysql://" : "jdbc:postgresql://";
+    String jdbcUrl = jdbcPrefix + uri.getHost() + ":" + port + uri.getPath();
     if (hasText(uri.getRawQuery())) {
       jdbcUrl += "?" + uri.getRawQuery();
     }
@@ -180,7 +218,17 @@ public final class DatasourceBootstrap {
       }
     }
 
-    return new ConnectionSettings(jdbcUrl, username, password, source);
+    return new ConnectionSettings(jdbcUrl, username, password, source, databaseMode);
+  }
+
+  private static Mode modeFromScheme(String scheme) {
+    if ("postgres".equalsIgnoreCase(scheme) || "postgresql".equalsIgnoreCase(scheme)) {
+      return Mode.POSTGRES;
+    }
+    if ("mysql".equalsIgnoreCase(scheme)) {
+      return Mode.MYSQL;
+    }
+    return null;
   }
 
   private static void applyConnectionSettings(Properties systemProperties, ConnectionSettings settings) {
@@ -215,6 +263,10 @@ public final class DatasourceBootstrap {
     return normalized;
   }
 
+  private static String defaultPort(Mode databaseMode) {
+    return databaseMode == Mode.MYSQL ? "3306" : "5432";
+  }
+
   private static String firstNonBlank(String... values) {
     for (String value : values) {
       if (hasText(value)) {
@@ -240,8 +292,8 @@ public final class DatasourceBootstrap {
   }
 
   public record BootstrapResult(Mode mode, String detail) {
-    public static BootstrapResult postgres(String source) {
-      return new BootstrapResult(Mode.POSTGRES, source);
+    public static BootstrapResult externalSql(Mode mode, String source) {
+      return new BootstrapResult(mode, source);
     }
 
     public static BootstrapResult embeddedH2(String dataDir) {
@@ -256,8 +308,10 @@ public final class DatasourceBootstrap {
   public enum Mode {
     UNCHANGED,
     POSTGRES,
+    MYSQL,
     EMBEDDED_H2
   }
 
-  private record ConnectionSettings(String url, String username, String password, String source) {}
+  private record ConnectionSettings(
+      String url, String username, String password, String source, Mode databaseMode) {}
 }

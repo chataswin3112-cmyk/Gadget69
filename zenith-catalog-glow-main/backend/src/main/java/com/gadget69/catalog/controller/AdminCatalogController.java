@@ -24,6 +24,7 @@ import com.gadget69.catalog.repository.VariantMediaRepository;
 import com.gadget69.catalog.service.AuthTokenService;
 import com.gadget69.catalog.service.CatalogSyncService;
 import com.gadget69.catalog.service.CloudinaryCommunityVideoService;
+import com.gadget69.catalog.service.OrderStateSupport;
 import com.gadget69.catalog.service.OtpService;
 import com.gadget69.catalog.service.UploadStorageService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -115,9 +116,9 @@ public class AdminCatalogController {
   public ApiDtos.DashboardStatsResponse dashboard(HttpServletRequest httpRequest) {
     authTokenService.requireAdmin(httpRequest);
 
-    List<CustomerOrder> allOrders = customerOrderRepository.findAllByOrderByCreatedAtDesc();
+    List<CustomerOrder> allOrders = customerOrderRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc();
     List<CustomerOrder> paidOrders = allOrders.stream()
-        .filter(order -> "PAID".equalsIgnoreCase(order.getPaymentStatus()))
+        .filter(order -> OrderStateSupport.isSuccessfulPayment(order.getPaymentStatus()))
         .toList();
 
     BigDecimal totalRevenue = paidOrders.stream()
@@ -386,35 +387,6 @@ public class AdminCatalogController {
       @RequestBody ApiDtos.CommunityVideoUploadSignatureRequest request) {
     authTokenService.requireAdmin(httpRequest);
     return cloudinaryCommunityVideoService.createUploadSignature(request);
-  }
-
-  @GetMapping("/orders")
-  public List<ApiDtos.OrderResponse> adminOrders(HttpServletRequest httpRequest) {
-    authTokenService.requireAdmin(httpRequest);
-    return customerOrderRepository.findAllByOrderByCreatedAtDesc().stream()
-        .map(catalogMapper::toOrderResponse)
-        .toList();
-  }
-
-  @PutMapping("/order/{id}/status")
-  public ApiDtos.OrderResponse updateOrderStatus(HttpServletRequest httpRequest,
-      @PathVariable Long id,
-      @RequestBody ApiDtos.UpdateOrderStatusRequest request) {
-    authTokenService.requireAdmin(httpRequest);
-
-    CustomerOrder order = customerOrderRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
-
-    String newStatus = request.orderStatus();
-    java.util.Set<String> validStatuses =
-        java.util.Set.of("PLACED", "CONFIRMED", "SHIPPED", "DELIVERED");
-    if (newStatus == null || !validStatuses.contains(newStatus.toUpperCase())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Invalid order status. Must be one of: PLACED, CONFIRMED, SHIPPED, DELIVERED");
-    }
-
-    order.setOrderStatus(newStatus.toUpperCase());
-    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
   }
 
   @PostMapping("/upload")

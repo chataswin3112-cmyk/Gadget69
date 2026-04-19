@@ -277,10 +277,12 @@ public final class ApiDtos {
       String razorpayOrderId,
       String razorpayPaymentId,
       String createdAt,
+      String updatedAt,
       List<OrderItemPayload> items,
       String currency,
       Integer amountPaise,
-      String razorpayKeyId
+      String razorpayKeyId,
+      Boolean isDeleted
   ) {}
 
   public record UpdateOrderStatusRequest(String orderStatus) {}

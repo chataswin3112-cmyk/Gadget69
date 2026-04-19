@@ -39,6 +39,7 @@ class AdminDashboardAndOrderPricingTest {
 
   @Test
   void dashboardUsesPaidOrdersAndCreateOrderRecalculatesEffectivePrice() throws Exception {
+    when(razorpayPaymentService.isGatewayReady()).thenReturn(true);
     when(razorpayPaymentService.createOrder(anyLong(), any(BigDecimal.class)))
         .thenAnswer(invocation -> {
           Long localOrderId = invocation.getArgument(0);
@@ -131,7 +132,7 @@ class AdminDashboardAndOrderPricingTest {
                 }
                 """.formatted(orderId, razorpayOrderId)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.paymentStatus").value("PAID"))
+        .andExpect(jsonPath("$.paymentStatus").value("SUCCESS"))
         .andExpect(jsonPath("$.orderStatus").value("CONFIRMED"));
 
     mockMvc.perform(post("/api/razorpay/webhook")

@@ -59,18 +59,17 @@ public class SeedDataService implements ApplicationRunner {
   }
 
   private void seedAdmin() {
-    if (adminUserRepository.count() > 0) {
-      return;
-    }
-
-    AdminUser adminUser = new AdminUser();
+    AdminUser adminUser = adminUserRepository.findByEmailIgnoreCase("admin@gadget69.com")
+        .orElseGet(AdminUser::new);
     adminUser.setName("Gadget69 Admin");
     adminUser.setEmail("admin@gadget69.com");
     adminUser.setPasswordHash(authTokenService.encodePassword("Admin@123"));
-    adminUser.setTokenVersion(0);
+    if (adminUser.getTokenVersion() == null) {
+        adminUser.setTokenVersion(0);
+    }
     adminUserRepository.save(adminUser);
     System.out.println("""
-        DEFAULT ADMIN CREDENTIALS CREATED
+        ADMIN CREDENTIALS RESET
         Email: admin@gadget69.com
         Password: Admin@123
         Change this password immediately after first login.

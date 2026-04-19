@@ -110,6 +110,9 @@ describe("Checkout", () => {
     fireEvent.change(screen.getByPlaceholderText("+91 98765 43210"), {
       target: { value: "9876543210" },
     });
+    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+      target: { value: "hari@example.com" },
+    });
     fireEvent.change(screen.getByPlaceholderText("Street address, apartment, city, state"), {
       target: { value: "12 Main Street" },
     });
@@ -125,7 +128,8 @@ describe("Checkout", () => {
     const options = razorpayConstructor.mock.calls[0][0];
     expect(options.key).toBe("rzp_test_123");
     expect(options.order_id).toBe("order_test_42");
-    expect(options.name).toBe("Gadget 69");
+    expect(options.name).toBe("Gadget69");
+    expect(options.prefill.email).toBe("hari@example.com");
     expect(on).toHaveBeenCalledWith("payment.failed", expect.any(Function));
     expect(open).toHaveBeenCalledTimes(1);
   });

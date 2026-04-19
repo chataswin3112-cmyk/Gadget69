@@ -29,18 +29,23 @@ describe("AdminOffers", () => {
       products: [
         {
           id: 1,
-          name: "Active Phone",
+          name: "Active Phone with a very long premium gadget title for layout verification",
           description: "Active offer",
           price: 1000,
           stockQuantity: 10,
           sectionId: 1,
           sectionName: "Phones",
+          model_number: "PH-100",
           imageUrl: "https://example.com/a.png",
           createdAt: "2026-01-01T00:00:00.000Z",
           offer: true,
           offerPrice: 900,
-          offerStartDate: toDateInput(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)),
-          offerEndDate: toDateInput(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)),
+          offerStartDate: toDateInput(
+            new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
+          ),
+          offerEndDate: toDateInput(
+            new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+          ),
         },
         {
           id: 2,
@@ -50,12 +55,17 @@ describe("AdminOffers", () => {
           stockQuantity: 10,
           sectionId: 1,
           sectionName: "Phones",
+          model_number: "PH-200",
           imageUrl: "https://example.com/b.png",
           createdAt: "2026-01-01T00:00:00.000Z",
           offer: true,
           offerPrice: 950,
-          offerStartDate: toDateInput(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2)),
-          offerEndDate: toDateInput(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 4)),
+          offerStartDate: toDateInput(
+            new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2)
+          ),
+          offerEndDate: toDateInput(
+            new Date(today.getFullYear(), today.getMonth(), today.getDate() + 4)
+          ),
         },
         {
           id: 3,
@@ -65,12 +75,17 @@ describe("AdminOffers", () => {
           stockQuantity: 10,
           sectionId: 1,
           sectionName: "Phones",
+          model_number: "PH-300",
           imageUrl: "https://example.com/c.png",
           createdAt: "2026-01-01T00:00:00.000Z",
           offer: true,
           offerPrice: 1000,
-          offerStartDate: toDateInput(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5)),
-          offerEndDate: toDateInput(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2)),
+          offerStartDate: toDateInput(
+            new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5)
+          ),
+          offerEndDate: toDateInput(
+            new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2)
+          ),
         },
         {
           id: 4,
@@ -80,6 +95,7 @@ describe("AdminOffers", () => {
           stockQuantity: 10,
           sectionId: 1,
           sectionName: "Phones",
+          model_number: "PH-400",
           imageUrl: "https://example.com/d.png",
           createdAt: "2026-01-01T00:00:00.000Z",
           offer: false,
@@ -101,5 +117,20 @@ describe("AdminOffers", () => {
     expect(screen.getByText("Upcoming")).toBeInTheDocument();
     expect(screen.getByText("Expired")).toBeInTheDocument();
     expect(screen.getByText("No Offer")).toBeInTheDocument();
+  });
+
+  it("renders product thumbnails with aligned name and meta content", () => {
+    render(
+      <MemoryRouter>
+        <AdminOffers />
+      </MemoryRouter>
+    );
+
+    const longName = screen.getByText(
+      "Active Phone with a very long premium gadget title for layout verification"
+    );
+    expect(longName).toHaveAttribute("data-clamp", "2");
+    expect(screen.getByAltText(longName.textContent || "")).toBeInTheDocument();
+    expect(screen.getByText("Phones - PH-100")).toBeInTheDocument();
   });
 });

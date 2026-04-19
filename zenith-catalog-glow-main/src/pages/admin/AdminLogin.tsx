@@ -169,6 +169,7 @@ const AdminLogin = () => {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
   const [lockoutRemaining, setLockoutRemaining] = useState(0);
+  const [errorMsg, setErrorMsg] = useState("");
   const lockoutTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -191,6 +192,7 @@ const AdminLogin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLockedOut) return;
+    setErrorMsg("");
     try {
       setLoading(true);
       const response = await adminLogin({ email, password });
@@ -201,10 +203,14 @@ const AdminLogin = () => {
       const newCount = attemptCount + 1;
       setAttemptCount(newCount);
       if (newCount >= MAX_LOGIN_ATTEMPTS) {
-        toast.error(`Too many failed attempts. Locked out for ${LOCKOUT_SECONDS} seconds.`);
+        const msg = `Too many failed attempts. Locked out for ${LOCKOUT_SECONDS} seconds.`;
+        setErrorMsg(msg);
+        toast.error(msg);
         startLockout();
       } else {
-        toast.error(getErrorMessage(error, "Invalid credentials"));
+        const msg = getErrorMessage(error, "Invalid credentials");
+        setErrorMsg(msg);
+        toast.error(msg);
         if (newCount >= 3) {
           toast.warning(`${MAX_LOGIN_ATTEMPTS - newCount} attempt(s) remaining before lockout.`);
         }
@@ -249,6 +255,13 @@ const AdminLogin = () => {
                 <p className="text-sm text-destructive font-body">
                   Account locked. Try again in <strong>{lockoutRemaining}s</strong>.
                 </p>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {!isLockedOut && errorMsg && (
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm font-body text-destructive text-center">
+                {errorMsg}
               </div>
             )}
 
