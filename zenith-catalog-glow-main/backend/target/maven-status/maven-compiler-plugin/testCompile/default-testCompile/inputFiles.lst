@@ -3,6 +3,7 @@ C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\b
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\config\LocalEnvLoaderTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\config\RateLimitFilterTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\config\RazorpayEnvironmentBindingTest.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\config\SpaForwardingControllerTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\AdminDashboardAndOrderPricingTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\AdminOfferUpdateTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\CatalogSyncControllerTest.java
