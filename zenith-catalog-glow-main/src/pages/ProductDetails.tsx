@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, type CSSProperties } from "react";
+import { useEffect, useState, useMemo, useCallback, type CSSProperties } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Minus, Plus, ShoppingBag, ChevronRight } from "lucide-react";
+import { Minus, Plus, ShoppingBag, ChevronRight, Play } from "lucide-react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
@@ -13,6 +13,8 @@ import { useCart } from "@/contexts/CartContext";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { uniqueMediaUrls } from "@/lib/media";
 import { getDisplayMrp, getEffectivePrice } from "@/lib/pricing";
+import { getVariant } from "@/api/productApi";
+import { VariantMedia } from "@/types";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -28,24 +30,53 @@ const ProductDetails = () => {
 
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [mainMedia, setMainMedia] = useState("");
+  const [mainMediaIndex, setMainMediaIndex] = useState(0);
+  const [variantMedia, setVariantMedia] = useState<VariantMedia[]>([]);
+  const [loadingVariant, setLoadingVariant] = useState(false);
+
+  // Build fallback media from product fields
+  const fallbackMediaUrls = useMemo(() => {
+    if (!product) return [];
+    return uniqueMediaUrls([
+      ...(product.galleryImages || []),
+      product.videoUrl,
+      product.imageUrl,
+    ]).map((url) => ({ id: 0, mediaUrl: url, mediaType: "IMAGE" as const, displayOrder: 0, isPrimary: false }));
+  }, [product]);
+
+  const loadVariantMedia = useCallback(async (variantId: number) => {
+    const variant = variants.find((v) => v.id === variantId);
+    // If variant has media pre-loaded, use it directly
+    if (variant?.media && variant.media.length > 0) {
+      setVariantMedia(variant.media);
+      setMainMediaIndex(0);
+      return;
+    }
+    // Otherwise fetch from API
+    setLoadingVariant(true);
+    try {
+      const data = await getVariant(variantId);
+      setVariantMedia(data.media || []);
+      setMainMediaIndex(0);
+    } catch {
+      setVariantMedia([]);
+    } finally {
+      setLoadingVariant(false);
+    }
+  }, [variants]);
 
   useEffect(() => {
     if (!product) {
       setSelectedVariantId(null);
-      setMainMedia("");
+      setVariantMedia([]);
       return;
     }
-
-    setSelectedVariantId(defaultVariant?.id ?? null);
-    setMainMedia(
-      defaultVariant?.images?.[0]?.imageUrl ||
-      product.galleryImages?.[0] ||
-      product.videoUrl ||
-      product.imageUrl ||
-      ""
-    );
-  }, [defaultVariant, product]);
+    const vid = defaultVariant?.id ?? null;
+    setSelectedVariantId(vid);
+    if (vid) {
+      void loadVariantMedia(vid);
+    }
+  }, [defaultVariant, product, loadVariantMedia]);
 
   const selectedVariant = useMemo(
     () => variants.find((v) => v.id === selectedVariantId),
@@ -59,6 +90,20 @@ const ProductDetails = () => {
         : [],
     [allProducts, product]
   );
+
+  const handleVariantChange = (variantId: number) => {
+    setSelectedVariantId(variantId);
+    void loadVariantMedia(variantId);
+  };
+
+  // Price: use variant's own price if set, else base price + adjustment
+  const basePrice = getEffectivePrice(product);
+  const finalPrice = selectedVariant?.price
+    ? Number(selectedVariant.price)
+    : basePrice + (selectedVariant?.priceAdjustment || 0);
+  const mrp = getDisplayMrp(product);
+  const stock = selectedVariant?.stock ?? product.stockQuantity;
+  const sku = selectedVariant?.sku;
 
   if (isLoading) {
     return (
@@ -84,27 +129,9 @@ const ProductDetails = () => {
     );
   }
 
-
-  const allMedia = uniqueMediaUrls([
-    ...(selectedVariant?.images?.map((img) => img.imageUrl) || []),
-    ...(product.galleryImages || []),
-    product.videoUrl,
-    product.imageUrl,
-  ]);
-  const basePrice = getEffectivePrice(product);
-  const priceAdj = selectedVariant?.priceAdjustment || 0;
-  const finalPrice = basePrice + priceAdj;
-  const mrp = getDisplayMrp(product);
-  const stock = selectedVariant?.stock ?? product.stockQuantity;
-  const sku = selectedVariant?.sku;
-
-  const handleVariantChange = (variantId: number) => {
-    setSelectedVariantId(variantId);
-    const v = variants.find((vr) => vr.id === variantId);
-    if (v?.images?.[0]) {
-      setMainMedia(v.images[0].imageUrl);
-    }
-  };
+  // Current media items — prefer variant media, fall back to product-level gallery
+  const activeMedia: VariantMedia[] = variantMedia.length > 0 ? variantMedia : fallbackMediaUrls;
+  const mainMediaItem = activeMedia[mainMediaIndex] ?? activeMedia[0] ?? null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,29 +152,52 @@ const ProductDetails = () => {
       {/* Product detail */}
       <div className="section-container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-          {/* Gallery */}
+          {/* Gallery — variant media-aware with IMAGE/VIDEO support */}
           <div className="enter-slide-in-left">
-            <div className="rounded-xl overflow-hidden shadow-premium bg-card">
-              <MediaFrame
-                src={mainMedia}
-                alt={product.name}
-                aspectRatio="aspect-square"
-                padding="p-8"
-                className="bg-secondary/20"
-                loading="eager"
-              />
+            {/* Main Media */}
+            <div className="relative rounded-xl overflow-hidden shadow-premium bg-card">
+              {loadingVariant && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
+                  <div className="h-8 w-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+                </div>
+              )}
+              {mainMediaItem?.mediaType === "VIDEO" ? (
+                <video
+                  key={mainMediaItem.mediaUrl}
+                  src={mainMediaItem.mediaUrl}
+                  controls
+                  className="w-full aspect-square object-contain bg-black"
+                />
+              ) : (
+                <MediaFrame
+                  src={mainMediaItem?.mediaUrl || product.imageUrl}
+                  alt={product.name}
+                  aspectRatio="aspect-square"
+                  padding="p-8"
+                  className="bg-secondary/20"
+                  loading="eager"
+                />
+              )}
             </div>
-            {allMedia.length > 1 && (
+
+            {/* Thumbnail Strip */}
+            {activeMedia.length > 1 && (
               <div className="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-                {allMedia.map((media, i) => (
+                {activeMedia.map((item, i) => (
                   <button
-                    key={i}
-                    onClick={() => setMainMedia(media)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                      mainMedia === media ? "border-accent" : "border-border"
+                    key={item.id ? `${item.id}-${i}` : i}
+                    onClick={() => setMainMediaIndex(i)}
+                    className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                      mainMediaIndex === i ? "border-accent" : "border-border"
                     }`}
                   >
-                    <MediaFrame src={media} alt="" padding="p-1" className="rounded-none" />
+                    {item.mediaType === "VIDEO" ? (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <Play className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <MediaFrame src={item.mediaUrl} alt="" padding="p-1" className="rounded-none" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -191,17 +241,45 @@ const ProductDetails = () => {
               )}
             </div>
 
-            {/* Variants */}
-            {variants.length > 1 && (
-              <div className="mb-6">
-                <p className="text-sm font-medium text-foreground mb-2 font-body">
-                  Color: {selectedVariant?.colorName}
-                </p>
-                <ColorSwatchSelector
-                  variants={variants.map((v) => ({ id: v.id, colorName: v.colorName, hexCode: v.hexCode }))}
-                  selectedId={selectedVariantId}
-                  onSelect={handleVariantChange}
-                />
+            {/* Variants — Color + Size selectors */}
+            {variants.length > 0 && (
+              <div className="mb-6 space-y-4">
+                {variants.some((v) => v.colorName) && (
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-2 font-body">
+                      Color: <span className="text-accent">{selectedVariant?.colorName}</span>
+                    </p>
+                    <ColorSwatchSelector
+                      variants={variants.map((v) => ({ id: v.id, colorName: v.colorName, hexCode: v.hexCode }))}
+                      selectedId={selectedVariantId}
+                      onSelect={handleVariantChange}
+                    />
+                  </div>
+                )}
+                {/* Size selector — shown only if any variant has a size */}
+                {variants.some((v) => v.size) && (
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-2 font-body">Size</p>
+                    <div className="flex flex-wrap gap-2">
+                      {variants
+                        .filter((v) => v.size)
+                        .map((v) => (
+                          <button
+                            key={v.id}
+                            onClick={() => handleVariantChange(v.id)}
+                            className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                              selectedVariantId === v.id
+                                ? "border-accent bg-accent/10 text-accent"
+                                : "border-border text-muted-foreground hover:border-accent/50"
+                            } ${v.stock === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
+                            disabled={v.stock === 0}
+                          >
+                            {v.size}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

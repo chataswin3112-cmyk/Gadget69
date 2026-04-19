@@ -20,6 +20,7 @@ const CategoryDetails = lazy(() => import("./pages/CategoryDetails"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
+const CheckoutFailure = lazy(() => import("./pages/CheckoutFailure"));
 const Contact = lazy(() => import("./pages/Contact"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
@@ -68,7 +69,7 @@ const App = () => (
           <CartProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <ScrollToTop />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
@@ -80,6 +81,7 @@ const App = () => (
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                  <Route path="/checkout/failure" element={<CheckoutFailure />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/refund-policy" element={<RefundPolicy />} />

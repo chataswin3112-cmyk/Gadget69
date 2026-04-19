@@ -54,6 +54,9 @@ public class CustomerOrder {
   @Column(name = "payment_status", nullable = false)
   private String paymentStatus = "PENDING";
 
+  @Column(name = "order_status", nullable = false)
+  private String orderStatus = "PLACED";
+
   @Column(name = "razorpay_order_id")
   private String razorpayOrderId;
 

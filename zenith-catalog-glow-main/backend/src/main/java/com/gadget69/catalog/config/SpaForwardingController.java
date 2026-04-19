@@ -18,12 +18,11 @@ public class SpaForwardingController {
   private final ResourceLoader resourceLoader;
   private final AppProperties appProperties;
 
-  @GetMapping({"/{path:[^\\.]*}", "/**/{path:[^\\.]*}"})
+  @GetMapping({
+      "/{path:^(?!api$|uploads$)[^\\.]*}",
+      "/{path:^(?!api$|uploads$)[^\\.]*}/**"
+  })
   public String forward(HttpServletRequest request) {
-    String uri = request.getRequestURI();
-    if (uri.startsWith("/api") || uri.startsWith("/uploads")) {
-      throw new ResponseStatusException(NOT_FOUND);
-    }
     if (!hasBundledSpa()) {
       if (isLocalRequest(request) && StringUtils.hasText(appProperties.getFrontendDevUrl())) {
         return "redirect:" + buildDevServerUrl(request);

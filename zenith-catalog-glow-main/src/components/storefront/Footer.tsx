@@ -14,7 +14,7 @@ const WhatsAppIcon = () => (
 
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-const footerLinkClass = "text-xs text-white/60 transition-colors hover:text-white font-body";
+const footerLinkClass = "text-xs leading-5 text-white/60 transition-colors hover:text-white font-body";
 const footerHeadingClass =
   "text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 font-heading";
 
@@ -23,7 +23,7 @@ const Footer = () => {
   const footerLogoSrc = settings.logoUrl || gadget69Wordmark;
 
   return (
-    <footer className="bg-[#0f0f0f] text-white">
+    <footer className="bg-[#0f0f0f] text-white [content-visibility:auto] [contain-intrinsic-size:560px]">
       <div className="section-container px-5 py-8 sm:px-8 sm:py-11">
         <div className="mb-7 flex flex-col items-start text-left sm:hidden">
           <StorefrontBrandLockup
@@ -32,6 +32,7 @@ const Footer = () => {
             className="mb-3 overflow-visible"
             imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
             labelClassName="text-lg"
+            fetchPriority="low"
           />
           {settings.footerText && (
             <p className="max-w-sm text-xs leading-6 text-white/55 font-body">{settings.footerText}</p>
@@ -67,7 +68,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-4 gap-y-7 border-b border-white/10 pb-7 sm:hidden">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-7 border-b border-white/10 pb-7 sm:hidden">
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Shop</p>
             <nav className="flex flex-col items-start gap-2">
@@ -98,7 +99,7 @@ const Footer = () => {
               )}
             </nav>
           </div>
-          <div className="space-y-3 text-left">
+          <div className="col-span-2 space-y-3 text-left">
             <p className={footerHeadingClass}>Legal</p>
             <nav className="flex flex-col items-start gap-2">
               <Link to="/privacy-policy" className={footerLinkClass}>
@@ -117,7 +118,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="hidden grid-cols-2 gap-8 border-b border-white/10 pb-8 sm:grid lg:grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,0.9fr))] lg:gap-x-10">
+        <div className="hidden border-b border-white/10 pb-8 sm:grid sm:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] sm:gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-x-12">
           <div className="flex flex-col items-start text-left">
             <StorefrontBrandLockup
               imageSrc={footerLogoSrc}
@@ -125,6 +126,7 @@ const Footer = () => {
               className="mb-4 overflow-visible"
               imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
               labelClassName="text-xl"
+              fetchPriority="low"
             />
             {settings.footerText && (
               <p className="max-w-sm text-xs leading-6 text-white/55 font-body">{settings.footerText}</p>
@@ -159,56 +161,58 @@ const Footer = () => {
               </a>
             </div>
           </div>
-          <div className="space-y-4 text-left">
-            <p className={footerHeadingClass}>Shop</p>
-            <nav className="flex flex-col items-start gap-2.5">
-              <Link to="/products" className={footerLinkClass}>
-                All Products
-              </Link>
-              <Link to="/categories" className={footerLinkClass}>
-                Categories
-              </Link>
-              <Link to="/products?filter=new" className={footerLinkClass}>
-                New Launches
-              </Link>
-              <Link to="/products?filter=best" className={footerLinkClass}>
-                Best Sellers
-              </Link>
-            </nav>
-          </div>
-          <div className="space-y-4 text-left">
-            <p className={footerHeadingClass}>Company</p>
-            <nav className="flex flex-col items-start gap-2.5">
-              <Link to="/contact" className={footerLinkClass}>
-                Contact Us
-              </Link>
-              {settings.catalogueUrl && (
-                <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>
-                  Catalogue
-                </a>
-              )}
-            </nav>
-          </div>
-          <div className="space-y-4 text-left">
-            <p className={footerHeadingClass}>Legal</p>
-            <nav className="flex flex-col items-start gap-2.5">
-              <Link to="/privacy-policy" className={footerLinkClass}>
-                Privacy Policy
-              </Link>
-              <Link to="/terms-and-conditions" className={footerLinkClass}>
-                Terms & Conditions
-              </Link>
-              <Link to="/shipping-policy" className={footerLinkClass}>
-                Shipping Policy
-              </Link>
-              <Link to="/refund-policy" className={footerLinkClass}>
-                Refund Policy
-              </Link>
-            </nav>
+          <div className="grid content-start items-start gap-x-8 gap-y-8 pt-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4 text-left">
+              <p className={footerHeadingClass}>Shop</p>
+              <nav className="flex flex-col items-start gap-2.5">
+                <Link to="/products" className={footerLinkClass}>
+                  All Products
+                </Link>
+                <Link to="/categories" className={footerLinkClass}>
+                  Categories
+                </Link>
+                <Link to="/products?filter=new" className={footerLinkClass}>
+                  New Launches
+                </Link>
+                <Link to="/products?filter=best" className={footerLinkClass}>
+                  Best Sellers
+                </Link>
+              </nav>
+            </div>
+            <div className="space-y-4 text-left">
+              <p className={footerHeadingClass}>Company</p>
+              <nav className="flex flex-col items-start gap-2.5">
+                <Link to="/contact" className={footerLinkClass}>
+                  Contact Us
+                </Link>
+                {settings.catalogueUrl && (
+                  <a href={resolveMediaUrl(settings.catalogueUrl)} className={footerLinkClass}>
+                    Catalogue
+                  </a>
+                )}
+              </nav>
+            </div>
+            <div className="space-y-4 text-left">
+              <p className={footerHeadingClass}>Legal</p>
+              <nav className="flex flex-col items-start gap-2.5">
+                <Link to="/privacy-policy" className={footerLinkClass}>
+                  Privacy Policy
+                </Link>
+                <Link to="/terms-and-conditions" className={footerLinkClass}>
+                  Terms & Conditions
+                </Link>
+                <Link to="/shipping-policy" className={footerLinkClass}>
+                  Shipping Policy
+                </Link>
+                <Link to="/refund-policy" className={footerLinkClass}>
+                  Refund Policy
+                </Link>
+              </nav>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 pt-5 text-[11px] font-body text-white/30">
+        <div className="flex flex-col items-start gap-3 pt-5 text-[11px] font-body text-white/30 sm:flex-row sm:items-center sm:justify-between">
           <span>Copyright {new Date().getFullYear()} Gadget 69. All rights reserved.</span>
           <button
             onClick={scrollToTop}

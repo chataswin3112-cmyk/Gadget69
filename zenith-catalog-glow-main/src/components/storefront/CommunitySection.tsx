@@ -61,7 +61,7 @@ const CommunitySection = () => {
 
   return (
     <>
-      <section className="section-padding">
+      <section className="section-padding [content-visibility:auto] [contain-intrinsic-size:920px]">
         <div className="section-container">
           <div className="home-section-panel" data-surface="mist">
             <div

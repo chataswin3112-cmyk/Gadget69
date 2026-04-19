@@ -26,14 +26,14 @@ describe("Footer", () => {
     });
   });
 
-  it("keeps the fixed Gadget 69 text in both footer brand areas while honoring a custom logo", () => {
+  it("renders both footer brand logos while honoring a custom image source", () => {
     const { container } = render(
       <MemoryRouter>
         <Footer />
       </MemoryRouter>
     );
 
-    expect(screen.getAllByText("Gadget 69")).toHaveLength(2);
+    expect(screen.getAllByAltText("Gadget 69")).toHaveLength(2);
     expect(screen.getAllByText("All Products").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/instagram/i).length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/facebook/i).length).toBeGreaterThan(0);

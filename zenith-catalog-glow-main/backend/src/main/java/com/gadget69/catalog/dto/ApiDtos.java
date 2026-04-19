@@ -133,7 +133,8 @@ public final class ApiDtos {
       String status,
       String default_thumbnail_url,
       List<String> galleryImages,
-      Map<String, String> specifications
+      Map<String, String> specifications,
+      List<VariantResponse> variants
   ) {}
 
   public record BannerPayload(
@@ -270,6 +271,7 @@ public final class ApiDtos {
       String pincode,
       BigDecimal totalAmount,
       String paymentStatus,
+      String orderStatus,
       String razorpayOrderId,
       String razorpayPaymentId,
       String createdAt,
@@ -277,5 +279,51 @@ public final class ApiDtos {
       String currency,
       Integer amountPaise,
       String razorpayKeyId
+  ) {}
+
+  public record UpdateOrderStatusRequest(String orderStatus) {}
+
+  // ── Variant DTOs ────────────────────────────────────────────────────────────
+
+  public record VariantMediaResponse(
+      Long id,
+      String mediaUrl,
+      String mediaType,
+      Integer displayOrder,
+      Boolean isPrimary
+  ) {}
+
+  public record VariantResponse(
+      Long id,
+      Long productId,
+      String colorName,
+      String hexCode,
+      String size,
+      java.math.BigDecimal price,
+      Integer priceAdjustment,
+      Integer stock,
+      String sku,
+      Boolean isDefault,
+      Integer displayOrder,
+      List<VariantMediaResponse> media
+  ) {}
+
+  public record VariantPayload(
+      String colorName,
+      String hexCode,
+      String size,
+      java.math.BigDecimal price,
+      Integer priceAdjustment,
+      Integer stock,
+      String sku,
+      Boolean isDefault,
+      Integer displayOrder
+  ) {}
+
+  public record VariantMediaPayload(
+      String mediaUrl,
+      String mediaType,
+      Integer displayOrder,
+      Boolean isPrimary
   ) {}
 }

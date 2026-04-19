@@ -9,7 +9,19 @@ interface MediaImageProps extends Omit<ComponentPropsWithoutRef<"img">, "src"> {
 }
 
 const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
-  ({ src, fallbackSrc = FALLBACK_IMAGE_SRC, onError, eager = false, loading, decoding, ...props }, ref) => {
+  (
+    {
+      src,
+      fallbackSrc = FALLBACK_IMAGE_SRC,
+      onError,
+      eager = false,
+      loading,
+      decoding,
+      fetchPriority,
+      ...props
+    },
+    ref
+  ) => {
     const resolvedFallbackSrc = useMemo(
       () => resolveMediaUrl(fallbackSrc) || FALLBACK_IMAGE_SRC,
       [fallbackSrc]
@@ -31,6 +43,7 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
         src={currentSrc}
         loading={loading ?? (eager ? "eager" : "lazy")}
         decoding={decoding ?? (eager ? "sync" : "async")}
+        {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
         onError={(event) => {
           onError?.(event);
 

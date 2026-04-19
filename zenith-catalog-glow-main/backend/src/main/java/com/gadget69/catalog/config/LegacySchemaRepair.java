@@ -26,11 +26,15 @@ public class LegacySchemaRepair implements ApplicationRunner {
   void repairLegacySchemas() {
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS currency VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS amount_paise INTEGER");
+    apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS order_status VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS razorpay_signature VARCHAR(512)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS last_razorpay_event_id VARCHAR(255)");
     apply("UPDATE customer_orders SET currency = 'INR' WHERE currency IS NULL OR TRIM(currency) = ''");
+    apply("UPDATE customer_orders SET order_status = 'PLACED' WHERE order_status IS NULL OR TRIM(order_status) = ''");
     apply("ALTER TABLE customer_orders ALTER COLUMN currency SET DEFAULT 'INR'");
     apply("ALTER TABLE customer_orders ALTER COLUMN currency SET NOT NULL");
+    apply("ALTER TABLE customer_orders ALTER COLUMN order_status SET DEFAULT 'PLACED'");
+    apply("ALTER TABLE customer_orders ALTER COLUMN order_status SET NOT NULL");
   }
 
   private void apply(String sql) {

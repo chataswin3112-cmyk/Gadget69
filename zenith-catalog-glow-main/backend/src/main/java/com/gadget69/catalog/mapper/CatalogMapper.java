@@ -6,9 +6,11 @@ import com.gadget69.catalog.entity.CommunityMedia;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.entity.OrderItem;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductVariant;
 import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
+import com.gadget69.catalog.entity.VariantMedia;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +32,10 @@ public class CatalogMapper {
   }
 
   public ApiDtos.ProductResponse toProductResponse(Product product) {
+    List<ApiDtos.VariantResponse> variants = product.getVariants() == null
+        ? List.of()
+        : product.getVariants().stream().map(this::toVariantResponse).toList();
+
     return new ApiDtos.ProductResponse(
         product.getId(),
         product.getName(),
@@ -59,7 +65,8 @@ public class CatalogMapper {
         product.getGalleryImages() == null
             ? List.of()
             : product.getGalleryImages().stream().map(this::toPublicMediaUrl).toList(),
-        product.getSpecifications()
+        product.getSpecifications(),
+        variants
     );
   }
 
@@ -137,6 +144,7 @@ public class CatalogMapper {
         order.getPincode(),
         order.getTotalAmount(),
         order.getPaymentStatus(),
+        order.getOrderStatus(),
         order.getRazorpayOrderId(),
         order.getRazorpayPaymentId(),
         order.getCreatedAt() == null ? null : order.getCreatedAt().toString(),
@@ -164,5 +172,36 @@ public class CatalogMapper {
       return url;
     }
     return url;
+  }
+
+  public ApiDtos.VariantResponse toVariantResponse(ProductVariant variant) {
+    List<ApiDtos.VariantMediaResponse> media = variant.getMedia() == null
+        ? List.of()
+        : variant.getMedia().stream().map(this::toVariantMediaResponse).toList();
+
+    return new ApiDtos.VariantResponse(
+        variant.getId(),
+        variant.getProduct() != null ? variant.getProduct().getId() : null,
+        variant.getColorName(),
+        variant.getHexCode(),
+        variant.getSize(),
+        variant.getPrice(),
+        variant.getPriceAdjustment(),
+        variant.getStock(),
+        variant.getSku(),
+        variant.getIsDefault(),
+        variant.getDisplayOrder(),
+        media
+    );
+  }
+
+  public ApiDtos.VariantMediaResponse toVariantMediaResponse(VariantMedia media) {
+    return new ApiDtos.VariantMediaResponse(
+        media.getId(),
+        toPublicMediaUrl(media.getMediaUrl()),
+        media.getMediaType(),
+        media.getDisplayOrder(),
+        media.getIsPrimary()
+    );
   }
 }

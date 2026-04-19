@@ -2,6 +2,7 @@ package com.gadget69.catalog.entity;
 
 import com.gadget69.catalog.config.MapStringConverter;
 import com.gadget69.catalog.config.StringListConverter;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -11,6 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -116,6 +119,10 @@ public class Product {
 
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
+
+  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @OrderBy("displayOrder ASC, id ASC")
+  private List<ProductVariant> variants = new ArrayList<>();
 
   @PrePersist
   void onCreate() {

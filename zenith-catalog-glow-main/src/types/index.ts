@@ -10,6 +10,16 @@ export interface Section {
   sort_order?: number;
 }
 
+export interface VariantMedia {
+  id: number;
+  variantId?: number;
+  mediaUrl: string;
+  mediaType: "IMAGE" | "VIDEO";
+  displayOrder: number;
+  isPrimary: boolean;
+}
+
+/** @deprecated use VariantMedia */
 export interface ProductVariantImage {
   id: number;
   variantId: number;
@@ -23,11 +33,16 @@ export interface ProductVariant {
   productId: number;
   colorName: string;
   hexCode: string;
-  sku?: string;
-  stock: number;
+  size?: string;
+  price?: number;
   priceAdjustment: number;
+  stock: number;
+  sku?: string;
   isDefault: boolean;
-  images: ProductVariantImage[];
+  displayOrder: number;
+  media: VariantMedia[];
+  /** @deprecated mapped from media for backward compat */
+  images?: ProductVariantImage[];
 }
 
 export interface Product {
@@ -75,6 +90,7 @@ export interface OrderItem {
 }
 
 export type PaymentStatus = "PENDING" | "AUTHORIZED" | "PAID" | "FAILED" | "REFUNDED" | string;
+export type OrderStatus = "PLACED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | string;
 
 export interface Order {
   id?: number;
@@ -84,6 +100,7 @@ export interface Order {
   pincode: string;
   totalAmount: number;
   paymentStatus: PaymentStatus;
+  orderStatus?: OrderStatus;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   razorpayKeyId?: string;

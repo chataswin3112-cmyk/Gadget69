@@ -43,7 +43,10 @@ const ReviewSection = () => {
   ).toFixed(1);
 
   return (
-    <section data-testid="review-section" className="section-padding overflow-hidden">
+    <section
+      data-testid="review-section"
+      className="section-padding overflow-hidden [content-visibility:auto] [contain-intrinsic-size:760px]"
+    >
       <div className="section-container">
         {/* Header */}
         <div className="mb-8 sm:mb-10 flex flex-col items-center text-center px-2">
@@ -77,10 +80,10 @@ const ReviewSection = () => {
         </div>
 
         {/* Single infinite marquee row — pauses on hover */}
-        <div className="relative hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] md:flex">
+        <div className="group relative hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] md:flex">
           <div
             data-testid="review-marquee-track"
-            className="review-marquee-track flex flex-nowrap animate-marquee-left gap-4 will-change-transform"
+            className="review-marquee-track flex flex-nowrap animate-marquee-left gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]"
           >
             {[...filled, ...filled].map((review, i) => (
               <ReviewCard

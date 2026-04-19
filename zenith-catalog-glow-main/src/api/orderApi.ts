@@ -20,3 +20,11 @@ export const getOrders = async (): Promise<Order[]> => {
   const res = await apiClient.get("/admin/orders");
   return res.data;
 };
+
+export const updateOrderStatus = async (
+  orderId: number,
+  orderStatus: string
+): Promise<Order> => {
+  const res = await apiClient.put(`/admin/order/${orderId}/status`, { orderStatus });
+  return res.data;
+};

@@ -11,12 +11,14 @@ import com.gadget69.catalog.repository.BannerRepository;
 import com.gadget69.catalog.repository.CommunityMediaRepository;
 import com.gadget69.catalog.repository.CustomerOrderRepository;
 import com.gadget69.catalog.repository.ProductRepository;
+import com.gadget69.catalog.repository.ProductVariantRepository;
 import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
 import com.gadget69.catalog.service.ProductPricingService;
 import com.gadget69.catalog.service.RazorpayPaymentService;
 import com.gadget69.catalog.service.RazorpayPaymentService.RazorpayOrder;
+import com.gadget69.catalog.service.EmailNotificationService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -25,6 +27,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,6 +52,8 @@ public class PublicCatalogController {
   private final CatalogMapper catalogMapper;
   private final ProductPricingService productPricingService;
   private final RazorpayPaymentService razorpayPaymentService;
+  private final EmailNotificationService emailNotificationService;
+  private final ProductVariantRepository productVariantRepository;
 
   @GetMapping("/health")
   public Map<String, Object> health() {
@@ -66,6 +71,7 @@ public class PublicCatalogController {
   }
 
   @GetMapping("/products")
+  @Transactional(readOnly = true)
   public List<ApiDtos.ProductResponse> products() {
     return productRepository.findAllByOrderByDisplayOrderAscCreatedAtDesc().stream()
         .map(catalogMapper::toProductResponse)
@@ -73,10 +79,18 @@ public class PublicCatalogController {
   }
 
   @GetMapping("/products/{id}")
+  @Transactional(readOnly = true)
   public ApiDtos.ProductResponse product(@PathVariable Long id) {
     Product product = productRepository.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     return catalogMapper.toProductResponse(product);
+  }
+
+  @GetMapping("/variants/{id}")
+  public ApiDtos.VariantResponse variant(@PathVariable Long id) {
+    return productVariantRepository.findById(id)
+        .map(catalogMapper::toVariantResponse)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Variant not found"));
   }
 
   @GetMapping("/banners")
@@ -221,9 +235,12 @@ public class PublicCatalogController {
     }
 
     order.setPaymentStatus("AUTHORIZED");
+    order.setOrderStatus("CONFIRMED");
     order.setRazorpayPaymentId(request.razorpayPaymentId());
     order.setRazorpaySignature(request.razorpaySignature());
-    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
+    CustomerOrder saved = customerOrderRepository.save(order);
+    emailNotificationService.sendOrderConfirmation(saved);
+    return catalogMapper.toOrderResponse(saved);
   }
 
   @PostMapping("/razorpay/webhook")
@@ -231,6 +248,19 @@ public class PublicCatalogController {
       @RequestBody String payload,
       @RequestHeader(value = "X-Razorpay-Signature", required = false) String signature,
       @RequestHeader(value = "X-Razorpay-Event-Id", required = false) String eventId) {
+    return handleRazorpayWebhookPayload(payload, signature, eventId);
+  }
+
+  /** Alias for /api/razorpay/webhook to satisfy spec requirement /webhook/razorpay */
+  @PostMapping("/razorpay-webhook")
+  public ResponseEntity<Void> razorpayWebhookAlias(
+      @RequestBody String payload,
+      @RequestHeader(value = "X-Razorpay-Signature", required = false) String signature,
+      @RequestHeader(value = "X-Razorpay-Event-Id", required = false) String eventId) {
+    return handleRazorpayWebhookPayload(payload, signature, eventId);
+  }
+
+  private ResponseEntity<Void> handleRazorpayWebhookPayload(String payload, String signature, String eventId) {
     if (!razorpayPaymentService.verifyWebhookSignature(payload, signature)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Razorpay webhook signature");
     }
@@ -284,9 +314,15 @@ public class PublicCatalogController {
     String paymentStatus = payment.path("status").asText("");
     if ("payment.captured".equals(event) || "captured".equalsIgnoreCase(paymentStatus)) {
       order.setPaymentStatus("PAID");
+      order.setOrderStatus("CONFIRMED");
+      order.setLastRazorpayEventId(eventId);
+      CustomerOrder saved = customerOrderRepository.save(order);
+      emailNotificationService.sendOrderConfirmation(saved);
+      return;
     } else if ("payment.authorized".equals(event) || "authorized".equalsIgnoreCase(paymentStatus)) {
       if ("PENDING".equalsIgnoreCase(order.getPaymentStatus())) {
         order.setPaymentStatus("AUTHORIZED");
+        order.setOrderStatus("CONFIRMED");
       }
     } else if ("payment.failed".equals(event) || "failed".equalsIgnoreCase(paymentStatus)) {
       if (!"PAID".equalsIgnoreCase(order.getPaymentStatus())
@@ -312,6 +348,7 @@ public class PublicCatalogController {
         response.pincode(),
         response.totalAmount(),
         response.paymentStatus(),
+        response.orderStatus(),
         response.razorpayOrderId(),
         response.razorpayPaymentId(),
         response.createdAt(),

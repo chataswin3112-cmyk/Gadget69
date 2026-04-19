@@ -74,7 +74,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return prev;
       });
     }
-  }, [products, isLoading]);
+  }, [products, isLoading, items.length]);
 
   const clearCart = useCallback(() => setItems([]), []);
 

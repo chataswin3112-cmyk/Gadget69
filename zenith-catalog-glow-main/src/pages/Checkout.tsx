@@ -158,7 +158,7 @@ const Checkout = () => {
               razorpaySignature: response.razorpay_signature,
             });
             clearCart();
-            navigate("/checkout/success");
+            navigate(`/checkout/success?orderId=${order.id}`);
           } catch (error) {
             console.error("Razorpay payment verification failed", error);
             setSubmitting(false);
@@ -173,11 +173,7 @@ const Checkout = () => {
       checkout.on("payment.failed", (response) => {
         console.error("Razorpay payment failed", response);
         setSubmitting(false);
-        toast({
-          title: "Payment failed",
-          description: "No amount was confirmed. Please retry from checkout.",
-          variant: "destructive",
-        });
+        navigate(`/checkout/failure${order.id ? `?orderId=${order.id}` : ""}`);
       });
       checkout.open();
     } catch (error) {

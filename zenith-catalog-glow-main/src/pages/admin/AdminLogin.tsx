@@ -227,7 +227,7 @@ const AdminLogin = () => {
                 alt="Gadget69"
                 className="h-10 w-auto"
                 decoding="async"
-                fetchPriority="high"
+                {...{ fetchpriority: "high" }}
               />
             </div>
             <p className="text-muted-foreground font-body text-sm">Admin Panel</p>

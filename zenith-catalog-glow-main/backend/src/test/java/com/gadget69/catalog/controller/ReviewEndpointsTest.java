@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,6 +36,8 @@ class ReviewEndpointsTest {
   @Test
   void publicReviewsReturnSeededEntriesInDescendingDateOrder() throws Exception {
     MvcResult result = mockMvc.perform(get("/api/reviews"))
+        .andExpect(handler().handlerType(PublicCatalogController.class))
+        .andExpect(handler().methodName("reviews"))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -48,6 +51,12 @@ class ReviewEndpointsTest {
   @Test
   void adminReviewCrudUpdatesAvatarAndPropagatesToPublicReviews() throws Exception {
     String token = loginAndExtractToken();
+
+    mockMvc.perform(get("/api/admin/reviews")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(handler().handlerType(AdminCatalogController.class))
+        .andExpect(handler().methodName("adminReviews"))
+        .andExpect(status().isOk());
 
     MvcResult createResult = mockMvc.perform(post("/api/admin/reviews")
             .header("Authorization", "Bearer " + token)
@@ -99,6 +108,8 @@ class ReviewEndpointsTest {
 
     MvcResult adminListResult = mockMvc.perform(get("/api/admin/reviews")
             .header("Authorization", "Bearer " + token))
+        .andExpect(handler().handlerType(AdminCatalogController.class))
+        .andExpect(handler().methodName("adminReviews"))
         .andExpect(status().isOk())
         .andReturn();
 

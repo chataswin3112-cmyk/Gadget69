@@ -1,4 +1,4 @@
-import { useEffect, type DependencyList } from "react";
+import { useEffect } from "react";
 
 const STAGGER_STEP_MS = 45;
 const STAGGER_MAX_MS = 180;
@@ -13,7 +13,9 @@ const clamp = (value: number, min: number, max: number) =>
  * Watches all homepage animation targets and reveals them once on entry.
  * Visible cards can also receive a subtle scroll-linked drift through CSS vars.
  */
-export function useScrollAnimations(dependencies: DependencyList = []) {
+export function useScrollAnimations(dependencies: ReadonlyArray<number> = []) {
+  const dependencyKey = dependencies.join(":");
+
   useEffect(() => {
     const sectionTargets = new Set<HTMLElement>();
     const cardTargets = new Set<HTMLElement>();
@@ -258,5 +260,5 @@ export function useScrollAnimations(dependencies: DependencyList = []) {
       sectionObserver.disconnect();
       cardObserver.disconnect();
     };
-  }, dependencies);
+  }, [dependencyKey]);
 }

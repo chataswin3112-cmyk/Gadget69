@@ -25,6 +25,19 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 12MB
+  # Mail — set APP_MAIL_ENABLED=true and below SMTP env vars to enable email notifications
+  mail:
+    host: ${APP_MAIL_HOST:smtp.gmail.com}
+    port: ${APP_MAIL_PORT:587}
+    username: ${APP_MAIL_USERNAME:}
+    password: ${APP_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: false
 
 app:
   upload-dir: ${APP_UPLOAD_DIR:./uploads}
@@ -48,3 +61,6 @@ app:
     webhook-secret: ${APP_RAZORPAY_WEBHOOK_SECRET:${RAZORPAY_WEBHOOK_SECRET:}}
     orders-api-url: ${APP_RAZORPAY_ORDERS_API_URL:${RAZORPAY_ORDERS_API_URL:https://api.razorpay.com/v1/orders}}
   allowed-origins: ${APP_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8080,http://127.0.0.1:8080}
+  mail:
+    enabled: ${APP_MAIL_ENABLED:false}
+    from: ${APP_MAIL_FROM:noreply@gadget69.in}

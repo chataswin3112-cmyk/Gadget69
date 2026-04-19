@@ -6,17 +6,21 @@ import com.gadget69.catalog.entity.Banner;
 import com.gadget69.catalog.entity.CommunityMedia;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductVariant;
 import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
+import com.gadget69.catalog.entity.VariantMedia;
 import com.gadget69.catalog.mapper.CatalogMapper;
 import com.gadget69.catalog.repository.BannerRepository;
 import com.gadget69.catalog.repository.CommunityMediaRepository;
 import com.gadget69.catalog.repository.CustomerOrderRepository;
 import com.gadget69.catalog.repository.ProductRepository;
+import com.gadget69.catalog.repository.ProductVariantRepository;
 import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
+import com.gadget69.catalog.repository.VariantMediaRepository;
 import com.gadget69.catalog.service.AuthTokenService;
 import com.gadget69.catalog.service.CatalogSyncService;
 import com.gadget69.catalog.service.CloudinaryCommunityVideoService;
@@ -33,6 +37,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,6 +68,8 @@ public class AdminCatalogController {
   private final CloudinaryCommunityVideoService cloudinaryCommunityVideoService;
   private final OtpService otpService;
   private final CatalogSyncService catalogSyncService;
+  private final ProductVariantRepository productVariantRepository;
+  private final VariantMediaRepository variantMediaRepository;
 
   @PostMapping("/login")
   public ApiDtos.AdminLoginResponse login(@RequestBody ApiDtos.AdminLoginRequest request) {
@@ -219,6 +226,7 @@ public class AdminCatalogController {
   }
 
   @GetMapping("/products")
+  @Transactional(readOnly = true)
   public List<ApiDtos.ProductResponse> adminProducts(HttpServletRequest httpRequest) {
     authTokenService.requireAdmin(httpRequest);
     return productRepository.findAllByOrderByDisplayOrderAscCreatedAtDesc().stream()
@@ -227,6 +235,7 @@ public class AdminCatalogController {
   }
 
   @PostMapping("/products")
+  @Transactional
   public ApiDtos.ProductResponse createProduct(HttpServletRequest httpRequest,
       @RequestBody ApiDtos.ProductPayload payload) {
     authTokenService.requireAdmin(httpRequest);
@@ -236,6 +245,7 @@ public class AdminCatalogController {
   }
 
   @PutMapping("/products/{id}")
+  @Transactional
   public ApiDtos.ProductResponse updateProduct(HttpServletRequest httpRequest, @PathVariable Long id,
       @RequestBody ApiDtos.ProductPayload payload) {
     authTokenService.requireAdmin(httpRequest);
@@ -383,6 +393,27 @@ public class AdminCatalogController {
     return customerOrderRepository.findAllByOrderByCreatedAtDesc().stream()
         .map(catalogMapper::toOrderResponse)
         .toList();
+  }
+
+  @PutMapping("/order/{id}/status")
+  public ApiDtos.OrderResponse updateOrderStatus(HttpServletRequest httpRequest,
+      @PathVariable Long id,
+      @RequestBody ApiDtos.UpdateOrderStatusRequest request) {
+    authTokenService.requireAdmin(httpRequest);
+
+    CustomerOrder order = customerOrderRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+    String newStatus = request.orderStatus();
+    java.util.Set<String> validStatuses =
+        java.util.Set.of("PLACED", "CONFIRMED", "SHIPPED", "DELIVERED");
+    if (newStatus == null || !validStatuses.contains(newStatus.toUpperCase())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid order status. Must be one of: PLACED, CONFIRMED, SHIPPED, DELIVERED");
+    }
+
+    order.setOrderStatus(newStatus.toUpperCase());
+    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
   }
 
   @PostMapping("/upload")
@@ -620,5 +651,170 @@ public class AdminCatalogController {
   }
 
   private record TopSellingStats(String productName, int unitsSold, BigDecimal revenue) {
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Variant Admin Endpoints
+  // ──────────────────────────────────────────────────────────────────────────────
+
+  @GetMapping("/products/{productId}/variants")
+  public List<ApiDtos.VariantResponse> listVariants(HttpServletRequest httpRequest,
+      @PathVariable Long productId) {
+    authTokenService.requireAdmin(httpRequest);
+    productRepository.findById(productId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+    return productVariantRepository.findByProductIdOrderByDisplayOrderAscIdAsc(productId).stream()
+        .map(catalogMapper::toVariantResponse)
+        .toList();
+  }
+
+  @PostMapping("/products/{productId}/variants")
+  public ApiDtos.VariantResponse createVariant(HttpServletRequest httpRequest,
+      @PathVariable Long productId,
+      @RequestBody ApiDtos.VariantPayload payload) {
+    authTokenService.requireAdmin(httpRequest);
+    Product product = productRepository.findById(productId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+    ProductVariant variant = new ProductVariant();
+    variant.setProduct(product);
+    applyVariant(variant, payload);
+
+    // If this is the first variant or marked default, ensure only one default
+    if (Boolean.TRUE.equals(variant.getIsDefault())) {
+      clearOtherDefaults(productId, null);
+    }
+    if (productVariantRepository.findByProductIdOrderByDisplayOrderAscIdAsc(productId).isEmpty()) {
+      variant.setIsDefault(true);
+    }
+
+    return catalogMapper.toVariantResponse(productVariantRepository.save(variant));
+  }
+
+  @PutMapping("/variants/{id}")
+  public ApiDtos.VariantResponse updateVariant(HttpServletRequest httpRequest,
+      @PathVariable Long id,
+      @RequestBody ApiDtos.VariantPayload payload) {
+    authTokenService.requireAdmin(httpRequest);
+    ProductVariant variant = productVariantRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Variant not found"));
+
+    applyVariant(variant, payload);
+
+    if (Boolean.TRUE.equals(variant.getIsDefault())) {
+      clearOtherDefaults(variant.getProduct().getId(), id);
+    }
+
+    return catalogMapper.toVariantResponse(productVariantRepository.save(variant));
+  }
+
+  @DeleteMapping("/variants/{id}")
+  public ResponseEntity<Void> deleteVariant(HttpServletRequest httpRequest,
+      @PathVariable Long id) {
+    authTokenService.requireAdmin(httpRequest);
+    ProductVariant variant = productVariantRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Variant not found"));
+    productVariantRepository.delete(variant);
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/variants/{id}/media")
+  public List<ApiDtos.VariantMediaResponse> listVariantMedia(HttpServletRequest httpRequest,
+      @PathVariable Long id) {
+    authTokenService.requireAdmin(httpRequest);
+    productVariantRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Variant not found"));
+    return variantMediaRepository.findByVariantIdOrderByDisplayOrderAscIdAsc(id).stream()
+        .map(catalogMapper::toVariantMediaResponse)
+        .toList();
+  }
+
+  @PostMapping("/variants/{id}/media")
+  public ApiDtos.VariantMediaResponse addVariantMedia(HttpServletRequest httpRequest,
+      @PathVariable Long id,
+      @RequestBody ApiDtos.VariantMediaPayload payload) {
+    authTokenService.requireAdmin(httpRequest);
+    ProductVariant variant = productVariantRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Variant not found"));
+
+    if (payload.mediaUrl() == null || payload.mediaUrl().isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Media URL is required");
+    }
+
+    String mediaType = (payload.mediaType() == null || payload.mediaType().isBlank())
+        ? "IMAGE" : payload.mediaType().toUpperCase();
+    if (!mediaType.equals("IMAGE") && !mediaType.equals("VIDEO")) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Media type must be IMAGE or VIDEO");
+    }
+
+    VariantMedia media = new VariantMedia();
+    media.setVariant(variant);
+    media.setMediaUrl(payload.mediaUrl().trim());
+    media.setMediaType(mediaType);
+    media.setDisplayOrder(payload.displayOrder() == null ? 0 : payload.displayOrder());
+    media.setIsPrimary(payload.isPrimary() == null ? false : payload.isPrimary());
+
+    // If isPrimary, clear others
+    if (Boolean.TRUE.equals(media.getIsPrimary())) {
+      variantMediaRepository.findByVariantIdOrderByDisplayOrderAscIdAsc(id).forEach(m -> {
+        m.setIsPrimary(false);
+        variantMediaRepository.save(m);
+      });
+    }
+
+    return catalogMapper.toVariantMediaResponse(variantMediaRepository.save(media));
+  }
+
+  @PutMapping("/variant-media/{id}/primary")
+  public ApiDtos.VariantMediaResponse setVariantMediaPrimary(HttpServletRequest httpRequest,
+      @PathVariable Long id) {
+    authTokenService.requireAdmin(httpRequest);
+    VariantMedia media = variantMediaRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+
+    // Clear other primaries for this variant
+    variantMediaRepository.findByVariantIdOrderByDisplayOrderAscIdAsc(media.getVariant().getId())
+        .forEach(m -> {
+          m.setIsPrimary(m.getId().equals(id));
+          variantMediaRepository.save(m);
+        });
+
+    media.setIsPrimary(true);
+    return catalogMapper.toVariantMediaResponse(variantMediaRepository.save(media));
+  }
+
+  @DeleteMapping("/variant-media/{id}")
+  public ResponseEntity<Void> deleteVariantMedia(HttpServletRequest httpRequest,
+      @PathVariable Long id) {
+    authTokenService.requireAdmin(httpRequest);
+    variantMediaRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+    variantMediaRepository.deleteById(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  private void applyVariant(ProductVariant variant, ApiDtos.VariantPayload payload) {
+    if (payload.colorName() == null || payload.colorName().isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Color name is required");
+    }
+    variant.setColorName(payload.colorName().trim());
+    variant.setHexCode(payload.hexCode() == null ? "#000000" : payload.hexCode().trim());
+    variant.setSize(blankToNull(payload.size()));
+    variant.setPrice(payload.price());
+    variant.setPriceAdjustment(payload.priceAdjustment() == null ? 0 : payload.priceAdjustment());
+    variant.setStock(payload.stock() == null ? 0 : payload.stock());
+    variant.setSku(blankToNull(payload.sku()));
+    variant.setIsDefault(payload.isDefault() == null ? false : payload.isDefault());
+    variant.setDisplayOrder(payload.displayOrder() == null ? 0 : payload.displayOrder());
+  }
+
+  private void clearOtherDefaults(Long productId, Long exceptVariantId) {
+    productVariantRepository.findByProductIdOrderByDisplayOrderAscIdAsc(productId).forEach(v -> {
+      if (!v.getId().equals(exceptVariantId)) {
+        v.setIsDefault(false);
+        productVariantRepository.save(v);
+      }
+    });
   }
 }
