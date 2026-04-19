@@ -1,5 +1,6 @@
 package com.gadget69.catalog.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,5 +33,12 @@ class CreateOrderRequestParsingTest {
             .content("{invalid"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Invalid JSON request body"));
+  }
+
+  @Test
+  void returnsMethodNotAllowedInsteadOfUnexpectedServerErrorForUnsupportedMethods() throws Exception {
+    mockMvc.perform(get("/api/create-order"))
+        .andExpect(status().isMethodNotAllowed())
+        .andExpect(jsonPath("$.message").value("Request method GET is not supported for this endpoint"));
   }
 }

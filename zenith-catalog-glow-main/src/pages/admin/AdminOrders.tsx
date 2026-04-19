@@ -10,7 +10,7 @@ import {
   updateAdminOrderDetails,
   updateAdminOrderStatus,
 } from "@/api/orderApi";
-import type { Order, Product } from "@/types";
+import type { Order, OrderFilters, Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -245,10 +245,20 @@ const AdminOrders = () => {
     [products]
   );
 
+  const serverFilters = useMemo<OrderFilters>(
+    () => ({
+      fromDate: filters.fromDate || undefined,
+      toDate: filters.toDate || undefined,
+      paymentStatus: filters.paymentStatus === "ALL" ? undefined : filters.paymentStatus,
+      orderStatus: filters.orderStatus === "ALL" ? undefined : filters.orderStatus,
+    }),
+    [filters]
+  );
+
   const loadOrders = useCallback(async () => {
     try {
       setError(null);
-      const data = await getAdminOrders();
+      const data = await getAdminOrders(serverFilters);
       setOrders(data.filter((order) => !order.isDeleted));
       setLastUpdated(new Date());
     } catch (loadError) {
@@ -256,7 +266,7 @@ const AdminOrders = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [serverFilters]);
 
   useEffect(() => {
     void loadOrders();
@@ -268,36 +278,8 @@ const AdminOrders = () => {
 
   const filteredOrders = useMemo(() => {
     return orders
-      .filter((order) => tabMatches(order, activeTab))
-      .filter((order) => {
-        const paymentStatus = normalizePaymentStatus(order.paymentStatus);
-        return filters.paymentStatus === "ALL"
-          ? true
-          : paymentStatus === filters.paymentStatus;
-      })
-      .filter((order) => {
-        const orderStatus = normalizeOrderStatus(order.orderStatus);
-        return filters.orderStatus === "ALL" ? true : orderStatus === filters.orderStatus;
-      })
-      .filter((order) => {
-        if (!filters.fromDate && !filters.toDate) {
-          return true;
-        }
-        if (!order.createdAt) {
-          return false;
-        }
-        const orderDate = new Date(order.createdAt);
-        const from = filters.fromDate ? new Date(`${filters.fromDate}T00:00:00`) : null;
-        const to = filters.toDate ? new Date(`${filters.toDate}T23:59:59`) : null;
-        if (from && orderDate < from) {
-          return false;
-        }
-        if (to && orderDate > to) {
-          return false;
-        }
-        return true;
-      });
-  }, [activeTab, filters, orders]);
+      .filter((order) => tabMatches(order, activeTab));
+  }, [activeTab, orders]);
 
   const summaryCards = useMemo(
     () =>

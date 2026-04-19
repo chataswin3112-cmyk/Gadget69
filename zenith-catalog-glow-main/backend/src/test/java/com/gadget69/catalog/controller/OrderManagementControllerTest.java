@@ -87,6 +87,13 @@ class OrderManagementControllerTest {
         .andExpect(jsonPath("$.orderStatus").value("CONFIRMED"))
         .andExpect(jsonPath("$.items[0].productName").value("Tracking Test Phone"));
 
+    mockMvc.perform(get("/api/orders")
+            .param("id", String.valueOf(orderId))
+            .param("phone", "+91 98765 43210"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(orderId))
+        .andExpect(jsonPath("$.items[0].productName").value("Tracking Test Phone"));
+
     mockMvc.perform(get("/api/admin/orders/{id}", orderId)
             .header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())

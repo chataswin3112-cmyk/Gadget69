@@ -33,7 +33,9 @@ public class LegacySchemaRepair implements ApplicationRunner {
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS razorpay_signature VARCHAR(512)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS last_razorpay_event_id VARCHAR(255)");
-    apply("UPDATE customer_orders SET customer_phone = phone WHERE (customer_phone IS NULL OR TRIM(customer_phone) = '') AND phone IS NOT NULL");
+    if (columnExists("customer_orders", "phone")) {
+      apply("UPDATE customer_orders SET customer_phone = phone WHERE (customer_phone IS NULL OR TRIM(customer_phone) = '') AND phone IS NOT NULL");
+    }
     apply("UPDATE customer_orders SET updated_at = created_at WHERE updated_at IS NULL");
     apply("UPDATE customer_orders SET is_deleted = FALSE WHERE is_deleted IS NULL");
     apply("UPDATE customer_orders SET currency = 'INR' WHERE currency IS NULL OR TRIM(currency) = ''");
@@ -64,6 +66,25 @@ public class LegacySchemaRepair implements ApplicationRunner {
       log.debug("Applied legacy schema repair: {}", sql);
     } catch (DataAccessException ex) {
       log.warn("Skipping legacy schema repair for unsupported SQL: {}", sql, ex);
+    }
+  }
+
+  private boolean columnExists(String tableName, String columnName) {
+    try {
+      Integer count = jdbcTemplate.queryForObject(
+          """
+              SELECT COUNT(*)
+              FROM information_schema.columns
+              WHERE UPPER(table_name) = UPPER(?)
+                AND UPPER(column_name) = UPPER(?)
+              """,
+          Integer.class,
+          tableName,
+          columnName);
+      return count != null && count > 0;
+    } catch (DataAccessException exception) {
+      log.debug("Could not inspect schema metadata for {}.{}", tableName, columnName, exception);
+      return false;
     }
   }
 }

@@ -137,11 +137,28 @@ public class PublicCatalogController {
     return createOrderInternal(request);
   }
 
+  @GetMapping("/orders")
+  @Transactional(readOnly = true)
+  public ApiDtos.OrderResponse getOrderByQuery(
+      HttpServletRequest request,
+      @RequestParam("id") Long id,
+      @RequestParam(value = "phone", required = false) String phone) {
+    return resolveOrderResponse(request, id, phone);
+  }
+
   @GetMapping("/orders/{id}")
+  @Transactional(readOnly = true)
   public ApiDtos.OrderResponse getOrderById(
       HttpServletRequest request,
       @PathVariable Long id,
       @RequestParam(value = "phone", required = false) String phone) {
+    return resolveOrderResponse(request, id, phone);
+  }
+
+  private ApiDtos.OrderResponse resolveOrderResponse(
+      HttpServletRequest request,
+      Long id,
+      String phone) {
     CustomerOrder order = customerOrderRepository.findByIdAndIsDeletedFalse(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 

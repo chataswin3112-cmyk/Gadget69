@@ -17,6 +17,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,8 +37,10 @@ public class OrderManagementController {
   private final CustomerOrderRepository customerOrderRepository;
   private final CatalogMapper catalogMapper;
   private final EmailNotificationService emailNotificationService;
+  private static final String NO_FILTER_SENTINEL = "__NO_FILTER__";
 
   @GetMapping
+  @Transactional(readOnly = true)
   public List<ApiDtos.OrderResponse> getAllOrders(
       HttpServletRequest request,
       @RequestParam(value = "orderStatus", required = false) String orderStatus,
@@ -54,16 +57,23 @@ public class OrderManagementController {
 
     Set<String> orderStatuses = parseStatuses(orderStatus, true);
     Set<String> paymentStatuses = parseStatuses(paymentStatus, false);
+    LocalDateTime fromCreatedAt = from == null ? null : from.atStartOfDay();
+    LocalDateTime toCreatedAtExclusive = to == null ? null : to.plusDays(1).atStartOfDay();
 
-    return customerOrderRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc().stream()
-        .filter(order -> matchesOrderStatus(order, orderStatuses))
-        .filter(order -> matchesPaymentStatus(order, paymentStatuses))
-        .filter(order -> matchesCreatedAt(order, from, to))
+    return customerOrderRepository.findAdminOrders(
+            queryValues(orderStatuses),
+            !orderStatuses.isEmpty(),
+            queryValues(paymentStatuses),
+            !paymentStatuses.isEmpty(),
+            fromCreatedAt,
+            toCreatedAtExclusive)
+        .stream()
         .map(catalogMapper::toOrderResponse)
         .toList();
   }
 
   @GetMapping("/{id}")
+  @Transactional(readOnly = true)
   public ApiDtos.OrderResponse getOrder(HttpServletRequest request, @PathVariable Long id) {
     authTokenService.requireAdmin(request);
     return catalogMapper.toOrderResponse(getActiveOrder(id));
@@ -213,34 +223,8 @@ public class OrderManagementController {
     }
   }
 
-  private boolean matchesOrderStatus(CustomerOrder order, Set<String> statuses) {
-    if (statuses.isEmpty()) {
-      return true;
-    }
-    return statuses.contains(OrderStateSupport.normalizeOrderStatus(order.getOrderStatus()));
-  }
-
-  private boolean matchesPaymentStatus(CustomerOrder order, Set<String> statuses) {
-    if (statuses.isEmpty()) {
-      return true;
-    }
-    return statuses.contains(OrderStateSupport.normalizePaymentStatus(order.getPaymentStatus()));
-  }
-
-  private boolean matchesCreatedAt(CustomerOrder order, LocalDate from, LocalDate to) {
-    LocalDateTime createdAt = order.getCreatedAt();
-    if (createdAt == null) {
-      return from == null && to == null;
-    }
-
-    LocalDate orderDate = createdAt.toLocalDate();
-    if (from != null && orderDate.isBefore(from)) {
-      return false;
-    }
-    if (to != null && orderDate.isAfter(to)) {
-      return false;
-    }
-    return true;
+  private Set<String> queryValues(Set<String> statuses) {
+    return statuses.isEmpty() ? Set.of(NO_FILTER_SENTINEL) : statuses;
   }
 
   private void sendStatusNotificationIfNeeded(CustomerOrder order) {
