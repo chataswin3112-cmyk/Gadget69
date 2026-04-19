@@ -1,5 +1,6 @@
 package com.gadget69.catalog.controller;
 
+import com.gadget69.catalog.config.InputSanitizer;
 import com.gadget69.catalog.dto.ApiDtos;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.mapper.CatalogMapper;
@@ -83,6 +84,49 @@ public class OrderManagementController {
     CustomerOrder saved = customerOrderRepository.save(order);
     sendStatusNotificationIfNeeded(saved);
     return catalogMapper.toOrderResponse(saved);
+  }
+
+  @PutMapping("/{id}/details")
+  public ApiDtos.OrderResponse updateOrderDetails(
+      HttpServletRequest request,
+      @PathVariable Long id,
+      @RequestBody ApiDtos.UpdateOrderDetailsRequest updateRequest) {
+    authTokenService.requireAdmin(request);
+
+    if (updateRequest == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Update payload is required");
+    }
+
+    String customerName = requiredValue(
+        InputSanitizer.sanitizeAndValidate(updateRequest.customerName(), "customerName"),
+        "Customer name is required");
+    InputSanitizer.validateCustomerName(customerName);
+
+    String phone = requiredValue(
+        InputSanitizer.sanitize(updateRequest.phone()), "Phone number is required");
+    InputSanitizer.validatePhone(phone);
+
+    String email = requiredValue(
+        InputSanitizer.sanitizeAndValidate(updateRequest.email(), "email"), "Email is required");
+    InputSanitizer.validateEmail(email);
+
+    String address = requiredValue(
+        InputSanitizer.sanitizeAndValidate(updateRequest.address(), "address"), "Address is required");
+    if (address.length() > 500) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Address is too long (max 500 chars)");
+    }
+
+    String pincode = requiredValue(
+        InputSanitizer.sanitize(updateRequest.pincode()), "Pincode is required");
+    InputSanitizer.validatePincode(pincode);
+
+    CustomerOrder order = getActiveOrder(id);
+    order.setCustomerName(customerName);
+    order.setPhone(phone);
+    order.setEmail(email.toLowerCase(java.util.Locale.ROOT));
+    order.setAddress(address);
+    order.setPincode(pincode);
+    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
   }
 
   @PutMapping("/{id}/cancel")
@@ -204,5 +248,12 @@ public class OrderManagementController {
     if (Set.of("SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED").contains(normalizedStatus)) {
       emailNotificationService.sendOrderStatusUpdate(order);
     }
+  }
+
+  private String requiredValue(String value, String message) {
+    if (value == null || value.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    }
+    return value.trim();
   }
 }

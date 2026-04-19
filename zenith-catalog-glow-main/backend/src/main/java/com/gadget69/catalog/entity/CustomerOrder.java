@@ -64,10 +64,10 @@ public class CustomerOrder {
   @Column(name = "amount_paise")
   private Integer amountPaise;
 
-  @Column(name = "payment_status", nullable = false)
+  @Column(name = "payment_status", nullable = false, columnDefinition = "varchar(255) default 'PENDING'")
   private String paymentStatus = "PENDING";
 
-  @Column(name = "order_status", nullable = false)
+  @Column(name = "order_status", nullable = false, columnDefinition = "varchar(255) default 'PENDING'")
   private String orderStatus = "PENDING";
 
   @Column(name = "razorpay_order_id")
@@ -88,7 +88,7 @@ public class CustomerOrder {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
-  @Column(name = "is_deleted", nullable = false)
+  @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
   private boolean isDeleted;
 
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

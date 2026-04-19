@@ -287,6 +287,14 @@ public final class ApiDtos {
 
   public record UpdateOrderStatusRequest(String orderStatus) {}
 
+  public record UpdateOrderDetailsRequest(
+      String customerName,
+      String phone,
+      String email,
+      String address,
+      String pincode
+  ) {}
+
   // ── Variant DTOs ────────────────────────────────────────────────────────────
 
   public record VariantMediaResponse(

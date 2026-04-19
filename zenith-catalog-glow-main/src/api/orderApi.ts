@@ -31,6 +31,11 @@ export const updateAdminOrderStatus = async (orderId: number, orderStatus: strin
   return res.data;
 };
 
+export const updateAdminOrderDetails = async (orderId: number, details: Partial<Order>): Promise<Order> => {
+  const res = await apiClient.put(`/admin/orders/${orderId}/details`, details);
+  return res.data;
+};
+
 export const cancelAdminOrder = async (orderId: number): Promise<Order> => {
   const res = await apiClient.put(`/admin/orders/${orderId}/cancel`);
   return res.data;

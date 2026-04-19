@@ -7,6 +7,7 @@ import {
   deleteAdminOrder,
   getAdminOrderById,
   getAdminOrders,
+  updateAdminOrderDetails,
   updateAdminOrderStatus,
 } from "@/api/orderApi";
 import type { Order, Product } from "@/types";
@@ -236,6 +237,8 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<Order>>({});
 
   const productLookup = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -328,6 +331,14 @@ const AdminOrders = () => {
     try {
       const order = await getAdminOrderById(orderId);
       setSelectedOrder(order);
+      setEditForm({
+        customerName: order.customerName,
+        phone: order.phone,
+        email: order.email,
+        address: order.address,
+        pincode: order.pincode,
+      });
+      setEditMode(false);
     } catch (viewError) {
       toast({
         title: "Unable to load order details",
@@ -358,6 +369,40 @@ const AdminOrders = () => {
       toast({
         title: "Failed to update status",
         description: getErrorMessage(statusError, "Please try again."),
+        variant: "destructive",
+      });
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const handleUpdateDetails = async () => {
+    if (!selectedOrder?.id) return;
+    
+    if (!editForm.customerName || !editForm.phone || !editForm.email || !editForm.address || !editForm.pincode) {
+      toast({
+        title: "Please fill all details",
+        description: "All customer and delivery details are mandatory.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const actionKey = `details-${selectedOrder.id}`;
+    setBusyAction(actionKey);
+    try {
+      const updated = await updateAdminOrderDetails(selectedOrder.id, editForm);
+      mergeOrder(updated);
+      setSelectedOrder(updated);
+      toast({
+        title: `Order #${selectedOrder.id} updated`,
+        description: "Order details have been successfully updated.",
+      });
+      setEditMode(false);
+    } catch (error) {
+      toast({
+        title: "Failed to update details",
+        description: getErrorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -800,23 +845,78 @@ const AdminOrders = () => {
               <div className="h-20 animate-pulse rounded-2xl bg-secondary/40" />
               <div className="h-20 animate-pulse rounded-2xl bg-secondary/40" />
             </div>
-          ) : selectedOrder ? (
             <div className="grid gap-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-bold">Order Details</h3>
+                {!editMode ? (
+                  <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
+                    Edit Details
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setEditMode(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => void handleUpdateDetails()}
+                      disabled={busyAction === `details-${selectedOrder.id}`}
+                    >
+                      {busyAction === `details-${selectedOrder.id}` ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div
                   data-tone="customer"
                   className="rounded-2xl border border-border/60 bg-secondary/20 p-4"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-3">
                     Customer
                   </p>
-                  <p className="mt-2 font-semibold text-foreground">
-                    {selectedOrder.customerName}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">{selectedOrder.phone}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {selectedOrder.email || "--"}
-                  </p>
+                  {!editMode ? (
+                    <>
+                      <p className="mt-2 font-semibold text-foreground">
+                        {selectedOrder.customerName}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">{selectedOrder.phone}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedOrder.email || "--"}
+                      </p>
+                    </>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-muted-foreground">Name</label>
+                        <input
+                          type="text"
+                          value={editForm.customerName || ""}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, customerName: e.target.value }))}
+                          className="w-full rounded-md border border-border bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">Phone</label>
+                        <input
+                          type="tel"
+                          value={editForm.phone || ""}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                          className="w-full rounded-md border border-border bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">Email</label>
+                        <input
+                          type="email"
+                          value={editForm.email || ""}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                          className="w-full rounded-md border border-border bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div
                   data-tone={getPaymentTone(selectedOrder.paymentStatus).tone}
@@ -853,7 +953,7 @@ const AdminOrders = () => {
                   getOrderTone(selectedOrder.orderStatus).surfaceClassName
                 )}
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-3">
                   Delivery
                 </p>
                 <p
@@ -865,10 +965,35 @@ const AdminOrders = () => {
                 >
                   {normalizeOrderStatus(selectedOrder.orderStatus)}
                 </p>
-                <p className="mt-3 text-sm text-muted-foreground">{selectedOrder.address}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Pincode: {selectedOrder.pincode}
-                </p>
+                {!editMode ? (
+                  <>
+                    <p className="mt-3 text-sm text-muted-foreground">{selectedOrder.address}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Pincode: {selectedOrder.pincode}
+                    </p>
+                  </>
+                ) : (
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <label className="text-xs text-muted-foreground">Address</label>
+                      <textarea
+                        value={editForm.address || ""}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                        rows={2}
+                        className="w-full resize-none rounded-md border border-border bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground">Pincode</label>
+                      <input
+                        type="text"
+                        value={editForm.pincode || ""}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, pincode: e.target.value }))}
+                        className="w-full rounded-md border border-border bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-2xl border border-border/60 bg-secondary/20 p-4">
