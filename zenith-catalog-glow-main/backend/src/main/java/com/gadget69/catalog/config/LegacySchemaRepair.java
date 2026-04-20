@@ -33,7 +33,8 @@ public class LegacySchemaRepair implements ApplicationRunner {
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS razorpay_signature VARCHAR(512)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS last_razorpay_event_id VARCHAR(255)");
-    if (columnExists("customer_orders", "phone")) {
+    boolean legacyPhoneColumnExists = columnExists("customer_orders", "phone");
+    if (legacyPhoneColumnExists) {
       apply("UPDATE customer_orders SET customer_phone = phone WHERE (customer_phone IS NULL OR TRIM(customer_phone) = '') AND phone IS NOT NULL");
     }
     apply("UPDATE customer_orders SET updated_at = created_at WHERE updated_at IS NULL");
@@ -53,6 +54,10 @@ public class LegacySchemaRepair implements ApplicationRunner {
     apply("ALTER TABLE customer_orders ALTER COLUMN updated_at SET NOT NULL");
     apply("ALTER TABLE customer_orders ALTER COLUMN is_deleted SET DEFAULT FALSE");
     apply("ALTER TABLE customer_orders ALTER COLUMN is_deleted SET NOT NULL");
+    if (legacyPhoneColumnExists) {
+      // Current JPA writes customer_phone only, so the stale legacy phone column must not remain NOT NULL.
+      apply("ALTER TABLE customer_orders DROP COLUMN IF EXISTS phone");
+    }
     apply("CREATE INDEX IF NOT EXISTS idx_customer_orders_created_at ON customer_orders (created_at)");
     apply("CREATE INDEX IF NOT EXISTS idx_customer_orders_customer_phone ON customer_orders (customer_phone)");
     apply("CREATE INDEX IF NOT EXISTS idx_customer_orders_order_status ON customer_orders (order_status)");

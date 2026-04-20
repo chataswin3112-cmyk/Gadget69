@@ -1,6 +1,7 @@
 package com.gadget69.catalog.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -67,6 +68,7 @@ class LegacySchemaRepairTest {
     assertTrue(columns.contains("IS_DELETED"));
     assertTrue(columns.contains("RAZORPAY_SIGNATURE"));
     assertTrue(columns.contains("LAST_RAZORPAY_EVENT_ID"));
+    assertFalse(columns.contains("PHONE"));
     assertEquals("INR", jdbcTemplate.queryForObject(
         "SELECT currency FROM customer_orders WHERE id = 1",
         String.class));
@@ -76,6 +78,16 @@ class LegacySchemaRepairTest {
     assertEquals("PENDING", jdbcTemplate.queryForObject(
         "SELECT order_status FROM customer_orders WHERE id = 1",
         String.class));
+
+    jdbcTemplate.update("""
+        INSERT INTO customer_orders (
+          customer_name, customer_phone, address, pincode, total_amount, currency, payment_status,
+          order_status, created_at, updated_at, is_deleted
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE)
+        """,
+        "Modern Checkout", "9988776655", "88 Lake Road", "560001", 1599.00, "INR", "PENDING", "PENDING");
+
+    assertEquals(2, jdbcTemplate.queryForObject("SELECT COUNT(*) FROM customer_orders", Integer.class));
   }
 
   @Test
