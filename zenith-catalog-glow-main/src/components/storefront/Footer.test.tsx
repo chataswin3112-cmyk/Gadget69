@@ -19,7 +19,8 @@ describe("Footer", () => {
         siteTitle: "Gadget69",
         footerText: "Premium electronics and smart gadgets for everyday use.",
         catalogueUrl: "https://cdn.example.com/catalogue.pdf",
-        facebookUrl: "https://facebook.com/gadget69",
+        whatsappNumber: "919361586278",
+        shopPhone: "9361586278",
         logoUrl: "https://cdn.example.com/custom-logo.png",
         announcementItems: [],
       },
@@ -36,8 +37,8 @@ describe("Footer", () => {
     expect(screen.getAllByAltText("Gadget 69")).toHaveLength(2);
     expect(screen.getAllByText("All Products").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/instagram/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByLabelText(/facebook/i).length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/whatsapp/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/93615 86278/).length).toBeGreaterThan(0);
 
     const customLogos = container.querySelectorAll('img[src="https://cdn.example.com/custom-logo.png"]');
     expect(customLogos).toHaveLength(2);

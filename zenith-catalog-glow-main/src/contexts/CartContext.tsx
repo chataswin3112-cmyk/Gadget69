@@ -1,88 +1,136 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { CartItem, Product } from "@/types";
-import { getEffectivePrice } from "@/lib/pricing";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { CartItem, Product, ProductVariant } from "@/types";
 import { useAdminData } from "@/contexts/AdminDataContext";
+import { getCartLineId, getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
+import { getVariantPrice } from "@/lib/pricing";
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, qty?: number) => void;
-  removeFromCart: (productId: number) => void;
-  updateQuantity: (productId: number, qty: number) => void;
+  addToCart: (product: Product, qty?: number, variant?: ProductVariant | null) => void;
+  removeFromCart: (lineId: string) => void;
+  updateQuantity: (lineId: string, qty: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalAmount: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
-
 const STORAGE_KEY = "mzflow_cart";
+
+const clampQuantity = (qty: number, maxStock?: number | null) =>
+  typeof maxStock === "number" && maxStock > 0 ? Math.min(qty, maxStock) : qty;
+
+const hydrateCartItem = (product: Product, variantId?: number): CartItem => {
+  const selectedVariant = product.variants?.find((variant) => variant.id === variantId);
+  const lineId = getCartLineId(product.id, selectedVariant?.id);
+  const mediaUrl = getPrimaryImageUrl(getVariantMedia(selectedVariant)) || getPrimaryImageUrl(getProductMedia(product));
+
+  return {
+    lineId,
+    product,
+    quantity: 1,
+    variantId: selectedVariant?.id,
+    selectedVariantId: selectedVariant?.id,
+    variantColor: selectedVariant?.colorName,
+    variantSize: selectedVariant?.size,
+    unitPrice: getVariantPrice(product, selectedVariant),
+    mediaUrl,
+  };
+};
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      return stored ? (JSON.parse(stored) as CartItem[]) : [];
     } catch {
       return [];
     }
   });
 
+  const { products, isLoading } = useAdminData();
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addToCart = useCallback((product: Product, qty = 1) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
+  const addToCart = useCallback((product: Product, qty = 1, variant?: ProductVariant | null) => {
+    const nextItem = hydrateCartItem(product, variant?.id);
+    const maxStock = variant?.stock ?? product.stockQuantity;
+
+    setItems((current) => {
+      const existing = current.find((item) => item.lineId === nextItem.lineId);
       if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id
-            ? { ...i, quantity: Math.min(i.quantity + qty, product.stockQuantity) }
-            : i
+        return current.map((item) =>
+          item.lineId === nextItem.lineId
+            ? { ...item, quantity: clampQuantity(item.quantity + qty, maxStock) }
+            : item
         );
       }
-      return [...prev, { product, quantity: qty }];
+      return [...current, { ...nextItem, quantity: clampQuantity(qty, maxStock) }];
     });
   }, []);
 
-  const removeFromCart = useCallback((productId: number) => {
-    setItems((prev) => prev.filter((i) => i.product.id !== productId));
+  const removeFromCart = useCallback((lineId: string) => {
+    setItems((current) => current.filter((item) => item.lineId !== lineId));
   }, []);
 
-  const updateQuantity = useCallback((productId: number, qty: number) => {
+  const updateQuantity = useCallback((lineId: string, qty: number) => {
     if (qty <= 0) {
-      setItems((prev) => prev.filter((i) => i.product.id !== productId));
+      setItems((current) => current.filter((item) => item.lineId !== lineId));
       return;
     }
-    setItems((prev) =>
-      prev.map((i) => (i.product.id === productId ? { ...i, quantity: qty } : i))
+
+    setItems((current) =>
+      current.map((item) => {
+        if (item.lineId !== lineId) {
+          return item;
+        }
+        const variant = item.variantId
+          ? item.product.variants?.find((candidate) => candidate.id === item.variantId)
+          : undefined;
+        const maxStock = variant?.stock ?? item.product.stockQuantity;
+        return { ...item, quantity: clampQuantity(qty, maxStock) };
+      })
     );
   }, []);
 
-  const { products, isLoading } = useAdminData();
-
   useEffect(() => {
-    if (!isLoading && items.length > 0) {
-      setItems((prev) => {
-        const validItems = prev.filter((item) =>
-          products.some((p) => p.id === item.product.id && p.status !== "INACTIVE")
-        );
-        if (validItems.length !== prev.length) {
-          console.warn("Removed unavailable or deleted products from cart");
-          return validItems;
-        }
-        return prev;
-      });
+    if (isLoading || items.length === 0) {
+      return;
     }
-  }, [products, isLoading, items.length]);
+
+    setItems((current) => {
+      const nextItems = current.flatMap((item) => {
+        const product = products.find((candidate) => candidate.id === item.product.id && candidate.status !== "INACTIVE");
+        if (!product) {
+          return [];
+        }
+
+        const selectedVariant = item.variantId
+          ? product.variants?.find((variant) => variant.id === item.variantId)
+          : undefined;
+        const rehydrated = hydrateCartItem(product, selectedVariant?.id);
+        return [
+          {
+            ...item,
+            ...rehydrated,
+            quantity: item.quantity,
+          },
+        ];
+      });
+
+      return JSON.stringify(current) === JSON.stringify(nextItems) ? current : nextItems;
+    });
+  }, [isLoading, items.length, products]);
 
   const clearCart = useCallback(() => setItems([]), []);
 
-  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
-  const totalAmount = items.reduce((sum, i) => {
-    const price = getEffectivePrice(i.product);
-    return sum + price * i.quantity;
-  }, 0);
+  const totalItems = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
+  const totalAmount = useMemo(
+    () => items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
+    [items]
+  );
 
   return (
     <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalAmount }}>
@@ -92,7 +140,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useCart = () => {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
-  return ctx;
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within CartProvider");
+  }
+  return context;
 };

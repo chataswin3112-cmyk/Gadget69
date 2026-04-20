@@ -50,11 +50,14 @@ public class StoreSettings {
   @Column(name = "instagram_url")
   private String instagramUrl;
 
-  @Column(name = "facebook_url")
-  private String facebookUrl;
-
   @Column(name = "whatsapp_number")
   private String whatsappNumber;
+
+  @Column(name = "shop_phone")
+  private String shopPhone;
+
+  @Column(name = "support_email")
+  private String supportEmail;
 
   @Column(name = "catalogue_url", length = 2000)
   private String catalogueUrl;

@@ -1,4 +1,4 @@
-import { Product } from "@/types";
+import { Product, ProductVariant } from "@/types";
 
 export type OfferStatus = "active" | "upcoming" | "expired" | "no-offer";
 
@@ -70,6 +70,21 @@ export const getEffectivePrice = (product: Product, referenceDate = new Date()) 
   isOfferActive(product, referenceDate) && typeof product.offerPrice === "number"
     ? product.offerPrice
     : product.price;
+
+export const getVariantPrice = (
+  product: Product,
+  variant?: ProductVariant | null,
+  referenceDate = new Date()
+) => {
+  const basePrice = getEffectivePrice(product, referenceDate);
+  if (!variant) {
+    return basePrice;
+  }
+  if (typeof variant.price === "number" && Number.isFinite(variant.price)) {
+    return variant.price;
+  }
+  return basePrice + (variant.priceAdjustment || 0);
+};
 
 export const getDisplayMrp = (product: Product, referenceDate = new Date()) => {
   if (typeof product.mrp === "number") {

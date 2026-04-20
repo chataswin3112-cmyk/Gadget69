@@ -1,6 +1,7 @@
 const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
 const DEFAULT_API_BASE_URL = "/api";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+const CLOUDINARY_HOST = "res.cloudinary.com";
 
 export const FALLBACK_IMAGE_SRC = "/placeholder.svg";
 
@@ -92,6 +93,39 @@ const isUnsafeAbsoluteMediaUrl = (candidateUrl: string, currentOrigin = resolveC
   }
 };
 
+const optimizeCloudinaryUrl = (candidateUrl: string) => {
+  try {
+    const parsed = new URL(candidateUrl);
+    if (parsed.hostname !== CLOUDINARY_HOST) {
+      return candidateUrl;
+    }
+
+    const segments = parsed.pathname.split("/");
+    const uploadIndex = segments.findIndex((segment, index) => index >= 2 && segment === "upload");
+    if (uploadIndex === -1) {
+      return candidateUrl;
+    }
+
+    const nextSegment = segments[uploadIndex + 1] || "";
+    const hasTransformations = nextSegment.includes(",") || nextSegment.includes("_");
+    if (hasTransformations) {
+      return candidateUrl;
+    }
+
+    const resourceType = segments[uploadIndex - 1];
+    const transformation =
+      resourceType === "video"
+        ? "f_auto,q_auto,vc_auto"
+        : "f_auto,q_auto,dpr_auto";
+
+    segments.splice(uploadIndex + 1, 0, transformation);
+    parsed.pathname = segments.join("/");
+    return parsed.toString();
+  } catch {
+    return candidateUrl;
+  }
+};
+
 export const resolveMediaUrl = (url?: string | null, currentOrigin = resolveCurrentOrigin()) => {
   if (!url) return "";
 
@@ -99,7 +133,10 @@ export const resolveMediaUrl = (url?: string | null, currentOrigin = resolveCurr
   if (!normalized) return "";
 
   if (/^(https?:|data:|blob:)/i.test(normalized)) {
-    return isUnsafeAbsoluteMediaUrl(normalized, currentOrigin) ? "" : normalized;
+    if (isUnsafeAbsoluteMediaUrl(normalized, currentOrigin)) {
+      return "";
+    }
+    return optimizeCloudinaryUrl(normalized);
   }
 
   if (normalized.startsWith("/uploads/")) {

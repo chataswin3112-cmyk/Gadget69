@@ -25,6 +25,10 @@ public class AppProperties {
     private String cloudName;
     private String apiKey;
     private String apiSecret;
+    private String productImageFolder = "gadget69/products/images";
+    private String productVideoFolder = "gadget69/products/videos";
+    private String variantImageFolder = "gadget69/variants/images";
+    private String variantVideoFolder = "gadget69/variants/videos";
     private String communityVideoFolder = "gadget69/community/videos";
     private boolean secure = true;
   }

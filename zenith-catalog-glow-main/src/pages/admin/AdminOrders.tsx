@@ -749,41 +749,45 @@ const AdminOrders = () => {
                           <td className="px-5 py-4 align-top">
                             <div className="flex flex-wrap gap-2">
                               <Button
-                                variant="outline"
                                 size="sm"
+                                title="View order details"
                                 onClick={() => void handleViewDetails(order.id)}
+                                className="bg-blue-600 text-white hover:bg-blue-700 border-0"
                               >
-                                <Eye className="mr-2 h-4 w-4" />
+                                <Eye className="mr-1.5 h-3.5 w-3.5" />
                                 View
                               </Button>
                               <Button
-                                variant="outline"
                                 size="sm"
+                                title="Cancel this order"
                                 disabled={
                                   busyAction === `cancel-${order.id}` ||
                                   normalizeOrderStatus(order.orderStatus) === "CANCELLED"
                                 }
                                 onClick={() => void handleCancelOrder(order)}
+                                className="bg-rose-600 text-white hover:bg-rose-700 border-0 disabled:opacity-50"
                               >
-                                <XCircle className="mr-2 h-4 w-4" />
+                                <XCircle className="mr-1.5 h-3.5 w-3.5" />
                                 Cancel
                               </Button>
                               <Button
-                                variant="outline"
                                 size="sm"
+                                title="Archive this order"
                                 disabled={busyAction === `archive-${order.id}`}
                                 onClick={() => void handleArchiveOrder(order)}
+                                className="bg-amber-500 text-white hover:bg-amber-600 border-0 disabled:opacity-50"
                               >
-                                <Archive className="mr-2 h-4 w-4" />
+                                <Archive className="mr-1.5 h-3.5 w-3.5" />
                                 Archive
                               </Button>
                               <Button
-                                variant="outline"
                                 size="sm"
+                                title="Permanently delete order"
                                 disabled={busyAction === `delete-${order.id}`}
                                 onClick={() => void handleDeleteOrder(order)}
+                                variant="destructive"
                               >
-                                <Trash2 className="mr-2 h-4 w-4" />
+                                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                                 Delete
                               </Button>
                             </div>

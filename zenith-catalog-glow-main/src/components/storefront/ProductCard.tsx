@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import MediaFrame from "./MediaFrame";
 import ColorSwatchSelector from "./ColorSwatchSelector";
-import { getDisplayMrp, getEffectivePrice } from "@/lib/pricing";
+import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
+import { getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
 
 interface ProductCardProps {
   product: Product;
@@ -34,15 +35,16 @@ const ProductCard = ({ product, animationPreset, className, drift }: ProductCard
     [variants, selectedVariantId]
   );
 
-  const displayImage = selectedVariant?.images?.[0]?.imageUrl || product.imageUrl;
-  const displayPrice = getEffectivePrice(product);
+  const displayImage =
+    getPrimaryImageUrl(getVariantMedia(selectedVariant)) || getPrimaryImageUrl(getProductMedia(product));
+  const displayPrice = getVariantPrice(product, selectedVariant);
   const mrp = getDisplayMrp(product);
   const discountPct =
     mrp && mrp > displayPrice ? Math.round(((mrp - displayPrice) / mrp) * 100) : null;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    addToCart(product);
+    addToCart(product, 1, selectedVariant);
     toast.success(`${product.name} added to cart`);
     window.dispatchEvent(new Event("open-cart-drawer"));
     setAddedFlash(true);

@@ -1,42 +1,57 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminVariantPanel from "@/components/admin/AdminVariantPanel";
+import ProductMediaManager from "@/components/admin/ProductMediaManager";
+import MediaImage from "@/components/ui/media-image";
 import { useAdminData } from "@/contexts/AdminDataContext";
+import { getErrorMessage } from "@/lib/api-error";
+import { getOfferStatus, getEffectivePrice, type OfferStatus } from "@/lib/pricing";
+import { getPrimaryImageUrl, getProductMedia } from "@/lib/catalog-media";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import MediaUploadField from "@/components/admin/MediaUploadField";
-import { getErrorMessage } from "@/lib/api-error";
-import MediaImage from "@/components/ui/media-image";
-import { Link } from "react-router-dom";
-import { getOfferStatus, type OfferStatus } from "@/lib/pricing";
 
-const emptyProduct: Partial<Product> = {
+const emptyProduct = (sectionId: number): Partial<Product> => ({
   name: "",
   description: "",
   price: 0,
   stockQuantity: 0,
-  sectionId: 1,
+  sectionId,
+  media: [],
   imageUrl: "",
   videoUrl: "",
   galleryImages: [],
   is_new_launch: false,
   is_best_seller: false,
   is_featured: false,
+  is_hero_featured: false,
   model_number: "",
   offer: false,
   offerPrice: undefined,
   mrp: undefined,
   createdAt: new Date().toISOString(),
   status: "ACTIVE",
-};
+  specifications: {},
+});
 
 const offerStatusLabel: Record<OfferStatus, string> = {
   active: "Active",
@@ -60,41 +75,59 @@ const AdminProducts = () => {
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const filtered = products.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase()) ||
-    product.sectionName?.toLowerCase().includes(search.toLowerCase())
+  const filteredProducts = useMemo(
+    () =>
+      products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(search.toLowerCase()) ||
+          product.sectionName?.toLowerCase().includes(search.toLowerCase())
+      ),
+    [products, search]
   );
 
   const openNew = () => {
     const firstSectionId = sections[0]?.id ?? 1;
-    setEditing({ ...emptyProduct, sectionId: firstSectionId });
+    setEditing(emptyProduct(firstSectionId));
     setIsNew(true);
   };
 
   const openEdit = (product: Product) => {
     setEditing({
       ...product,
+      media: getProductMedia(product),
+      specifications: product.specifications || {},
       galleryImages: product.galleryImages || [],
     });
     setIsNew(false);
   };
 
-  const save = async () => {
-    if (!editing?.name) {
-      toast.error("Name is required");
+  const saveProduct = async () => {
+    if (!editing?.name?.trim()) {
+      toast.error("Product name is required");
       return;
     }
 
     try {
       setSaving(true);
-      if (isNew) {
-        await addProduct(editing);
-        toast.success("Product added");
-      } else if (editing.id) {
-        await updateProduct(editing.id, editing);
-        toast.success("Product updated");
-      }
-      setEditing(null);
+      const payload: Partial<Product> = {
+        ...editing,
+        media: (editing.media || []).map((item, index) => ({
+          ...item,
+          displayOrder: index,
+        })),
+      };
+
+      const saved = isNew
+        ? await addProduct(payload)
+        : await updateProduct(editing.id!, payload);
+
+      setEditing({
+        ...saved,
+        media: getProductMedia(saved),
+        specifications: saved.specifications || {},
+      });
+      setIsNew(false);
+      toast.success(isNew ? "Product created. You can add variants now." : "Product updated");
     } catch (error) {
       toast.error(getErrorMessage(error, "Failed to save product"));
     } finally {
@@ -103,7 +136,9 @@ const AdminProducts = () => {
   };
 
   const confirmDelete = async () => {
-    if (deleteId === null) return;
+    if (deleteId === null) {
+      return;
+    }
 
     try {
       await deleteProduct(deleteId);
@@ -117,273 +152,392 @@ const AdminProducts = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="font-heading text-2xl font-bold">Products</h1>
-            <p className="text-muted-foreground font-body text-sm mt-1">{products.length} products</p>
+            <p className="mt-1 text-sm text-muted-foreground font-body">{products.length} products</p>
           </div>
           <div className="flex gap-3">
-            <Input placeholder="Search..." value={search} onChange={(event) => setSearch(event.target.value)} className="w-48" />
+            <Input
+              placeholder="Search products..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="w-52"
+            />
             <Button asChild variant="outline">
               <Link to="/admin/offers">Manage Offers</Link>
             </Button>
             <Button onClick={openNew} className="bg-accent text-accent-foreground hover:bg-accent/90">
-              <Plus className="h-4 w-4 mr-2" /> Add Product
+              <Plus className="mr-2 h-4 w-4" />
+              Add Product
             </Button>
           </div>
         </div>
 
-        <div className="bg-card rounded-xl shadow-premium overflow-hidden">
+        <div className="overflow-hidden rounded-xl bg-card shadow-premium">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border text-left">
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Image</th>
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Name</th>
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Category</th>
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Price</th>
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Offer</th>
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Stock</th>
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Badges</th>
-                  <th className="p-4 text-xs text-muted-foreground uppercase font-body">Actions</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Image</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Product</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Category</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Price</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Offer</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Stock</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Variants</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map((product) => (
-                  <tr key={product.id} className="hover:bg-muted/30">
-                    <td className="p-4">
-                      <MediaImage src={product.imageUrl} alt={product.name} className="w-10 h-10 rounded-md object-contain bg-secondary/30" />
-                    </td>
-                    <td className="p-4">
-                      <p className="font-medium font-body text-sm">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">{product.model_number}</p>
-                    </td>
-                    <td className="p-4 text-sm font-body">{product.sectionName}</td>
-                    <td className="p-4 text-sm font-bold font-body">Rs. {product.price.toLocaleString()}</td>
-                    <td className="p-4">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${offerStatusClassName[getOfferStatus(product)]}`}>
-                        {offerStatusLabel[getOfferStatus(product)]}
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm font-body">{product.stockQuantity}</td>
-                    <td className="p-4">
-                      <div className="flex gap-1 flex-wrap">
-                        {product.is_new_launch && <span className="px-2 py-0.5 text-[10px] bg-accent/20 text-accent rounded-full">New</span>}
-                        {product.is_best_seller && <span className="px-2 py-0.5 text-[10px] bg-rose/20 text-rose-foreground rounded-full">Best</span>}
-                        {product.is_featured && <span className="px-2 py-0.5 text-[10px] bg-secondary text-foreground rounded-full">Featured</span>}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => openEdit(product)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(product.id)} className="text-destructive">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {!filtered.length && !isLoading && (
+                {filteredProducts.map((product) => {
+                  const displayImage = getPrimaryImageUrl(getProductMedia(product)) || product.imageUrl;
+                  const variantsCount = product.variants?.length || 0;
+
+                  return (
+                    <tr key={product.id} className="hover:bg-muted/20">
+                      <td className="p-4">
+                        <MediaImage
+                          src={displayImage}
+                          alt={product.name}
+                          className="h-12 w-12 rounded-xl bg-secondary/30 object-cover"
+                        />
+                      </td>
+                      <td className="p-4">
+                        <p className="text-sm font-medium font-body">{product.name}</p>
+                        <p className="text-xs text-muted-foreground">{product.model_number || "No model number"}</p>
+                      </td>
+                      <td className="p-4 text-sm font-body">{product.sectionName}</td>
+                      <td className="p-4 text-sm font-semibold font-body">
+                        Rs. {getEffectivePrice(product).toLocaleString()}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${offerStatusClassName[getOfferStatus(product)]}`}
+                        >
+                          {offerStatusLabel[getOfferStatus(product)]}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm font-body">{product.stockQuantity}</td>
+                      <td className="p-4 text-sm font-body">{variantsCount}</td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => openEdit(product)}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive"
+                            onClick={() => setDeleteId(product.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!filteredProducts.length && !isLoading ? (
                   <tr>
                     <td colSpan={8} className="p-8 text-center text-sm text-muted-foreground font-body">
                       No products found.
                     </td>
                   </tr>
-                )}
+                ) : null}
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <Dialog open={!!editing} onOpenChange={() => setEditing(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <Dialog open={Boolean(editing)} onOpenChange={(open) => (!open ? setEditing(null) : undefined)}>
+        <DialogContent className="max-h-[92vh] max-w-6xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading">{isNew ? "Add Product" : "Edit Product"}</DialogTitle>
+            <DialogTitle className="font-heading">
+              {isNew ? "Create Product" : `Edit ${editing?.name || "Product"}`}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2 col-span-2">
-                <Label className="font-body">Name</Label>
-                <Input value={editing?.name || ""} onChange={(event) => setEditing((prev) => prev ? { ...prev, name: event.target.value } : prev)} />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body">Model Number</Label>
-                <Input value={editing?.model_number || ""} onChange={(event) => setEditing((prev) => prev ? { ...prev, model_number: event.target.value } : prev)} />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body">Category</Label>
-                <Select value={String(editing?.sectionId || sections[0]?.id || 1)} onValueChange={(value) => setEditing((prev) => prev ? { ...prev, sectionId: parseInt(value, 10) } : prev)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {sections.map((section) => (
-                      <SelectItem key={section.id} value={String(section.id)}>{section.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body">Price</Label>
-                <Input type="number" value={editing?.price || 0} onChange={(event) => setEditing((prev) => prev ? { ...prev, price: parseFloat(event.target.value) || 0 } : prev)} />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body">MRP</Label>
-                <Input type="number" value={editing?.mrp || ""} onChange={(event) => setEditing((prev) => prev ? { ...prev, mrp: parseFloat(event.target.value) || undefined } : prev)} />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body">Stock</Label>
-                <Input type="number" value={editing?.stockQuantity || 0} onChange={(event) => setEditing((prev) => prev ? { ...prev, stockQuantity: parseInt(event.target.value, 10) || 0 } : prev)} />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body">Display Order</Label>
-                <Input type="number" value={editing?.display_order || 0} onChange={(event) => setEditing((prev) => prev ? { ...prev, display_order: parseInt(event.target.value, 10) || 0 } : prev)} />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body">Status</Label>
-                <Select value={editing?.status || "ACTIVE"} onValueChange={(value) => setEditing((prev) => prev ? { ...prev, status: value } : prev)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="DRAFT">Draft</SelectItem>
-                    <SelectItem value="ARCHIVED">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2 col-span-2">
-                <Label className="font-body">Offers</Label>
-                <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground font-body">
-                  Scheduled offers are managed from the Offers page.
-                </div>
-              </div>
-              <div className="space-y-2 col-span-2">
-                <MediaUploadField
-                  label="Primary Image"
-                  value={editing?.imageUrl}
-                  accept="image/*"
-                  placeholder="Paste image URL or upload one"
-                  onChange={(value) => setEditing((prev) => prev ? { ...prev, imageUrl: value } : prev)}
-                />
-              </div>
-              <div className="space-y-2 col-span-2">
-                <MediaUploadField
-                  label="Product Video"
-                  value={editing?.videoUrl}
-                  accept="video/*"
-                  placeholder="Paste video URL or upload one"
-                  onChange={(value) => setEditing((prev) => prev ? { ...prev, videoUrl: value } : prev)}
-                />
-              </div>
-              <div className="space-y-2 col-span-2">
-                <Label className="font-body">Gallery Images</Label>
-                <Textarea
-                  rows={4}
-                  value={(editing?.galleryImages || []).join("\n")}
-                  onChange={(event) =>
-                    setEditing((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            galleryImages: event.target.value
-                              .split("\n")
-                              .map((item) => item.trim())
-                              .filter(Boolean),
-                          }
-                        : prev
-                    )
-                  }
-                  placeholder="One image URL per line"
-                />
-              </div>
-              <div className="space-y-4 col-span-2">
-                <Label className="font-body">Specifications (Optional)</Label>
-                <div className="space-y-2">
-                  {Object.entries(editing?.specifications || {}).map(([key, value], index) => (
-                    <div key={index} className="flex gap-2 items-center">
-                      <Input
-                        placeholder="e.g. Processor"
-                        value={key}
-                        className="w-1/3"
-                        onChange={(e) => {
-                          const newSpecs = { ...(editing?.specifications || {}) };
-                          const entries = Object.entries(newSpecs);
-                          const newKey = e.target.value;
-                          const oldVal = entries[index][1];
-                          // To preserve order, rebuild object
-                          const updatedSpecs: Record<string, string> = {};
-                          entries.forEach(([k, v], i) => {
-                            if (i === index) updatedSpecs[newKey] = oldVal;
-                            else updatedSpecs[k] = v;
-                          });
-                          setEditing((prev) => prev ? { ...prev, specifications: updatedSpecs } : prev);
-                        }}
-                      />
-                      <Input
-                        placeholder="e.g. Apple M3 Pro"
-                        value={value}
-                        className="flex-1"
-                        onChange={(e) => {
-                          const newSpecs = { ...(editing?.specifications || {}) };
-                          const entries = Object.entries(newSpecs);
-                          entries[index][1] = e.target.value;
-                          setEditing((prev) => prev ? { ...prev, specifications: Object.fromEntries(entries) } : prev);
-                        }}
-                      />
+
+          {editing ? (
+            <Tabs defaultValue="details" className="space-y-6">
+              <TabsList className="h-auto flex-wrap justify-start rounded-2xl bg-secondary/40 p-1">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="media">Media</TabsTrigger>
+                <TabsTrigger value="variants">Variants</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="font-body">Product Name</Label>
+                    <Input
+                      value={editing.name || ""}
+                      onChange={(event) =>
+                        setEditing((current) => (current ? { ...current, name: event.target.value } : current))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Model Number</Label>
+                    <Input
+                      value={editing.model_number || ""}
+                      onChange={(event) =>
+                        setEditing((current) =>
+                          current ? { ...current, model_number: event.target.value } : current
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Category</Label>
+                    <Select
+                      value={String(editing.sectionId || sections[0]?.id || 1)}
+                      onValueChange={(value) =>
+                        setEditing((current) =>
+                          current ? { ...current, sectionId: Number.parseInt(value, 10) } : current
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sections.map((section) => (
+                          <SelectItem key={section.id} value={String(section.id)}>
+                            {section.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Base Price</Label>
+                    <Input
+                      type="number"
+                      value={editing.price || 0}
+                      onChange={(event) =>
+                        setEditing((current) =>
+                          current ? { ...current, price: Number.parseFloat(event.target.value) || 0 } : current
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">MRP</Label>
+                    <Input
+                      type="number"
+                      value={editing.mrp || ""}
+                      onChange={(event) =>
+                        setEditing((current) =>
+                          current
+                            ? {
+                                ...current,
+                                mrp: event.target.value
+                                  ? Number.parseFloat(event.target.value)
+                                  : undefined,
+                              }
+                            : current
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Stock Quantity</Label>
+                    <Input
+                      type="number"
+                      value={editing.stockQuantity || 0}
+                      onChange={(event) =>
+                        setEditing((current) =>
+                          current
+                            ? { ...current, stockQuantity: Number.parseInt(event.target.value, 10) || 0 }
+                            : current
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Display Order</Label>
+                    <Input
+                      type="number"
+                      value={editing.display_order || 0}
+                      onChange={(event) =>
+                        setEditing((current) =>
+                          current
+                            ? { ...current, display_order: Number.parseInt(event.target.value, 10) || 0 }
+                            : current
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Status</Label>
+                    <Select
+                      value={editing.status || "ACTIVE"}
+                      onValueChange={(value) =>
+                        setEditing((current) => (current ? { ...current, status: value } : current))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">Active</SelectItem>
+                        <SelectItem value="DRAFT">Draft</SelectItem>
+                        <SelectItem value="ARCHIVED">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="font-body">Description</Label>
+                    <Textarea
+                      rows={5}
+                      value={editing.description || ""}
+                      onChange={(event) =>
+                        setEditing((current) =>
+                          current ? { ...current, description: event.target.value } : current
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-3 md:col-span-2">
+                    <Label className="font-body">Specifications</Label>
+                    <div className="space-y-2">
+                      {Object.entries(editing.specifications || {}).map(([key, specValue], index, entries) => (
+                        <div key={`${key}-${index}`} className="flex gap-2">
+                          <Input
+                            value={key}
+                            placeholder="Key"
+                            onChange={(event) => {
+                              const nextEntries = [...entries];
+                              nextEntries[index] = [event.target.value, specValue];
+                              setEditing((current) =>
+                                current
+                                  ? { ...current, specifications: Object.fromEntries(nextEntries) }
+                                  : current
+                              );
+                            }}
+                          />
+                          <Input
+                            value={specValue}
+                            placeholder="Value"
+                            onChange={(event) => {
+                              const nextEntries = [...entries];
+                              nextEntries[index] = [key, event.target.value];
+                              setEditing((current) =>
+                                current
+                                  ? { ...current, specifications: Object.fromEntries(nextEntries) }
+                                  : current
+                              );
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive"
+                            onClick={() => {
+                              const nextEntries = entries.filter((_, entryIndex) => entryIndex !== index);
+                              setEditing((current) =>
+                                current
+                                  ? { ...current, specifications: Object.fromEntries(nextEntries) }
+                                  : current
+                              );
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive h-10 w-10 shrink-0"
-                        onClick={() => {
-                          const newSpecs = { ...(editing?.specifications || {}) };
-                          const currentKey = Object.keys(newSpecs)[index];
-                          delete newSpecs[currentKey];
-                          setEditing((prev) => prev ? { ...prev, specifications: newSpecs } : prev);
-                        }}
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          setEditing((current) =>
+                            current
+                              ? {
+                                  ...current,
+                                  specifications: {
+                                    ...(current.specifications || {}),
+                                    [`Specification ${Object.keys(current.specifications || {}).length + 1}`]: "",
+                                  },
+                                }
+                              : current
+                          )
+                        }
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Specification
                       </Button>
                     </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-2"
-                    onClick={() => {
-                      const newSpecs = { ...(editing?.specifications || {}) };
-                      const newKey = `Specification ${Object.keys(newSpecs).length + 1}`;
-                      newSpecs[newKey] = "";
-                      setEditing((prev) => prev ? { ...prev, specifications: newSpecs } : prev);
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" /> Add Specification
-                  </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2 col-span-2">
-                <Label className="font-body">Description</Label>
-                <Textarea value={editing?.description || ""} onChange={(event) => setEditing((prev) => prev ? { ...prev, description: event.target.value } : prev)} rows={4} />
-              </div>
-            </div>
-            <div className="flex items-center gap-6 flex-wrap">
-              <div className="flex items-center gap-2">
-                <Switch checked={!!editing?.is_new_launch} onCheckedChange={(value) => setEditing((prev) => prev ? { ...prev, is_new_launch: value } : prev)} />
-                <Label className="font-body text-sm">New Launch</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={!!editing?.is_best_seller} onCheckedChange={(value) => setEditing((prev) => prev ? { ...prev, is_best_seller: value } : prev)} />
-                <Label className="font-body text-sm">Bestseller</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={!!editing?.is_featured} onCheckedChange={(value) => setEditing((prev) => prev ? { ...prev, is_featured: value } : prev)} />
-                <Label className="font-body text-sm">Featured</Label>
-              </div>
-            </div>
-          </div>
+
+                <div className="flex flex-wrap gap-6">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={Boolean(editing.is_new_launch)}
+                      onCheckedChange={(value) =>
+                        setEditing((current) => (current ? { ...current, is_new_launch: value } : current))
+                      }
+                    />
+                    <Label className="font-body text-sm">New Launch</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={Boolean(editing.is_best_seller)}
+                      onCheckedChange={(value) =>
+                        setEditing((current) => (current ? { ...current, is_best_seller: value } : current))
+                      }
+                    />
+                    <Label className="font-body text-sm">Best Seller</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={Boolean(editing.is_featured)}
+                      onCheckedChange={(value) =>
+                        setEditing((current) => (current ? { ...current, is_featured: value } : current))
+                      }
+                    />
+                    <Label className="font-body text-sm">Featured</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={Boolean(editing.is_hero_featured)}
+                      onCheckedChange={(value) =>
+                        setEditing((current) => (current ? { ...current, is_hero_featured: value } : current))
+                      }
+                    />
+                    <Label className="font-body text-sm">Hero Feature</Label>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="media">
+                <ProductMediaManager
+                  value={editing.media || []}
+                  onChange={(media) => setEditing((current) => (current ? { ...current, media } : current))}
+                />
+              </TabsContent>
+
+              <TabsContent value="variants">
+                {editing.id ? (
+                  <AdminVariantPanel productId={editing.id} />
+                ) : (
+                  <div className="rounded-2xl border border-border bg-card/40 p-6 text-sm text-muted-foreground">
+                    Save this product first, then add color variants, pricing, stock, and per-variant media here.
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          ) : null}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button onClick={save} disabled={saving} className="bg-accent text-accent-foreground hover:bg-accent/90">
-              {saving ? "Saving..." : "Save"}
+            <Button variant="outline" onClick={() => setEditing(null)}>
+              Close
+            </Button>
+            <Button onClick={saveProduct} disabled={saving} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              {saving ? "Saving..." : isNew ? "Create Product" : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -393,11 +547,15 @@ const AdminProducts = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Product</AlertDialogTitle>
-            <AlertDialogDescription>This will permanently delete this product.</AlertDialogDescription>
+            <AlertDialogDescription>
+              This permanently removes the product and its variants.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

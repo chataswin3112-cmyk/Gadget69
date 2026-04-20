@@ -4,6 +4,7 @@ import type { Order } from "@/types";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
+import { describeVariant } from "@/lib/catalog-media";
 
 const LAST_ORDER_STORAGE_KEY = "gadget69:last-order";
 
@@ -32,8 +33,14 @@ const CheckoutSuccess = () => {
 
   const productSummary =
     order?.items?.length === 1
-      ? order.items[0].productName
-      : order?.items?.map((item) => item.productName).join(", ");
+      ? describeVariant(order.items[0].variantColor, order.items[0].variantSize)
+        ? `${order.items[0].productName} (${describeVariant(order.items[0].variantColor, order.items[0].variantSize)})`
+        : order.items[0].productName
+      : order?.items?.map((item) =>
+          describeVariant(item.variantColor, item.variantSize)
+            ? `${item.productName} (${describeVariant(item.variantColor, item.variantSize)})`
+            : item.productName
+        ).join(", ");
 
   const quantitySummary = order?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 

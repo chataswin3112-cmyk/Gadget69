@@ -1,5 +1,11 @@
 import apiClient from "./client";
-import { Product, ProductVariant, VariantMedia } from "@/types";
+import {
+  CatalogMediaUploadSignature,
+  Product,
+  ProductMedia,
+  ProductVariant,
+  VariantMedia,
+} from "@/types";
 
 export const getProducts = async (): Promise<Product[]> => {
   const res = await apiClient.get("/products");
@@ -45,6 +51,86 @@ export const uploadFile = async (file: File): Promise<string> => {
   return res.data.url;
 };
 
+export const getCatalogMediaUploadSignature = async (data: {
+  fileName: string;
+  contentType: string;
+  fileSize: number;
+  target: "PRODUCT" | "VARIANT";
+}): Promise<CatalogMediaUploadSignature> => {
+  const res = await apiClient.post("/admin/catalog-media/upload-signature", data);
+  return res.data;
+};
+
+export const uploadCatalogMediaFile = async (
+  file: File,
+  target: "PRODUCT" | "VARIANT"
+): Promise<{
+  secureUrl: string;
+  mediaType: "IMAGE" | "VIDEO";
+  publicId?: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+}> => {
+  const signature = await getCatalogMediaUploadSignature({
+    fileName: file.name,
+    contentType: file.type,
+    fileSize: file.size,
+    target,
+  });
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("api_key", signature.apiKey);
+  formData.append("timestamp", String(signature.timestamp));
+  formData.append("signature", signature.signature);
+  formData.append("folder", signature.folder);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+  const payload = await response.json();
+
+  if (!response.ok || !payload.secure_url) {
+    throw new Error(payload?.error?.message || "Upload failed");
+  }
+
+  return {
+    secureUrl: payload.secure_url as string,
+    mediaType: signature.resourceType === "video" ? "VIDEO" : "IMAGE",
+    publicId: payload.public_id as string | undefined,
+    width: payload.width as number | undefined,
+    height: payload.height as number | undefined,
+    duration: payload.duration as number | undefined,
+  };
+};
+
+export const getProductMedia = async (productId: number): Promise<ProductMedia[]> => {
+  const res = await apiClient.get(`/admin/products/${productId}/media`);
+  return res.data;
+};
+
+export const addProductMedia = async (
+  productId: number,
+  data: Omit<ProductMedia, "id" | "productId">
+): Promise<ProductMedia> => {
+  const res = await apiClient.post(`/admin/products/${productId}/media`, data);
+  return res.data;
+};
+
+export const setProductMediaPrimary = async (mediaId: number): Promise<ProductMedia> => {
+  const res = await apiClient.put(`/admin/product-media/${mediaId}/primary`, {});
+  return res.data;
+};
+
+export const deleteProductMedia = async (mediaId: number): Promise<void> => {
+  await apiClient.delete(`/admin/product-media/${mediaId}`);
+};
+
 // ── Admin Variant APIs ───────────────────────────────────────────────────────
 
 export const getProductVariants = async (productId: number): Promise<ProductVariant[]> => {
@@ -79,7 +165,13 @@ export const getVariantMedia = async (variantId: number): Promise<VariantMedia[]
 
 export const addVariantMedia = async (
   variantId: number,
-  data: { mediaUrl: string; mediaType: "IMAGE" | "VIDEO"; displayOrder?: number; isPrimary?: boolean }
+  data: {
+    mediaUrl: string;
+    mediaType: "IMAGE" | "VIDEO";
+    mediaRole: "MAIN" | "SIDE" | "BACK" | "ADDITIONAL";
+    displayOrder?: number;
+    isPrimary?: boolean;
+  }
 ): Promise<VariantMedia> => {
   const res = await apiClient.post(`/admin/variants/${variantId}/media`, data);
   return res.data;

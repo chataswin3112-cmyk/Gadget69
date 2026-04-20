@@ -38,6 +38,9 @@ public class VariantMedia {
   @Column(name = "media_type", nullable = false, length = 10)
   private String mediaType = "IMAGE";
 
+  @Column(name = "media_role", nullable = false, length = 20)
+  private String mediaRole = "ADDITIONAL";
+
   @Column(name = "display_order", nullable = false)
   private Integer displayOrder = 0;
 

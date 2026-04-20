@@ -361,15 +361,6 @@ const AdminSettings = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-body">Facebook URL</Label>
-              <Input
-                value={form.facebookUrl || ""}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, facebookUrl: event.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
               <Label className="font-body">WhatsApp Number</Label>
               <Input
                 value={form.whatsappNumber || ""}
@@ -380,6 +371,24 @@ const AdminSettings = () => {
               <p className="font-body text-xs text-muted-foreground">
                 This saved number is also used for admin password-reset OTP delivery.
               </p>
+            </div>
+            <div className="space-y-2">
+              <Label className="font-body">Shop Phone</Label>
+              <Input
+                value={form.shopPhone || ""}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, shopPhone: event.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="font-body">Support Email</Label>
+              <Input
+                value={form.supportEmail || ""}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, supportEmail: event.target.value }))
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label className="font-body">Contact URL</Label>

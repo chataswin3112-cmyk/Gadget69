@@ -2,14 +2,19 @@ package com.gadget69.catalog.service;
 
 import com.gadget69.catalog.entity.AdminUser;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductMedia;
 import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.StoreSettings;
 import com.gadget69.catalog.repository.AdminUserRepository;
+import com.gadget69.catalog.repository.ProductMediaRepository;
 import com.gadget69.catalog.repository.ProductRepository;
+import com.gadget69.catalog.repository.ProductVariantRepository;
 import com.gadget69.catalog.repository.ReviewRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
+import com.gadget69.catalog.repository.VariantMediaRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -18,6 +23,8 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +37,9 @@ public class SeedDataService implements ApplicationRunner {
   private final AdminUserRepository adminUserRepository;
   private final SectionRepository sectionRepository;
   private final ProductRepository productRepository;
+  private final ProductMediaRepository productMediaRepository;
+  private final ProductVariantRepository productVariantRepository;
+  private final VariantMediaRepository variantMediaRepository;
   private final ReviewRepository reviewRepository;
   private final StoreSettingsRepository storeSettingsRepository;
   private final AuthTokenService authTokenService;
@@ -37,6 +47,7 @@ public class SeedDataService implements ApplicationRunner {
   private final JdbcTemplate jdbcTemplate;
 
   @Override
+  @Transactional
   public void run(ApplicationArguments args) {
     ensureAdminUserTokenVersionColumn();
     seedAdmin();
@@ -44,6 +55,10 @@ public class SeedDataService implements ApplicationRunner {
     seedSettings();
     seedReviews();
     backfillLegacyOfferSchedules();
+    backfillStoreSettingsContacts();
+    backfillProductMedia();
+    backfillVariantMediaRoles();
+    dropLegacyFacebookColumn();
   }
 
   private void ensureAdminUserTokenVersionColumn() {
@@ -96,8 +111,9 @@ public class SeedDataService implements ApplicationRunner {
         "Support available on WhatsApp"
     ));
     settings.setInstagramUrl("https://instagram.com");
-    settings.setFacebookUrl("https://facebook.com");
-    settings.setWhatsappNumber("919876543210");
+    settings.setWhatsappNumber("919361586278");
+    settings.setShopPhone("9361586278");
+    settings.setSupportEmail("natrajganesh2000@gmail.com");
     settings.setCatalogueUrl("#");
     settings.setContactUrl("/contact");
     storeSettingsRepository.save(settings);
@@ -150,6 +166,101 @@ public class SeedDataService implements ApplicationRunner {
 
     if (!productsToBackfill.isEmpty()) {
       productRepository.saveAll(productsToBackfill);
+    }
+  }
+
+  private void backfillStoreSettingsContacts() {
+    storeSettingsRepository.findTopByOrderByIdAsc().ifPresent(settings -> {
+      boolean updated = false;
+      if (settings.getWhatsappNumber() == null || settings.getWhatsappNumber().isBlank()) {
+        settings.setWhatsappNumber("919361586278");
+        updated = true;
+      }
+      if (settings.getShopPhone() == null || settings.getShopPhone().isBlank()) {
+        settings.setShopPhone("9361586278");
+        updated = true;
+      }
+      if (settings.getSupportEmail() == null || settings.getSupportEmail().isBlank()) {
+        settings.setSupportEmail("natrajganesh2000@gmail.com");
+        updated = true;
+      }
+      if (updated) {
+        storeSettingsRepository.save(settings);
+      }
+    });
+  }
+
+  private void backfillProductMedia() {
+    List<Product> productsToUpdate = new ArrayList<>();
+    for (Product product : productRepository.findAll()) {
+      if (!productMediaRepository.findByProductIdOrderByDisplayOrderAscIdAsc(product.getId()).isEmpty()) {
+        continue;
+      }
+
+      int displayOrder = 0;
+      boolean updated = false;
+      if (product.getImageUrl() != null && !product.getImageUrl().isBlank()) {
+        ProductMedia media = new ProductMedia();
+        media.setProduct(product);
+        media.setMediaUrl(product.getImageUrl());
+        media.setMediaType("IMAGE");
+        media.setMediaRole("MAIN");
+        media.setDisplayOrder(displayOrder++);
+        media.setIsPrimary(true);
+        product.getMedia().add(media);
+        updated = true;
+      }
+      if (product.getVideoUrl() != null && !product.getVideoUrl().isBlank()) {
+        ProductMedia media = new ProductMedia();
+        media.setProduct(product);
+        media.setMediaUrl(product.getVideoUrl());
+        media.setMediaType("VIDEO");
+        media.setMediaRole("ADDITIONAL");
+        media.setDisplayOrder(displayOrder++);
+        media.setIsPrimary(false);
+        product.getMedia().add(media);
+        updated = true;
+      }
+      if (product.getGalleryImages() != null) {
+        for (String galleryImage : product.getGalleryImages()) {
+          if (galleryImage == null || galleryImage.isBlank()) {
+            continue;
+          }
+          ProductMedia media = new ProductMedia();
+          media.setProduct(product);
+          media.setMediaUrl(galleryImage);
+          media.setMediaType("IMAGE");
+          media.setMediaRole("ADDITIONAL");
+          media.setDisplayOrder(displayOrder++);
+          media.setIsPrimary(false);
+          product.getMedia().add(media);
+          updated = true;
+        }
+      }
+      if (updated) {
+        productsToUpdate.add(product);
+      }
+    }
+
+    if (!productsToUpdate.isEmpty()) {
+      productRepository.saveAll(productsToUpdate);
+    }
+  }
+
+  private void backfillVariantMediaRoles() {
+    variantMediaRepository.findAll().forEach(media -> {
+      if (media.getMediaRole() == null || media.getMediaRole().isBlank()) {
+        media.setMediaRole(Boolean.TRUE.equals(media.getIsPrimary()) ? "MAIN" : "ADDITIONAL");
+        variantMediaRepository.save(media);
+      }
+    });
+  }
+
+  private void dropLegacyFacebookColumn() {
+    try {
+      jdbcTemplate.execute("ALTER TABLE store_settings DROP COLUMN IF EXISTS facebook_url");
+    } catch (Exception exception) {
+      LOGGER.debug("Skipping legacy store_settings facebook_url cleanup", exception);
     }
   }
 

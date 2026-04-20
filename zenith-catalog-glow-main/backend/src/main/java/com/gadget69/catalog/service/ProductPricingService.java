@@ -1,6 +1,7 @@
 package com.gadget69.catalog.service;
 
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductVariant;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.springframework.stereotype.Service;
@@ -34,5 +35,19 @@ public class ProductPricingService {
       return product.getOfferPrice();
     }
     return product.getPrice();
+  }
+
+  public BigDecimal resolveEffectivePrice(Product product, ProductVariant variant, LocalDate currentDate) {
+    BigDecimal basePrice = resolveEffectivePrice(product, currentDate);
+    if (variant == null) {
+      return basePrice;
+    }
+    if (variant.getPrice() != null) {
+      return variant.getPrice();
+    }
+    if (basePrice == null) {
+      return null;
+    }
+    return basePrice.add(BigDecimal.valueOf(variant.getPriceAdjustment() == null ? 0 : variant.getPriceAdjustment()));
   }
 }

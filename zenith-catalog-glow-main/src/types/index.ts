@@ -1,3 +1,6 @@
+export type MediaType = "IMAGE" | "VIDEO";
+export type MediaRole = "MAIN" | "SIDE" | "BACK" | "ADDITIONAL";
+
 export interface Section {
   id: number;
   name: string;
@@ -10,11 +13,22 @@ export interface Section {
   sort_order?: number;
 }
 
+export interface ProductMedia {
+  id?: number | null;
+  productId?: number;
+  mediaUrl: string;
+  mediaType: MediaType;
+  mediaRole: MediaRole;
+  displayOrder: number;
+  isPrimary: boolean;
+}
+
 export interface VariantMedia {
   id: number;
   variantId?: number;
   mediaUrl: string;
-  mediaType: "IMAGE" | "VIDEO";
+  mediaType: MediaType;
+  mediaRole: MediaRole;
   displayOrder: number;
   isPrimary: boolean;
 }
@@ -74,17 +88,27 @@ export interface Product {
   galleryImages?: string[];
   specifications?: Record<string, string>;
   variants?: ProductVariant[];
+  media?: ProductMedia[];
 }
 
 export interface CartItem {
+  lineId: string;
   product: Product;
   quantity: number;
+  variantId?: number;
+  variantColor?: string;
+  variantSize?: string;
   selectedVariantId?: number;
+  unitPrice: number;
+  mediaUrl?: string;
 }
 
 export interface OrderItem {
   productId: number;
   productName: string;
+  variantId?: number;
+  variantColor?: string;
+  variantSize?: string;
   quantity: number;
   price: number;
 }
@@ -164,10 +188,20 @@ export interface StoreSettings {
   footerText?: string;
   announcementItems: string[];
   instagramUrl?: string;
-  facebookUrl?: string;
   whatsappNumber?: string;
+  shopPhone?: string;
+  supportEmail?: string;
   catalogueUrl?: string;
   contactUrl?: string;
+}
+
+export interface CatalogMediaUploadSignature {
+  cloudName: string;
+  apiKey: string;
+  timestamp: number;
+  signature: string;
+  folder: string;
+  resourceType: "image" | "video";
 }
 
 export interface CommunityMedia {

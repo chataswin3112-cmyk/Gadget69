@@ -3,6 +3,7 @@ package com.gadget69.catalog.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductVariant;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,21 @@ class ProductPricingServiceTest {
     assertThat(productPricingService.isOfferActive(disabled, LocalDate.parse("2026-04-12"))).isFalse();
     assertThat(productPricingService.resolveEffectivePrice(scheduled, LocalDate.parse("2026-04-16")))
         .isEqualByComparingTo("999.99");
+  }
+
+  @Test
+  void variantPriceOverridesOrAdjustsBaseProductPrice() {
+    Product product = buildProduct(true, "2026-04-10", "2026-04-15");
+    ProductVariant explicitVariant = new ProductVariant();
+    explicitVariant.setPrice(new BigDecimal("549.00"));
+
+    ProductVariant adjustedVariant = new ProductVariant();
+    adjustedVariant.setPriceAdjustment(50);
+
+    assertThat(productPricingService.resolveEffectivePrice(product, explicitVariant, LocalDate.parse("2026-04-12")))
+        .isEqualByComparingTo("549.00");
+    assertThat(productPricingService.resolveEffectivePrice(product, adjustedVariant, LocalDate.parse("2026-04-12")))
+        .isEqualByComparingTo("849.99");
   }
 
   private Product buildProduct(boolean offerEnabled, String startDate, String endDate) {

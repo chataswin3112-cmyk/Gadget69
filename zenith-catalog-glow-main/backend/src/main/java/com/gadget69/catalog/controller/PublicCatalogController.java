@@ -6,6 +6,7 @@ import com.gadget69.catalog.dto.ApiDtos;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.entity.OrderItem;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductVariant;
 import com.gadget69.catalog.mapper.CatalogMapper;
 import com.gadget69.catalog.repository.BannerRepository;
 import com.gadget69.catalog.repository.CommunityMediaRepository;
@@ -219,15 +220,21 @@ public class PublicCatalogController {
     order.setCurrency("INR");
 
     HashSet<Long> productIds = new HashSet<>();
+    HashSet<Long> variantIds = new HashSet<>();
     for (ApiDtos.OrderItemPayload itemPayload : request.items()) {
       if (itemPayload.productId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product id is required");
       }
       productIds.add(itemPayload.productId());
+      if (itemPayload.variantId() != null) {
+        variantIds.add(itemPayload.variantId());
+      }
     }
 
     Map<Long, Product> productsById = productRepository.findAllById(productIds).stream()
         .collect(java.util.stream.Collectors.toMap(Product::getId, product -> product));
+    Map<Long, ProductVariant> variantsById = productVariantRepository.findAllById(variantIds).stream()
+        .collect(java.util.stream.Collectors.toMap(ProductVariant::getId, variant -> variant));
 
     BigDecimal totalAmount = BigDecimal.ZERO;
     for (ApiDtos.OrderItemPayload itemPayload : request.items()) {
@@ -239,15 +246,29 @@ public class PublicCatalogController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product is not available");
       }
       int quantity = normalizeQuantity(itemPayload.quantity());
-      BigDecimal unitPrice = productPricingService.resolveEffectivePrice(product, LocalDate.now());
+      ProductVariant selectedVariant = resolveSelectedVariant(product, itemPayload, variantsById);
+      BigDecimal unitPrice = productPricingService.resolveEffectivePrice(product, selectedVariant, LocalDate.now());
       if (unitPrice == null || unitPrice.signum() <= 0) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product price is not configured");
+      }
+      if (selectedVariant != null) {
+        if (selectedVariant.getStock() == null || selectedVariant.getStock() <= 0) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected variant is out of stock");
+        }
+        if (quantity > selectedVariant.getStock()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected variant does not have enough stock");
+        }
+      } else if (product.getStockQuantity() != null && quantity > product.getStockQuantity()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product does not have enough stock");
       }
 
       OrderItem orderItem = new OrderItem();
       orderItem.setOrder(order);
       orderItem.setProductId(product.getId());
       orderItem.setProductName(product.getName());
+      orderItem.setVariantId(selectedVariant == null ? null : selectedVariant.getId());
+      orderItem.setVariantColor(selectedVariant == null ? null : selectedVariant.getColorName());
+      orderItem.setVariantSize(selectedVariant == null ? null : selectedVariant.getSize());
       orderItem.setQuantity(quantity);
       orderItem.setPrice(unitPrice);
       order.getItems().add(orderItem);
@@ -413,6 +434,29 @@ public class PublicCatalogController {
 
     order.setLastRazorpayEventId(eventId);
     customerOrderRepository.save(order);
+  }
+
+  private ProductVariant resolveSelectedVariant(
+      Product product,
+      ApiDtos.OrderItemPayload itemPayload,
+      Map<Long, ProductVariant> variantsById) {
+    List<ProductVariant> variants = product.getVariants() == null ? List.of() : product.getVariants();
+    if (variants.isEmpty()) {
+      return null;
+    }
+
+    if (itemPayload.variantId() != null) {
+      ProductVariant variant = variantsById.get(itemPayload.variantId());
+      if (variant == null || variant.getProduct() == null || !product.getId().equals(variant.getProduct().getId())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected variant does not belong to this product");
+      }
+      return variant;
+    }
+
+    return variants.stream()
+        .filter(variant -> Boolean.TRUE.equals(variant.getIsDefault()))
+        .findFirst()
+        .orElse(variants.get(0));
   }
 
   private boolean isDuplicateEvent(CustomerOrder order, String eventId) {

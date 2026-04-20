@@ -35,6 +35,15 @@ public class OrderItem {
   @Column(name = "product_name", nullable = false)
   private String productName;
 
+  @Column(name = "variant_id")
+  private Long variantId;
+
+  @Column(name = "variant_color")
+  private String variantColor;
+
+  @Column(name = "variant_size")
+  private String variantSize;
+
   @Column(nullable = false)
   private Integer quantity;
 

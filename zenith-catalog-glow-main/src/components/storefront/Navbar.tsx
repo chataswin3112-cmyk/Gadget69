@@ -2,7 +2,9 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useAdminData } from "@/contexts/AdminDataContext";
 import { cn } from "@/lib/utils";
+
 import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import StorefrontBrandLockup from "./StorefrontBrandLockup";
 
@@ -20,6 +22,7 @@ const navLinks = [
 
 const Navbar = () => {
   const { totalItems } = useCart();
+  const { settings } = useAdminData();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
@@ -27,6 +30,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [shouldRenderCart, setShouldRenderCart] = useState(false);
   const [shouldRenderMegaMenu, setShouldRenderMegaMenu] = useState(false);
+
 
   const openCart = () => {
     setShouldRenderCart(true);

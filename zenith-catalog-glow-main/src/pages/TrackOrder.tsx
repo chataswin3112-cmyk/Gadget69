@@ -6,6 +6,7 @@ import Footer from "@/components/storefront/Footer";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import { getOrderById } from "@/api/orderApi";
 import { getErrorMessage } from "@/lib/api-error";
+import { describeVariant } from "@/lib/catalog-media";
 import { toast } from "@/hooks/use-toast";
 import type { Order } from "@/types";
 
@@ -151,7 +152,13 @@ const TrackOrder = () => {
                   <div className="rounded-3xl border border-border/60 bg-background/80 p-6 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Product Name</p>
                     <p className="mt-3 text-sm font-semibold text-foreground">
-                      {order.items.map((item) => item.productName).join(", ")}
+                      {order.items
+                        .map((item) =>
+                          describeVariant(item.variantColor, item.variantSize)
+                            ? `${item.productName} (${describeVariant(item.variantColor, item.variantSize)})`
+                            : item.productName
+                        )
+                        .join(", ")}
                     </p>
                   </div>
                   <div className="rounded-3xl border border-border/60 bg-background/80 p-6 shadow-sm">

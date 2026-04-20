@@ -64,6 +64,7 @@ com\gadget69\catalog\dto\ApiDtos$AdminLoginResponse.class
 com\gadget69\catalog\service\UploadStorageService$StoredFile.class
 com\gadget69\catalog\repository\StoreSettingsRepository.class
 com\gadget69\catalog\config\RateLimitFilter.class
+com\gadget69\catalog\service\CloudinaryCatalogMediaService$1.class
 com\gadget69\catalog\config\InputSanitizer.class
 com\gadget69\catalog\config\SecurityHeadersFilter.class
 com\gadget69\catalog\service\CatalogSyncService$CatalogProduct.class

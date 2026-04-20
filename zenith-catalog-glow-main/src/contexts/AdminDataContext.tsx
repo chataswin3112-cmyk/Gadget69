@@ -78,6 +78,9 @@ const defaultSettings: StoreSettings = {
   id: 1,
   siteTitle: "Gadget69",
   announcementItems: [],
+  whatsappNumber: "919361586278",
+  shopPhone: "9361586278",
+  supportEmail: "natrajganesh2000@gmail.com",
 };
 
 const AdminDataContext = createContext<AdminDataContextType | undefined>(undefined);

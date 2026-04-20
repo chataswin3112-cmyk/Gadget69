@@ -6,6 +6,7 @@ import com.gadget69.catalog.entity.Banner;
 import com.gadget69.catalog.entity.CommunityMedia;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductMedia;
 import com.gadget69.catalog.entity.ProductVariant;
 import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.Section;
@@ -15,6 +16,7 @@ import com.gadget69.catalog.mapper.CatalogMapper;
 import com.gadget69.catalog.repository.BannerRepository;
 import com.gadget69.catalog.repository.CommunityMediaRepository;
 import com.gadget69.catalog.repository.CustomerOrderRepository;
+import com.gadget69.catalog.repository.ProductMediaRepository;
 import com.gadget69.catalog.repository.ProductRepository;
 import com.gadget69.catalog.repository.ProductVariantRepository;
 import com.gadget69.catalog.repository.ReviewRepository;
@@ -23,6 +25,7 @@ import com.gadget69.catalog.repository.StoreSettingsRepository;
 import com.gadget69.catalog.repository.VariantMediaRepository;
 import com.gadget69.catalog.service.AuthTokenService;
 import com.gadget69.catalog.service.CatalogSyncService;
+import com.gadget69.catalog.service.CloudinaryCatalogMediaService;
 import com.gadget69.catalog.service.CloudinaryCommunityVideoService;
 import com.gadget69.catalog.service.OrderStateSupport;
 import com.gadget69.catalog.service.OtpService;
@@ -72,6 +75,8 @@ public class AdminCatalogController {
   private final CatalogSyncService catalogSyncService;
   private final ProductVariantRepository productVariantRepository;
   private final VariantMediaRepository variantMediaRepository;
+  private final ProductMediaRepository productMediaRepository;
+  private final CloudinaryCatalogMediaService cloudinaryCatalogMediaService;
 
   @PostMapping("/login")
   public ApiDtos.AdminLoginResponse login(@RequestBody ApiDtos.AdminLoginRequest request) {
@@ -389,6 +394,14 @@ public class AdminCatalogController {
     return cloudinaryCommunityVideoService.createUploadSignature(request);
   }
 
+  @PostMapping("/catalog-media/upload-signature")
+  public ApiDtos.CatalogMediaUploadSignatureResponse catalogMediaUploadSignature(
+      HttpServletRequest httpRequest,
+      @RequestBody ApiDtos.CatalogMediaUploadSignatureRequest request) {
+    authTokenService.requireAdmin(httpRequest);
+    return cloudinaryCatalogMediaService.createUploadSignature(request);
+  }
+
   @PostMapping("/upload")
   public ApiDtos.UploadResponse upload(HttpServletRequest httpRequest,
       @RequestParam("file") MultipartFile file) {
@@ -442,6 +455,9 @@ public class AdminCatalogController {
       StoreSettings settings = new StoreSettings();
       settings.setSiteTitle("Gadget69");
       settings.setAnnouncementItems(List.of());
+      settings.setWhatsappNumber("919361586278");
+      settings.setShopPhone("9361586278");
+      settings.setSupportEmail("natrajganesh2000@gmail.com");
       return storeSettingsRepository.save(settings);
     });
   }
@@ -489,6 +505,7 @@ public class AdminCatalogController {
         payload.galleryImages() == null ? new ArrayList<>() : new ArrayList<>(payload.galleryImages()));
     product.setSpecifications(
         payload.specifications() == null ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(payload.specifications()));
+    applyProductMedia(product, payload.media(), payload.imageUrl(), payload.videoUrl(), payload.galleryImages());
   }
 
   private void applyBanner(Banner banner, ApiDtos.BannerPayload payload) {
@@ -518,8 +535,9 @@ public class AdminCatalogController {
     settings.setAnnouncementItems(
         payload.announcementItems() == null ? new ArrayList<>() : new ArrayList<>(payload.announcementItems()));
     settings.setInstagramUrl(payload.instagramUrl());
-    settings.setFacebookUrl(payload.facebookUrl());
     settings.setWhatsappNumber(payload.whatsappNumber());
+    settings.setShopPhone(requiredValue(blankToDefault(payload.shopPhone(), "9361586278"), "Shop phone is required"));
+    settings.setSupportEmail(requiredValue(blankToDefault(payload.supportEmail(), "natrajganesh2000@gmail.com"), "Support email is required"));
     settings.setCatalogueUrl(normalizePublicAssetUrl(payload.catalogueUrl(), "Catalogue URL"));
     settings.setContactUrl(payload.contactUrl());
   }
@@ -694,6 +712,81 @@ public class AdminCatalogController {
   // Variant Admin Endpoints
   // ──────────────────────────────────────────────────────────────────────────────
 
+  @GetMapping("/products/{productId}/media")
+  public List<ApiDtos.ProductMediaResponse> listProductMedia(HttpServletRequest httpRequest,
+      @PathVariable Long productId) {
+    authTokenService.requireAdmin(httpRequest);
+    productRepository.findById(productId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+    return productMediaRepository.findByProductIdOrderByDisplayOrderAscIdAsc(productId).stream()
+        .map(catalogMapper::toProductMediaResponse)
+        .toList();
+  }
+
+  @PostMapping("/products/{productId}/media")
+  @Transactional
+  public ApiDtos.ProductMediaResponse addProductMedia(HttpServletRequest httpRequest,
+      @PathVariable Long productId,
+      @RequestBody ApiDtos.ProductMediaPayload payload) {
+    authTokenService.requireAdmin(httpRequest);
+    Product product = productRepository.findById(productId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+    ProductMedia media = new ProductMedia();
+    media.setProduct(product);
+    media.setMediaUrl(requiredValue(blankToNull(payload.mediaUrl()), "Media URL is required"));
+    media.setMediaType(normalizeMediaType(payload.mediaType()));
+    media.setMediaRole(normalizeMediaRole(payload.mediaRole()));
+    media.setDisplayOrder(payload.displayOrder() == null ? product.getMedia().size() : payload.displayOrder());
+    media.setIsPrimary(payload.isPrimary() == null ? false : payload.isPrimary());
+    product.getMedia().add(media);
+
+    if (Boolean.TRUE.equals(media.getIsPrimary())) {
+      clearOtherProductMediaPrimaries(product, null);
+      media.setIsPrimary(true);
+    }
+    ensurePrimaryProductMedia(product);
+    syncLegacyProductMediaFields(product);
+    productRepository.save(product);
+
+    ProductMedia savedMedia = product.getMedia().stream()
+        .filter(item -> item.getMediaUrl().equals(media.getMediaUrl()))
+        .reduce((first, second) -> second)
+        .orElse(media);
+    return catalogMapper.toProductMediaResponse(savedMedia);
+  }
+
+  @PutMapping("/product-media/{id}/primary")
+  @Transactional
+  public ApiDtos.ProductMediaResponse setProductMediaPrimary(HttpServletRequest httpRequest,
+      @PathVariable Long id) {
+    authTokenService.requireAdmin(httpRequest);
+    ProductMedia media = productMediaRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+    Product product = media.getProduct();
+    clearOtherProductMediaPrimaries(product, id);
+    media.setIsPrimary(true);
+    ensurePrimaryProductMedia(product);
+    syncLegacyProductMediaFields(product);
+    productRepository.save(product);
+    return catalogMapper.toProductMediaResponse(media);
+  }
+
+  @DeleteMapping("/product-media/{id}")
+  @Transactional
+  public ResponseEntity<Void> deleteProductMedia(HttpServletRequest httpRequest,
+      @PathVariable Long id) {
+    authTokenService.requireAdmin(httpRequest);
+    ProductMedia media = productMediaRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+    Product product = media.getProduct();
+    product.getMedia().removeIf(item -> item.getId().equals(id));
+    ensurePrimaryProductMedia(product);
+    syncLegacyProductMediaFields(product);
+    productRepository.save(product);
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping("/products/{productId}/variants")
   public List<ApiDtos.VariantResponse> listVariants(HttpServletRequest httpRequest,
       @PathVariable Long productId) {
@@ -778,17 +871,13 @@ public class AdminCatalogController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Media URL is required");
     }
 
-    String mediaType = (payload.mediaType() == null || payload.mediaType().isBlank())
-        ? "IMAGE" : payload.mediaType().toUpperCase();
-    if (!mediaType.equals("IMAGE") && !mediaType.equals("VIDEO")) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Media type must be IMAGE or VIDEO");
-    }
+    String mediaType = normalizeMediaType(payload.mediaType());
 
     VariantMedia media = new VariantMedia();
     media.setVariant(variant);
     media.setMediaUrl(payload.mediaUrl().trim());
     media.setMediaType(mediaType);
+    media.setMediaRole(normalizeMediaRole(payload.mediaRole()));
     media.setDisplayOrder(payload.displayOrder() == null ? 0 : payload.displayOrder());
     media.setIsPrimary(payload.isPrimary() == null ? false : payload.isPrimary());
 
@@ -799,6 +888,8 @@ public class AdminCatalogController {
         variantMediaRepository.save(m);
       });
     }
+    variant.getMedia().add(media);
+    ensurePrimaryVariantMedia(variant);
 
     return catalogMapper.toVariantMediaResponse(variantMediaRepository.save(media));
   }
@@ -818,6 +909,7 @@ public class AdminCatalogController {
         });
 
     media.setIsPrimary(true);
+    ensurePrimaryVariantMedia(media.getVariant());
     return catalogMapper.toVariantMediaResponse(variantMediaRepository.save(media));
   }
 
@@ -844,6 +936,146 @@ public class AdminCatalogController {
     variant.setSku(blankToNull(payload.sku()));
     variant.setIsDefault(payload.isDefault() == null ? false : payload.isDefault());
     variant.setDisplayOrder(payload.displayOrder() == null ? 0 : payload.displayOrder());
+  }
+
+  private void applyProductMedia(
+      Product product,
+      List<ApiDtos.ProductMediaPayload> mediaPayloads,
+      String imageUrl,
+      String videoUrl,
+      List<String> galleryImages) {
+    List<ApiDtos.ProductMediaPayload> normalizedPayloads = (mediaPayloads == null || mediaPayloads.isEmpty())
+        ? buildLegacyProductMediaPayloads(imageUrl, videoUrl, galleryImages)
+        : mediaPayloads;
+
+    product.getMedia().clear();
+    int displayOrder = 0;
+    for (ApiDtos.ProductMediaPayload mediaPayload : normalizedPayloads) {
+      if (mediaPayload == null || blankToNull(mediaPayload.mediaUrl()) == null) {
+        continue;
+      }
+
+      ProductMedia media = new ProductMedia();
+      media.setProduct(product);
+      media.setMediaUrl(mediaPayload.mediaUrl().trim());
+      media.setMediaType(normalizeMediaType(mediaPayload.mediaType()));
+      media.setMediaRole(normalizeMediaRole(mediaPayload.mediaRole()));
+      media.setDisplayOrder(mediaPayload.displayOrder() == null ? displayOrder : mediaPayload.displayOrder());
+      media.setIsPrimary(mediaPayload.isPrimary() == null ? false : mediaPayload.isPrimary());
+      product.getMedia().add(media);
+      displayOrder++;
+    }
+
+    ensurePrimaryProductMedia(product);
+    syncLegacyProductMediaFields(product);
+  }
+
+  private List<ApiDtos.ProductMediaPayload> buildLegacyProductMediaPayloads(
+      String imageUrl,
+      String videoUrl,
+      List<String> galleryImages) {
+    List<ApiDtos.ProductMediaPayload> payloads = new ArrayList<>();
+    int displayOrder = 0;
+
+    if (blankToNull(imageUrl) != null) {
+      payloads.add(new ApiDtos.ProductMediaPayload(imageUrl.trim(), "IMAGE", "MAIN", displayOrder++, true));
+    }
+
+    if (blankToNull(videoUrl) != null) {
+      payloads.add(new ApiDtos.ProductMediaPayload(videoUrl.trim(), "VIDEO", "ADDITIONAL", displayOrder++, false));
+    }
+
+    if (galleryImages != null) {
+      for (String galleryImage : galleryImages) {
+        if (blankToNull(galleryImage) == null) {
+          continue;
+        }
+        payloads.add(new ApiDtos.ProductMediaPayload(galleryImage.trim(), "IMAGE", "ADDITIONAL", displayOrder++, false));
+      }
+    }
+
+    return payloads;
+  }
+
+  private void ensurePrimaryProductMedia(Product product) {
+    boolean hasPrimary = product.getMedia().stream().anyMatch(item -> Boolean.TRUE.equals(item.getIsPrimary()));
+    if (hasPrimary) {
+      return;
+    }
+    product.getMedia().stream()
+        .filter(item -> "IMAGE".equalsIgnoreCase(item.getMediaType()))
+        .findFirst()
+        .ifPresent(item -> item.setIsPrimary(true));
+  }
+
+  private void ensurePrimaryVariantMedia(ProductVariant variant) {
+    boolean hasPrimary = variant.getMedia().stream().anyMatch(item -> Boolean.TRUE.equals(item.getIsPrimary()));
+    if (hasPrimary) {
+      return;
+    }
+    variant.getMedia().stream()
+        .filter(item -> "IMAGE".equalsIgnoreCase(item.getMediaType()))
+        .findFirst()
+        .ifPresent(item -> item.setIsPrimary(true));
+  }
+
+  private void clearOtherProductMediaPrimaries(Product product, Long exceptId) {
+    product.getMedia().forEach(item -> item.setIsPrimary(item.getId() != null && item.getId().equals(exceptId)));
+  }
+
+  private void syncLegacyProductMediaFields(Product product) {
+    List<ProductMedia> sortedMedia = product.getMedia().stream()
+        .sorted((left, right) -> {
+          int byOrder = Integer.compare(left.getDisplayOrder(), right.getDisplayOrder());
+          if (byOrder != 0) {
+            return byOrder;
+          }
+          if (left.getId() == null || right.getId() == null) {
+            return 0;
+          }
+          return Long.compare(left.getId(), right.getId());
+        })
+        .toList();
+
+    ProductMedia primaryImage = sortedMedia.stream()
+        .filter(item -> "IMAGE".equalsIgnoreCase(item.getMediaType()))
+        .filter(item -> Boolean.TRUE.equals(item.getIsPrimary()))
+        .findFirst()
+        .orElseGet(() -> sortedMedia.stream()
+            .filter(item -> "IMAGE".equalsIgnoreCase(item.getMediaType()))
+            .findFirst()
+            .orElse(null));
+    ProductMedia firstVideo = sortedMedia.stream()
+        .filter(item -> "VIDEO".equalsIgnoreCase(item.getMediaType()))
+        .findFirst()
+        .orElse(null);
+
+    product.setImageUrl(primaryImage == null ? null : primaryImage.getMediaUrl());
+    product.setVideoUrl(firstVideo == null ? null : firstVideo.getMediaUrl());
+    product.setDefaultThumbnailUrl(primaryImage == null ? null : primaryImage.getMediaUrl());
+    product.setGalleryImages(sortedMedia.stream()
+        .filter(item -> "IMAGE".equalsIgnoreCase(item.getMediaType()))
+        .map(ProductMedia::getMediaUrl)
+        .filter(url -> primaryImage == null || !url.equals(primaryImage.getMediaUrl()))
+        .toList());
+  }
+
+  private String normalizeMediaType(String mediaType) {
+    String normalizedMediaType = blankToDefault(mediaType, "IMAGE").toUpperCase();
+    if (!normalizedMediaType.equals("IMAGE") && !normalizedMediaType.equals("VIDEO")) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Media type must be IMAGE or VIDEO");
+    }
+    return normalizedMediaType;
+  }
+
+  private String normalizeMediaRole(String mediaRole) {
+    String normalizedMediaRole = blankToDefault(mediaRole, "ADDITIONAL").toUpperCase();
+    if (!List.of("MAIN", "SIDE", "BACK", "ADDITIONAL").contains(normalizedMediaRole)) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Media role must be MAIN, SIDE, BACK, or ADDITIONAL");
+    }
+    return normalizedMediaRole;
   }
 
   private void clearOtherDefaults(Long productId, Long exceptVariantId) {

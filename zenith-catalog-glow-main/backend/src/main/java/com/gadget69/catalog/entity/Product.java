@@ -124,6 +124,10 @@ public class Product {
   @OrderBy("displayOrder ASC, id ASC")
   private List<ProductVariant> variants = new ArrayList<>();
 
+  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  @OrderBy("displayOrder ASC, id ASC")
+  private List<ProductMedia> media = new ArrayList<>();
+
   @PrePersist
   void onCreate() {
     createdAt = LocalDateTime.now();

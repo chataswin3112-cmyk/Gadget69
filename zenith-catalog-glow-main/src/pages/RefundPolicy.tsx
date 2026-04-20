@@ -2,7 +2,7 @@ import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
-import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/social-links";
+import { DEFAULT_WHATSAPP_NUMBER, formatPhoneDisplay, toWhatsAppUrl } from "@/lib/social-links";
 import {
   BUSINESS_NAME,
   BUSINESS_SUMMARY,
@@ -37,6 +37,9 @@ const cancellationPolicy = [
   "Once tracking is generated, cancellation is not possible",
   "For cancelled orders, the full amount will be refunded",
 ];
+
+const whatsappUrl = toWhatsAppUrl(DEFAULT_WHATSAPP_NUMBER);
+const whatsappDisplay = formatPhoneDisplay(DEFAULT_WHATSAPP_NUMBER);
 
 const RefundPolicy = () => (
   <div className="min-h-screen bg-background">
@@ -138,12 +141,12 @@ const RefundPolicy = () => (
               <p>
                 WhatsApp:{" "}
                 <a
-                  href={WHATSAPP_URL}
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-foreground transition-colors hover:text-accent"
                 >
-                  {WHATSAPP_DISPLAY}
+                  {whatsappDisplay}
                 </a>
               </p>
               <p className="pt-2 text-xs text-muted-foreground">

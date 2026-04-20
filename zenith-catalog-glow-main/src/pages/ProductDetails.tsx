@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useCallback, type CSSProperties } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Minus, Plus, ShoppingBag, ChevronRight, Play } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ChevronRight, Minus, Play, Plus, ShoppingBag } from "lucide-react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
@@ -9,18 +9,21 @@ import ProductCard from "@/components/storefront/ProductCard";
 import ColorSwatchSelector from "@/components/storefront/ColorSwatchSelector";
 import MediaFrame from "@/components/storefront/MediaFrame";
 import SectionHeader from "@/components/storefront/SectionHeader";
+import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useCart } from "@/contexts/CartContext";
 import { useAdminData } from "@/contexts/AdminDataContext";
-import { uniqueMediaUrls } from "@/lib/media";
-import { getDisplayMrp, getEffectivePrice } from "@/lib/pricing";
 import { getVariant } from "@/api/productApi";
-import { VariantMedia } from "@/types";
+import { getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
+import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
+import { ProductMedia, VariantMedia } from "@/types";
+
+type DisplayMedia = ProductMedia | VariantMedia;
 
 const ProductDetails = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { products: allProducts, isLoading } = useAdminData();
-  const product = allProducts.find((p) => p.id === Number(id));
+  const product = allProducts.find((item) => item.id === Number(id));
 
   const variants = useMemo(() => product?.variants || [], [product?.variants]);
   const defaultVariant = useMemo(
@@ -28,42 +31,37 @@ const ProductDetails = () => {
     [variants]
   );
 
-  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(defaultVariant?.id ?? null);
   const [quantity, setQuantity] = useState(1);
-  const [mainMediaIndex, setMainMediaIndex] = useState(0);
   const [variantMedia, setVariantMedia] = useState<VariantMedia[]>([]);
   const [loadingVariant, setLoadingVariant] = useState(false);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Build fallback media from product fields
-  const fallbackMediaUrls = useMemo(() => {
-    if (!product) return [];
-    return uniqueMediaUrls([
-      ...(product.galleryImages || []),
-      product.videoUrl,
-      product.imageUrl,
-    ]).map((url) => ({ id: 0, mediaUrl: url, mediaType: "IMAGE" as const, displayOrder: 0, isPrimary: false }));
-  }, [product]);
+  const loadVariantMedia = useCallback(
+    async (variantId: number) => {
+      const variant = variants.find((item) => item.id === variantId);
+      if (variant?.media?.length) {
+        setVariantMedia(getVariantMedia(variant));
+        setCurrentSlide(0);
+        carouselApi?.scrollTo(0);
+        return;
+      }
 
-  const loadVariantMedia = useCallback(async (variantId: number) => {
-    const variant = variants.find((v) => v.id === variantId);
-    // If variant has media pre-loaded, use it directly
-    if (variant?.media && variant.media.length > 0) {
-      setVariantMedia(variant.media);
-      setMainMediaIndex(0);
-      return;
-    }
-    // Otherwise fetch from API
-    setLoadingVariant(true);
-    try {
-      const data = await getVariant(variantId);
-      setVariantMedia(data.media || []);
-      setMainMediaIndex(0);
-    } catch {
-      setVariantMedia([]);
-    } finally {
-      setLoadingVariant(false);
-    }
-  }, [variants]);
+      setLoadingVariant(true);
+      try {
+        const data = await getVariant(variantId);
+        setVariantMedia(data.media || []);
+        setCurrentSlide(0);
+        carouselApi?.scrollTo(0);
+      } catch {
+        setVariantMedia([]);
+      } finally {
+        setLoadingVariant(false);
+      }
+    },
+    [carouselApi, variants]
+  );
 
   useEffect(() => {
     if (!product) {
@@ -71,22 +69,46 @@ const ProductDetails = () => {
       setVariantMedia([]);
       return;
     }
-    const vid = defaultVariant?.id ?? null;
-    setSelectedVariantId(vid);
-    if (vid) {
-      void loadVariantMedia(vid);
+
+    const variantId = defaultVariant?.id ?? null;
+    setSelectedVariantId(variantId);
+    if (variantId) {
+      void loadVariantMedia(variantId);
+    } else {
+      setVariantMedia([]);
     }
-  }, [defaultVariant, product, loadVariantMedia]);
+  }, [defaultVariant, loadVariantMedia, product]);
+
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
+
+    const onSelect = () => setCurrentSlide(carouselApi.selectedScrollSnap());
+    onSelect();
+    carouselApi.on("select", onSelect);
+    carouselApi.on("reInit", onSelect);
+    return () => {
+      carouselApi.off("select", onSelect);
+    };
+  }, [carouselApi]);
 
   const selectedVariant = useMemo(
-    () => variants.find((v) => v.id === selectedVariantId),
-    [variants, selectedVariantId]
+    () => variants.find((variant) => variant.id === selectedVariantId),
+    [selectedVariantId, variants]
   );
+
+  const productMedia = useMemo(() => getProductMedia(product), [product]);
+  const activeMedia: DisplayMedia[] = variantMedia.length > 0 ? variantMedia : productMedia;
+  const finalPrice = product ? getVariantPrice(product, selectedVariant) : 0;
+  const mrp = product ? getDisplayMrp(product) : undefined;
+  const stock = selectedVariant?.stock ?? product?.stockQuantity ?? 0;
+  const sku = selectedVariant?.sku;
 
   const relatedProducts = useMemo(
     () =>
       product
-        ? allProducts.filter((p) => p.sectionId === product.sectionId && p.id !== product.id).slice(0, 4)
+        ? allProducts.filter((item) => item.sectionId === product.sectionId && item.id !== product.id).slice(0, 4)
         : [],
     [allProducts, product]
   );
@@ -96,19 +118,18 @@ const ProductDetails = () => {
     void loadVariantMedia(variantId);
   };
 
-  // Price: use variant's own price if set, else base price + adjustment
-  const basePrice = getEffectivePrice(product);
-  const finalPrice = selectedVariant?.price
-    ? Number(selectedVariant.price)
-    : basePrice + (selectedVariant?.priceAdjustment || 0);
-  const mrp = getDisplayMrp(product);
-  const stock = selectedVariant?.stock ?? product.stockQuantity;
-  const sku = selectedVariant?.sku;
+  const handleAddToCart = () => {
+    if (!product) {
+      return;
+    }
+    addToCart(product, quantity, selectedVariant);
+    window.dispatchEvent(new Event("open-cart-drawer"));
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
   }
@@ -120,8 +141,8 @@ const ProductDetails = () => {
         <Navbar />
         <div className="section-container section-padding pt-24 text-center">
           <h1 className="font-heading text-3xl font-bold">Product Not Found</h1>
-          <Link to="/products" className="text-accent hover:underline mt-4 inline-block font-body">
-            ← Back to Products
+          <Link to="/products" className="mt-4 inline-block text-accent hover:underline font-body">
+            Back to Products
           </Link>
         </div>
         <Footer />
@@ -129,216 +150,220 @@ const ProductDetails = () => {
     );
   }
 
-  // Current media items — prefer variant media, fall back to product-level gallery
-  const activeMedia: VariantMedia[] = variantMedia.length > 0 ? variantMedia : fallbackMediaUrls;
-  const mainMediaItem = activeMedia[mainMediaIndex] ?? activeMedia[0] ?? null;
-
   return (
     <div className="min-h-screen bg-background">
       <AnnouncementBar />
       <Navbar />
 
-      {/* Breadcrumb */}
-      <div className="section-container pt-6 pb-2">
+      <div className="section-container pb-2 pt-6">
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground font-body">
-          <Link to="/" className="hover:text-accent">Home</Link>
+          <Link to="/" className="hover:text-accent">
+            Home
+          </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link to="/products" className="hover:text-accent">Products</Link>
+          <Link to="/products" className="hover:text-accent">
+            Products
+          </Link>
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="text-foreground">{product.name}</span>
         </nav>
       </div>
 
-      {/* Product detail */}
       <div className="section-container py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-          {/* Gallery — variant media-aware with IMAGE/VIDEO support */}
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="enter-slide-in-left">
-            {/* Main Media */}
-            <div className="relative rounded-xl overflow-hidden shadow-premium bg-card">
-              {loadingVariant && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
-                  <div className="h-8 w-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+            <div className="relative rounded-3xl border border-border bg-card p-4 shadow-premium">
+              {loadingVariant ? (
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-background/60">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
                 </div>
-              )}
-              {mainMediaItem?.mediaType === "VIDEO" ? (
-                <video
-                  key={mainMediaItem.mediaUrl}
-                  src={mainMediaItem.mediaUrl}
-                  controls
-                  className="w-full aspect-square object-contain bg-black"
-                />
-              ) : (
-                <MediaFrame
-                  src={mainMediaItem?.mediaUrl || product.imageUrl}
-                  alt={product.name}
-                  aspectRatio="aspect-square"
-                  padding="p-8"
-                  className="bg-secondary/20"
-                  loading="eager"
-                />
-              )}
+              ) : null}
+
+              <Carousel setApi={setCarouselApi} opts={{ loop: activeMedia.length > 1 }}>
+                <CarouselContent>
+                  {activeMedia.map((media, index) => (
+                    <CarouselItem key={`${media.id ?? "fallback"}-${media.mediaUrl}-${index}`}>
+                      {media.mediaType === "VIDEO" ? (
+                        <video
+                          controls
+                          preload="metadata"
+                          className="aspect-square w-full rounded-2xl bg-black object-contain"
+                        >
+                          <source src={media.mediaUrl} type="video/mp4" />
+                        </video>
+                      ) : (
+                        <MediaFrame
+                          src={media.mediaUrl}
+                          alt={`${product.name} ${index + 1}`}
+                          aspectRatio="aspect-square"
+                          padding="p-8"
+                          className="rounded-2xl bg-secondary/20"
+                          loading={index === 0 ? "eager" : "lazy"}
+                        />
+                      )}
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {activeMedia.length > 1 ? (
+                  <>
+                    <CarouselPrevious className="left-4 top-1/2 translate-y-[-50%]" />
+                    <CarouselNext className="right-4 top-1/2 translate-y-[-50%]" />
+                  </>
+                ) : null}
+              </Carousel>
             </div>
 
-            {/* Thumbnail Strip */}
-            {activeMedia.length > 1 && (
-              <div className="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-                {activeMedia.map((item, i) => (
+            {activeMedia.length > 1 ? (
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {activeMedia.map((media, index) => (
                   <button
-                    key={item.id ? `${item.id}-${i}` : i}
-                    onClick={() => setMainMediaIndex(i)}
-                    className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                      mainMediaIndex === i ? "border-accent" : "border-border"
+                    key={`${media.id ?? "thumb"}-${media.mediaUrl}-${index}`}
+                    type="button"
+                    onClick={() => {
+                      setCurrentSlide(index);
+                      carouselApi?.scrollTo(index);
+                    }}
+                    className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border-2 transition-all ${
+                      currentSlide === index ? "border-accent" : "border-border"
                     }`}
                   >
-                    {item.mediaType === "VIDEO" ? (
-                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                    {media.mediaType === "VIDEO" ? (
+                      <div className="flex h-full w-full items-center justify-center bg-muted">
                         <Play className="h-6 w-6 text-muted-foreground" />
                       </div>
                     ) : (
-                      <MediaFrame src={item.mediaUrl} alt="" padding="p-1" className="rounded-none" />
+                      <MediaFrame src={media.mediaUrl} alt="" padding="p-1" className="rounded-none" />
                     )}
                   </button>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
 
-          {/* Info */}
-          <div
-            className="enter-slide-in-right flex flex-col"
-            style={{ "--enter-delay": "80ms" } as CSSProperties}
-          >
-            {product.sectionName && (
+          <div className="enter-slide-in-right flex flex-col" style={{ "--enter-delay": "80ms" } as CSSProperties}>
+            {product.sectionName ? (
               <Link
                 to={`/categories/${product.sectionId}`}
-                className="text-xs uppercase tracking-[0.2em] text-accent font-medium mb-2 font-body hover:underline"
+                className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-accent hover:underline font-body"
               >
                 {product.sectionName}
               </Link>
-            )}
-            <h1 className="font-heading text-3xl lg:text-4xl font-bold text-foreground mb-1">
-              {product.name}
-            </h1>
-            {product.model_number && (
-              <p className="text-sm text-muted-foreground font-body mb-4">{product.model_number}</p>
-            )}
+            ) : null}
 
-            {/* Price */}
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-3xl font-bold text-foreground font-body">
-                ₹{finalPrice.toLocaleString()}
-              </span>
-              {mrp && mrp > finalPrice && (
+            <h1 className="mb-1 font-heading text-3xl font-bold text-foreground lg:text-4xl">{product.name}</h1>
+            {product.model_number ? (
+              <p className="mb-4 text-sm text-muted-foreground font-body">{product.model_number}</p>
+            ) : null}
+
+            <div className="mb-6 flex items-baseline gap-3">
+              <span className="text-3xl font-bold text-foreground font-body">Rs. {finalPrice.toLocaleString()}</span>
+              {mrp && mrp > finalPrice ? (
                 <>
-                  <span className="text-lg text-muted-foreground line-through font-body">
-                    ₹{mrp.toLocaleString()}
-                  </span>
-                  <span className="text-sm font-medium text-accent-foreground bg-accent/20 px-2 py-0.5 rounded">
+                  <span className="text-lg line-through text-muted-foreground font-body">Rs. {mrp.toLocaleString()}</span>
+                  <span className="rounded bg-accent/20 px-2 py-0.5 text-sm font-medium text-accent-foreground">
                     {Math.round(((mrp - finalPrice) / mrp) * 100)}% OFF
                   </span>
                 </>
-              )}
+              ) : null}
             </div>
 
-            {/* Variants — Color + Size selectors */}
-            {variants.length > 0 && (
+            {variants.length > 0 ? (
               <div className="mb-6 space-y-4">
-                {variants.some((v) => v.colorName) && (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-foreground font-body">
+                    Color: <span className="text-accent">{selectedVariant?.colorName}</span>
+                  </p>
+                  <ColorSwatchSelector
+                    variants={variants.map((variant) => ({
+                      id: variant.id,
+                      colorName: variant.colorName,
+                      hexCode: variant.hexCode,
+                    }))}
+                    selectedId={selectedVariantId}
+                    onSelect={handleVariantChange}
+                  />
+                </div>
+
+                {variants.some((variant) => variant.size) ? (
                   <div>
-                    <p className="text-sm font-medium text-foreground mb-2 font-body">
-                      Color: <span className="text-accent">{selectedVariant?.colorName}</span>
-                    </p>
-                    <ColorSwatchSelector
-                      variants={variants.map((v) => ({ id: v.id, colorName: v.colorName, hexCode: v.hexCode }))}
-                      selectedId={selectedVariantId}
-                      onSelect={handleVariantChange}
-                    />
-                  </div>
-                )}
-                {/* Size selector — shown only if any variant has a size */}
-                {variants.some((v) => v.size) && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2 font-body">Size</p>
+                    <p className="mb-2 text-sm font-medium text-foreground font-body">Size</p>
                     <div className="flex flex-wrap gap-2">
                       {variants
-                        .filter((v) => v.size)
-                        .map((v) => (
+                        .filter((variant) => variant.size)
+                        .map((variant) => (
                           <button
-                            key={v.id}
-                            onClick={() => handleVariantChange(v.id)}
-                            className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
-                              selectedVariantId === v.id
+                            key={variant.id}
+                            type="button"
+                            onClick={() => handleVariantChange(variant.id)}
+                            disabled={variant.stock === 0}
+                            className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
+                              selectedVariantId === variant.id
                                 ? "border-accent bg-accent/10 text-accent"
                                 : "border-border text-muted-foreground hover:border-accent/50"
-                            } ${v.stock === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
-                            disabled={v.stock === 0}
+                            } ${variant.stock === 0 ? "cursor-not-allowed opacity-40" : ""}`}
                           >
-                            {v.size}
+                            {variant.size}
                           </button>
                         ))}
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
 
-            {/* Stock & SKU */}
-            <div className="flex items-center gap-4 mb-6 text-sm font-body">
+            <div className="mb-6 flex items-center gap-4 text-sm font-body">
               <span className={stock > 0 ? "text-accent" : "text-destructive"}>
                 {stock > 0 ? `In Stock (${stock})` : "Out of Stock"}
               </span>
-              {sku && <span className="text-muted-foreground">SKU: {sku}</span>}
+              {sku ? <span className="text-muted-foreground">SKU: {sku}</span> : null}
             </div>
 
-            {/* Description */}
-            <p className="text-muted-foreground font-body leading-relaxed mb-8 whitespace-pre-wrap">
+            <p className="mb-8 whitespace-pre-wrap text-muted-foreground font-body leading-relaxed">
               {product.description}
             </p>
 
-            {/* Specifications */}
-            {product.specifications && Object.keys(product.specifications).length > 0 && (
+            {product.specifications && Object.keys(product.specifications).length > 0 ? (
               <div className="mb-8">
-                <h3 className="font-heading font-semibold text-lg mb-4 text-foreground">Specifications</h3>
-                <div className="border border-border rounded-lg overflow-hidden flex flex-col font-body text-sm">
+                <h3 className="mb-4 text-lg font-semibold text-foreground font-heading">Specifications</h3>
+                <div className="flex flex-col overflow-hidden rounded-lg border border-border text-sm font-body">
                   {Object.entries(product.specifications).map(([key, value], index) => (
                     <div
                       key={key}
-                      className={`flex px-4 py-3 ${
+                      className={`flex border-b border-border px-4 py-3 last:border-b-0 ${
                         index % 2 === 0 ? "bg-muted/30" : "bg-card"
-                      } border-b border-border last:border-b-0`}
+                      }`}
                     >
-                      <span className="w-1/3 font-medium text-muted-foreground shrink-0">{key}</span>
-                      <span className="w-2/3 text-foreground break-words">{value}</span>
+                      <span className="w-1/3 shrink-0 font-medium text-muted-foreground">{key}</span>
+                      <span className="w-2/3 break-words text-foreground">{value}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
-            {/* Quantity + Add to cart */}
-            <div className="flex flex-wrap items-center gap-3 mt-auto">
-              <div className="flex items-center border border-input rounded-lg">
+            <div className="mt-auto flex flex-wrap items-center gap-3">
+              <div className="flex items-center rounded-lg border border-input">
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  type="button"
+                  onClick={() => setQuantity((current) => Math.max(1, current - 1))}
                   className="px-3 py-2.5 hover:bg-secondary transition-colors"
                 >
                   <Minus className="h-4 w-4" />
                 </button>
-                <span className="px-4 py-2.5 font-medium text-sm font-body min-w-[3rem] text-center">
-                  {quantity}
-                </span>
+                <span className="min-w-[3rem] px-4 py-2.5 text-center text-sm font-medium font-body">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(Math.min(stock, quantity + 1))}
+                  type="button"
+                  onClick={() => setQuantity((current) => Math.min(stock, current + 1))}
                   className="px-3 py-2.5 hover:bg-secondary transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
               <button
-                onClick={() => addToCart(product, quantity)}
+                type="button"
+                onClick={handleAddToCart}
                 disabled={stock <= 0}
-                className="flex-1 min-w-[160px] flex items-center justify-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-medium transition-colors hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex min-w-[160px] flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShoppingBag className="h-5 w-5" />
                 Add to Cart
@@ -348,17 +373,16 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {/* Related products */}
-      {relatedProducts.length > 0 && (
+      {relatedProducts.length > 0 ? (
         <div className="section-container section-padding">
           <SectionHeader title="You May Also Like" viewAllLink={`/categories/${product.sectionId}`} />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard key={relatedProduct.id} product={relatedProduct} />
             ))}
           </div>
         </div>
-      )}
+      ) : null}
 
       <FloatingContactActions />
       <Footer />

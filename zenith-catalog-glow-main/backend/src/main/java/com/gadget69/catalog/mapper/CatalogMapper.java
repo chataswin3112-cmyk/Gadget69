@@ -6,11 +6,13 @@ import com.gadget69.catalog.entity.CommunityMedia;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.entity.OrderItem;
 import com.gadget69.catalog.entity.Product;
+import com.gadget69.catalog.entity.ProductMedia;
 import com.gadget69.catalog.entity.ProductVariant;
 import com.gadget69.catalog.entity.Review;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
 import com.gadget69.catalog.entity.VariantMedia;
+import java.util.ArrayList;
 import com.gadget69.catalog.service.OrderStateSupport;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,27 @@ public class CatalogMapper {
     List<ApiDtos.VariantResponse> variants = product.getVariants() == null
         ? List.of()
         : product.getVariants().stream().map(this::toVariantResponse).toList();
+    List<ApiDtos.ProductMediaResponse> media = resolveProductMedia(product);
+    String primaryImageUrl = media.stream()
+        .filter(item -> "IMAGE".equalsIgnoreCase(item.mediaType()))
+        .filter(item -> Boolean.TRUE.equals(item.isPrimary()))
+        .map(ApiDtos.ProductMediaResponse::mediaUrl)
+        .findFirst()
+        .orElseGet(() -> media.stream()
+            .filter(item -> "IMAGE".equalsIgnoreCase(item.mediaType()))
+            .map(ApiDtos.ProductMediaResponse::mediaUrl)
+            .findFirst()
+            .orElse(toPublicMediaUrl(product.getImageUrl())));
+    String primaryVideoUrl = media.stream()
+        .filter(item -> "VIDEO".equalsIgnoreCase(item.mediaType()))
+        .map(ApiDtos.ProductMediaResponse::mediaUrl)
+        .findFirst()
+        .orElse(toPublicMediaUrl(product.getVideoUrl()));
+    List<String> galleryImages = media.stream()
+        .filter(item -> "IMAGE".equalsIgnoreCase(item.mediaType()))
+        .map(ApiDtos.ProductMediaResponse::mediaUrl)
+        .filter(url -> url != null && !url.equals(primaryImageUrl))
+        .toList();
 
     return new ApiDtos.ProductResponse(
         product.getId(),
@@ -45,8 +68,8 @@ public class CatalogMapper {
         product.getStockQuantity(),
         product.getSection().getId(),
         product.getSection().getName(),
-        toPublicMediaUrl(product.getImageUrl()),
-        toPublicMediaUrl(product.getVideoUrl()),
+        primaryImageUrl,
+        primaryVideoUrl,
         product.getCreatedAt() == null ? null : product.getCreatedAt().toString(),
         product.getOffer(),
         product.getOfferPrice(),
@@ -62,12 +85,11 @@ public class CatalogMapper {
         product.getIsFeatured(),
         product.getIsHeroFeatured(),
         product.getStatus(),
-        toPublicMediaUrl(product.getDefaultThumbnailUrl()),
-        product.getGalleryImages() == null
-            ? List.of()
-            : product.getGalleryImages().stream().map(this::toPublicMediaUrl).toList(),
+        toPublicMediaUrl(product.getDefaultThumbnailUrl() == null ? primaryImageUrl : product.getDefaultThumbnailUrl()),
+        galleryImages,
         product.getSpecifications(),
-        variants
+        variants,
+        media
     );
   }
 
@@ -95,8 +117,9 @@ public class CatalogMapper {
         settings.getFooterText(),
         settings.getAnnouncementItems(),
         settings.getInstagramUrl(),
-        settings.getFacebookUrl(),
         settings.getWhatsappNumber(),
+        settings.getShopPhone(),
+        settings.getSupportEmail(),
         toPublicMediaUrl(settings.getCatalogueUrl()),
         settings.getContactUrl()
     );
@@ -163,6 +186,9 @@ public class CatalogMapper {
     return new ApiDtos.OrderItemPayload(
         orderItem.getProductId(),
         orderItem.getProductName(),
+        orderItem.getVariantId(),
+        orderItem.getVariantColor(),
+        orderItem.getVariantSize(),
         orderItem.getQuantity(),
         orderItem.getPrice()
     );
@@ -204,8 +230,66 @@ public class CatalogMapper {
         media.getId(),
         toPublicMediaUrl(media.getMediaUrl()),
         media.getMediaType(),
+        media.getMediaRole(),
         media.getDisplayOrder(),
         media.getIsPrimary()
     );
+  }
+
+  public ApiDtos.ProductMediaResponse toProductMediaResponse(ProductMedia media) {
+    return new ApiDtos.ProductMediaResponse(
+        media.getId(),
+        toPublicMediaUrl(media.getMediaUrl()),
+        media.getMediaType(),
+        media.getMediaRole(),
+        media.getDisplayOrder(),
+        media.getIsPrimary()
+    );
+  }
+
+  private List<ApiDtos.ProductMediaResponse> resolveProductMedia(Product product) {
+    if (product.getMedia() != null && !product.getMedia().isEmpty()) {
+      return product.getMedia().stream().map(this::toProductMediaResponse).toList();
+    }
+
+    List<ApiDtos.ProductMediaResponse> legacyMedia = new ArrayList<>();
+    int displayOrder = 0;
+
+    if (product.getImageUrl() != null && !product.getImageUrl().isBlank()) {
+      legacyMedia.add(new ApiDtos.ProductMediaResponse(
+          null,
+          toPublicMediaUrl(product.getImageUrl()),
+          "IMAGE",
+          "MAIN",
+          displayOrder++,
+          true));
+    }
+
+    if (product.getVideoUrl() != null && !product.getVideoUrl().isBlank()) {
+      legacyMedia.add(new ApiDtos.ProductMediaResponse(
+          null,
+          toPublicMediaUrl(product.getVideoUrl()),
+          "VIDEO",
+          "ADDITIONAL",
+          displayOrder++,
+          false));
+    }
+
+    if (product.getGalleryImages() != null) {
+      for (String imageUrl : product.getGalleryImages()) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+          continue;
+        }
+        legacyMedia.add(new ApiDtos.ProductMediaResponse(
+            null,
+            toPublicMediaUrl(imageUrl),
+            "IMAGE",
+            "ADDITIONAL",
+            displayOrder++,
+            false));
+      }
+    }
+
+    return legacyMedia;
   }
 }

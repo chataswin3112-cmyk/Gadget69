@@ -1,9 +1,15 @@
 import { Link } from "react-router-dom";
-import { ArrowUp, Facebook, Instagram } from "lucide-react";
+import { ArrowUp, Instagram } from "lucide-react";
 import { useAdminData } from "@/contexts/AdminDataContext";
-import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import { resolveMediaUrl } from "@/lib/media";
-import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/social-links";
+import {
+  DEFAULT_INSTAGRAM_URL,
+  DEFAULT_SHOP_PHONE,
+  formatPhoneDisplay,
+  toPhoneHref,
+  toWhatsAppUrl,
+} from "@/lib/social-links";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import StorefrontBrandLockup from "./StorefrontBrandLockup";
 
 const WhatsAppIcon = () => (
@@ -13,18 +19,20 @@ const WhatsAppIcon = () => (
 );
 
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
 const footerLinkClass = "text-xs leading-5 text-white/60 transition-colors hover:text-white font-body";
-const footerHeadingClass =
-  "text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 font-heading";
+const footerHeadingClass = "text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 font-heading";
 
 const Footer = () => {
   const { settings } = useAdminData();
   const footerLogoSrc = resolveMediaUrl(settings.logoUrl) || gadget69Wordmark;
   const catalogueUrl = resolveMediaUrl(settings.catalogueUrl);
+  const instagramUrl = settings.instagramUrl || DEFAULT_INSTAGRAM_URL;
+  const whatsappUrl = toWhatsAppUrl(settings.whatsappNumber);
+  const phoneDisplay = formatPhoneDisplay(settings.shopPhone || DEFAULT_SHOP_PHONE);
+  const phoneHref = toPhoneHref(settings.shopPhone || DEFAULT_SHOP_PHONE);
 
   return (
-    <footer className="bg-[#0f0f0f] text-white [content-visibility:auto] [contain-intrinsic-size:560px]">
+    <footer className="bg-[#0f0f0f] text-white [contain-intrinsic-size:560px] [content-visibility:auto]">
       <div className="section-container px-5 py-8 sm:px-8 sm:py-11">
         <div className="mb-7 flex flex-col items-start text-left sm:hidden">
           <StorefrontBrandLockup
@@ -35,12 +43,13 @@ const Footer = () => {
             labelClassName="text-lg"
             fetchPriority="low"
           />
-          {settings.footerText && (
+          {settings.footerText ? (
             <p className="max-w-sm text-xs leading-6 text-white/55 font-body">{settings.footerText}</p>
-          )}
+          ) : null}
+
           <div className="mt-4 flex items-center gap-3">
             <a
-              href={INSTAGRAM_URL}
+              href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -48,24 +57,17 @@ const Footer = () => {
             >
               <Instagram className="h-3.5 w-3.5" />
             </a>
-            <a
-              href={settings.facebookUrl || "https://facebook.com"}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#1877F2] hover:text-white"
-            >
-              <Facebook className="h-3.5 w-3.5" />
-            </a>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white"
-            >
-              <WhatsAppIcon />
-            </a>
+            {whatsappUrl ? (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white"
+              >
+                <WhatsAppIcon />
+              </a>
+            ) : null}
           </div>
         </div>
 
@@ -73,51 +75,32 @@ const Footer = () => {
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Shop</p>
             <nav className="flex flex-col items-start gap-2">
-              <Link to="/products" className={footerLinkClass}>
-                All Products
-              </Link>
-              <Link to="/categories" className={footerLinkClass}>
-                Categories
-              </Link>
-              <Link to="/products?filter=new" className={footerLinkClass}>
-                New Launches
-              </Link>
-              <Link to="/products?filter=best" className={footerLinkClass}>
-                Best Sellers
-              </Link>
+              <Link to="/products" className={footerLinkClass}>All Products</Link>
+              <Link to="/categories" className={footerLinkClass}>Categories</Link>
+              <Link to="/products?filter=new" className={footerLinkClass}>New Launches</Link>
+              <Link to="/products?filter=best" className={footerLinkClass}>Best Sellers</Link>
             </nav>
           </div>
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Company</p>
             <nav className="flex flex-col items-start gap-2">
-              <Link to="/contact" className={footerLinkClass}>
-                Contact Us
-              </Link>
-              <Link to="/track-order" className={footerLinkClass}>
-                Track Order
-              </Link>
-              {catalogueUrl && (
-                <a href={catalogueUrl} className={footerLinkClass}>
-                  Catalogue
-                </a>
-              )}
+              <Link to="/contact" className={footerLinkClass}>Contact Us</Link>
+              <Link to="/track-order" className={footerLinkClass}>Track Order</Link>
+              {catalogueUrl ? (
+                <a href={catalogueUrl} className={footerLinkClass}>Catalogue</a>
+              ) : null}
+              {phoneHref ? (
+                <a href={phoneHref} className={footerLinkClass}>Call {phoneDisplay}</a>
+              ) : null}
             </nav>
           </div>
           <div className="col-span-2 space-y-3 text-left">
             <p className={footerHeadingClass}>Legal</p>
             <nav className="flex flex-col items-start gap-2">
-              <Link to="/privacy-policy" className={footerLinkClass}>
-                Privacy Policy
-              </Link>
-              <Link to="/terms-and-conditions" className={footerLinkClass}>
-                Terms & Conditions
-              </Link>
-              <Link to="/shipping-policy" className={footerLinkClass}>
-                Shipping Policy
-              </Link>
-              <Link to="/refund-policy" className={footerLinkClass}>
-                Refund Policy
-              </Link>
+              <Link to="/privacy-policy" className={footerLinkClass}>Privacy Policy</Link>
+              <Link to="/terms-and-conditions" className={footerLinkClass}>Terms & Conditions</Link>
+              <Link to="/shipping-policy" className={footerLinkClass}>Shipping Policy</Link>
+              <Link to="/refund-policy" className={footerLinkClass}>Refund Policy</Link>
             </nav>
           </div>
         </div>
@@ -132,94 +115,65 @@ const Footer = () => {
               labelClassName="text-xl"
               fetchPriority="low"
             />
-            {settings.footerText && (
+            {settings.footerText ? (
               <p className="max-w-sm text-xs leading-6 text-white/55 font-body">{settings.footerText}</p>
-            )}
+            ) : null}
+
             <div className="mt-5 flex items-center gap-3">
               <a
-                href={INSTAGRAM_URL}
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#E1306C] hover:text-white hover:scale-110"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:scale-110 hover:bg-[#E1306C] hover:text-white"
               >
                 <Instagram className="h-4 w-4" />
               </a>
-              <a
-                href={settings.facebookUrl || "https://facebook.com"}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#1877F2] hover:text-white hover:scale-110"
-              >
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:bg-[#25D366] hover:text-white hover:scale-110"
-              >
-                <WhatsAppIcon />
-              </a>
+              {whatsappUrl ? (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition-all duration-300 hover:scale-110 hover:bg-[#25D366] hover:text-white"
+                >
+                  <WhatsAppIcon />
+                </a>
+              ) : null}
             </div>
           </div>
           <div className="grid content-start items-start gap-x-8 gap-y-8 pt-2 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-4 text-left">
               <p className={footerHeadingClass}>Shop</p>
               <nav className="flex flex-col items-start gap-2.5">
-                <Link to="/products" className={footerLinkClass}>
-                  All Products
-                </Link>
-                <Link to="/categories" className={footerLinkClass}>
-                  Categories
-                </Link>
-                <Link to="/products?filter=new" className={footerLinkClass}>
-                  New Launches
-                </Link>
-                <Link to="/products?filter=best" className={footerLinkClass}>
-                  Best Sellers
-                </Link>
+                <Link to="/products" className={footerLinkClass}>All Products</Link>
+                <Link to="/categories" className={footerLinkClass}>Categories</Link>
+                <Link to="/products?filter=new" className={footerLinkClass}>New Launches</Link>
+                <Link to="/products?filter=best" className={footerLinkClass}>Best Sellers</Link>
               </nav>
             </div>
             <div className="space-y-4 text-left">
               <p className={footerHeadingClass}>Company</p>
               <nav className="flex flex-col items-start gap-2.5">
-                <Link to="/contact" className={footerLinkClass}>
-                  Contact Us
-                </Link>
-                <Link to="/track-order" className={footerLinkClass}>
-                  Track Order
-                </Link>
-                {catalogueUrl && (
-                  <a href={catalogueUrl} className={footerLinkClass}>
-                    Catalogue
-                  </a>
-                )}
+                <Link to="/contact" className={footerLinkClass}>Contact Us</Link>
+                <Link to="/track-order" className={footerLinkClass}>Track Order</Link>
+                {catalogueUrl ? <a href={catalogueUrl} className={footerLinkClass}>Catalogue</a> : null}
+                {phoneHref ? <a href={phoneHref} className={footerLinkClass}>Call {phoneDisplay}</a> : null}
               </nav>
             </div>
             <div className="space-y-4 text-left">
               <p className={footerHeadingClass}>Legal</p>
               <nav className="flex flex-col items-start gap-2.5">
-                <Link to="/privacy-policy" className={footerLinkClass}>
-                  Privacy Policy
-                </Link>
-                <Link to="/terms-and-conditions" className={footerLinkClass}>
-                  Terms & Conditions
-                </Link>
-                <Link to="/shipping-policy" className={footerLinkClass}>
-                  Shipping Policy
-                </Link>
-                <Link to="/refund-policy" className={footerLinkClass}>
-                  Refund Policy
-                </Link>
+                <Link to="/privacy-policy" className={footerLinkClass}>Privacy Policy</Link>
+                <Link to="/terms-and-conditions" className={footerLinkClass}>Terms & Conditions</Link>
+                <Link to="/shipping-policy" className={footerLinkClass}>Shipping Policy</Link>
+                <Link to="/refund-policy" className={footerLinkClass}>Refund Policy</Link>
               </nav>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-start gap-3 pt-5 text-[11px] font-body text-white/30 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col items-start gap-3 pt-5 text-[11px] text-white/30 font-body sm:flex-row sm:items-center sm:justify-between">
           <span>Copyright {new Date().getFullYear()} Gadget 69. All rights reserved.</span>
           <button
             onClick={scrollToTop}

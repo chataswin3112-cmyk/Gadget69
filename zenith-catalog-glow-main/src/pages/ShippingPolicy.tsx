@@ -2,7 +2,7 @@ import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import FloatingContactActions from "@/components/storefront/FloatingContactActions";
-import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/social-links";
+import { DEFAULT_WHATSAPP_NUMBER, formatPhoneDisplay, toWhatsAppUrl } from "@/lib/social-links";
 import {
   BUSINESS_NAME,
   ORDER_PROCESSING_WINDOW,
@@ -21,6 +21,9 @@ const deliveryNotes = [
   "Remote or non-metro locations may take longer than standard transit timelines.",
   "If a shipment is delayed, returned, or marked undeliverable, our support team will assist with the next steps.",
 ];
+
+const whatsappUrl = toWhatsAppUrl(DEFAULT_WHATSAPP_NUMBER);
+const whatsappDisplay = formatPhoneDisplay(DEFAULT_WHATSAPP_NUMBER);
 
 const ShippingPolicy = () => (
   <div className="min-h-screen bg-background">
@@ -93,12 +96,12 @@ const ShippingPolicy = () => (
               <p>
                 Phone / WhatsApp:{" "}
                 <a
-                  href={WHATSAPP_URL}
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-foreground transition-colors hover:text-accent"
                 >
-                  {WHATSAPP_DISPLAY}
+                  {whatsappDisplay}
                 </a>
               </p>
               <p>Support Hours: {SUPPORT_HOURS}</p>

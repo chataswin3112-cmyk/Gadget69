@@ -8,7 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { toast } from "@/hooks/use-toast";
 import { createOrder, verifyPayment } from "@/api/orderApi";
 import { getErrorMessage } from "@/lib/api-error";
-import { getEffectivePrice } from "@/lib/pricing";
+import { describeVariant } from "@/lib/catalog-media";
 import { resolveMediaUrl } from "@/lib/media";
 
 const RAZORPAY_SCRIPT_ID = "razorpay-checkout-js";
@@ -93,6 +93,9 @@ const resolveRazorpayBrandImage = () => {
   }
 };
 
+const getCheckoutItemUnitPrice = (item: (typeof useCart extends () => infer T ? T : never)["items"][number]) =>
+  item.unitPrice ?? item.product.offerPrice ?? item.product.price;
+
 const Checkout = () => {
   const { items, totalAmount, totalItems, clearCart } = useCart();
   const navigate = useNavigate();
@@ -128,8 +131,11 @@ const Checkout = () => {
         items: items.map((item) => ({
           productId: item.product.id,
           productName: item.product.name,
+          variantId: item.variantId,
+          variantColor: item.variantColor,
+          variantSize: item.variantSize,
           quantity: item.quantity,
-          price: getEffectivePrice(item.product),
+          price: getCheckoutItemUnitPrice(item),
         })),
       });
 
@@ -301,13 +307,17 @@ const Checkout = () => {
             <div className="sticky top-24 rounded-xl bg-card p-6 shadow-premium">
               <h2 className="mb-4 font-heading text-lg font-bold">Order Summary</h2>
               <div className="space-y-3 text-sm font-body">
-                {items.map((item) => (
-                  <div key={item.product.id} className="flex justify-between">
+                {items.map((item, index) => (
+                  <div key={item.lineId ?? `${item.product.id}-${item.variantId ?? "base"}-${index}`} className="flex justify-between gap-3">
                     <span className="mr-2 truncate text-muted-foreground">
-                      {item.product.name} x {item.quantity}
+                      {item.product.name}
+                      {describeVariant(item.variantColor, item.variantSize)
+                        ? ` (${describeVariant(item.variantColor, item.variantSize)})`
+                        : ""}
+                      {" "}x {item.quantity}
                     </span>
                     <span className="whitespace-nowrap font-medium">
-                      Rs. {(getEffectivePrice(item.product) * item.quantity).toLocaleString()}
+                      Rs. {(getCheckoutItemUnitPrice(item) * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}

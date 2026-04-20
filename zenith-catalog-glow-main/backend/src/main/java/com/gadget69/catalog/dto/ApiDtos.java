@@ -22,6 +22,22 @@ public final class ApiDtos {
 
   public record UploadResponse(String url, String fileName, String mediaType) {}
 
+  public record CatalogMediaUploadSignatureRequest(
+      String fileName,
+      String contentType,
+      Long fileSize,
+      String target
+  ) {}
+
+  public record CatalogMediaUploadSignatureResponse(
+      String cloudName,
+      String apiKey,
+      Long timestamp,
+      String signature,
+      String folder,
+      String resourceType
+  ) {}
+
   public record CommunityVideoUploadSignatureRequest(
       String fileName,
       String contentType,
@@ -103,7 +119,8 @@ public final class ApiDtos {
       String status,
       String default_thumbnail_url,
       List<String> galleryImages,
-      Map<String, String> specifications
+      Map<String, String> specifications,
+      List<ProductMediaPayload> media
   ) {}
 
   public record ProductResponse(
@@ -134,7 +151,8 @@ public final class ApiDtos {
       String default_thumbnail_url,
       List<String> galleryImages,
       Map<String, String> specifications,
-      List<VariantResponse> variants
+      List<VariantResponse> variants,
+      List<ProductMediaResponse> media
   ) {}
 
   public record BannerPayload(
@@ -168,8 +186,9 @@ public final class ApiDtos {
       String footerText,
       List<String> announcementItems,
       String instagramUrl,
-      String facebookUrl,
       String whatsappNumber,
+      String shopPhone,
+      String supportEmail,
       String catalogueUrl,
       String contactUrl
   ) {}
@@ -183,8 +202,9 @@ public final class ApiDtos {
       String footerText,
       List<String> announcementItems,
       String instagramUrl,
-      String facebookUrl,
       String whatsappNumber,
+      String shopPhone,
+      String supportEmail,
       String catalogueUrl,
       String contactUrl
   ) {}
@@ -242,6 +262,9 @@ public final class ApiDtos {
   public record OrderItemPayload(
       Long productId,
       String productName,
+      Long variantId,
+      String variantColor,
+      String variantSize,
       Integer quantity,
       BigDecimal price
   ) {}
@@ -297,10 +320,28 @@ public final class ApiDtos {
 
   // ── Variant DTOs ────────────────────────────────────────────────────────────
 
+  public record ProductMediaResponse(
+      Long id,
+      String mediaUrl,
+      String mediaType,
+      String mediaRole,
+      Integer displayOrder,
+      Boolean isPrimary
+  ) {}
+
+  public record ProductMediaPayload(
+      String mediaUrl,
+      String mediaType,
+      String mediaRole,
+      Integer displayOrder,
+      Boolean isPrimary
+  ) {}
+
   public record VariantMediaResponse(
       Long id,
       String mediaUrl,
       String mediaType,
+      String mediaRole,
       Integer displayOrder,
       Boolean isPrimary
   ) {}
@@ -335,6 +376,7 @@ public final class ApiDtos {
   public record VariantMediaPayload(
       String mediaUrl,
       String mediaType,
+      String mediaRole,
       Integer displayOrder,
       Boolean isPrimary
   ) {}

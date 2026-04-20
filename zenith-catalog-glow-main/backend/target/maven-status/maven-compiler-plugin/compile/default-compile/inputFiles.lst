@@ -22,6 +22,7 @@ C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\b
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\entity\CustomerOrder.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\entity\OrderItem.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\entity\Product.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\entity\ProductMedia.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\entity\ProductVariant.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\entity\Review.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\entity\Section.java
@@ -32,6 +33,7 @@ C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\b
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\BannerRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\CommunityMediaRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\CustomerOrderRepository.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\ProductMediaRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\ProductRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\ProductVariantRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\ReviewRepository.java
@@ -40,6 +42,7 @@ C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\b
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\repository\VariantMediaRepository.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\AuthTokenService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\CatalogSyncService.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\CloudinaryCatalogMediaService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\CloudinaryCommunityVideoService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\EmailNotificationService.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\main\java\com\gadget69\catalog\service\OrderStateSupport.java
