@@ -49,7 +49,6 @@ public class SeedDataService implements ApplicationRunner {
   @Override
   @Transactional
   public void run(ApplicationArguments args) {
-    ensureAdminUserTokenVersionColumn();
     seedAdmin();
     seedCatalog();
     seedSettings();
@@ -59,18 +58,6 @@ public class SeedDataService implements ApplicationRunner {
     backfillProductMedia();
     backfillVariantMediaRoles();
     dropLegacyFacebookColumn();
-  }
-
-  private void ensureAdminUserTokenVersionColumn() {
-    try {
-      jdbcTemplate.execute("""
-          ALTER TABLE admin_users
-          ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0 NOT NULL
-          """);
-      jdbcTemplate.update("UPDATE admin_users SET token_version = 0 WHERE token_version IS NULL");
-    } catch (Exception exception) {
-      LOGGER.debug("Skipping legacy admin_users token_version schema repair", exception);
-    }
   }
 
   private void seedAdmin() {

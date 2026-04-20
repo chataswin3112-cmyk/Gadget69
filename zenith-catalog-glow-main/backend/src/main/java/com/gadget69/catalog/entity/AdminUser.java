@@ -33,7 +33,7 @@ public class AdminUser {
   private String passwordHash;
 
   /** Incremented on every password change; invalidates all tokens issued before the change. */
-  @Column(name = "token_version", nullable = false)
+  @Column(name = "token_version", nullable = false, columnDefinition = "integer default 0")
   private Integer tokenVersion = 0;
 
   @Column(name = "created_at", nullable = false)
