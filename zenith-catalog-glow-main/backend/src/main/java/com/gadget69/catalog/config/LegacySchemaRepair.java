@@ -196,6 +196,7 @@ public class LegacySchemaRepair {
               FROM information_schema.columns
               WHERE UPPER(table_name) = UPPER(?)
                 AND UPPER(column_name) = UPPER(?)
+                AND table_schema NOT IN ('information_schema', 'pg_catalog')
               """,
           Integer.class,
           tableName,
@@ -214,6 +215,7 @@ public class LegacySchemaRepair {
               SELECT COUNT(*)
               FROM information_schema.tables
               WHERE UPPER(table_name) = UPPER(?)
+                AND table_schema NOT IN ('information_schema', 'pg_catalog')
               """,
           Integer.class,
           tableName);

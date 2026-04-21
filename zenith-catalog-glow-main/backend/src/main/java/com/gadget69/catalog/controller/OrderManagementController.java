@@ -40,6 +40,11 @@ public class OrderManagementController {
   private static final Logger log = LoggerFactory.getLogger(OrderManagementController.class);
   private static final Set<String> ADMIN_PAYMENT_STATUSES =
       Set.of("PENDING", "SUCCESS", "FAILED", "REFUNDED");
+  private static final Set<String> DISABLED_ORDER_STATUS_FILTER =
+      Set.of("__NO_ORDER_STATUS_FILTER__");
+  private static final Set<String> DISABLED_PAYMENT_STATUS_FILTER =
+      Set.of("__NO_PAYMENT_STATUS_FILTER__");
+  private static final LocalDateTime DISABLED_DATE_FILTER = LocalDateTime.of(1970, 1, 1, 0, 0);
 
   private final AuthTokenService authTokenService;
   private final CustomerOrderRepository customerOrderRepository;
@@ -62,12 +67,22 @@ public class OrderManagementController {
     List<CustomerOrder> orders;
     try {
       orders = customerOrderRepository.findAdminOrders(
-          normalizedFilters.orderStatuses(),
           !normalizedFilters.orderStatuses().isEmpty(),
-          normalizedFilters.paymentStatuses(),
+          normalizedFilters.orderStatuses().isEmpty()
+              ? DISABLED_ORDER_STATUS_FILTER
+              : normalizedFilters.orderStatuses(),
           !normalizedFilters.paymentStatuses().isEmpty(),
-          normalizedFilters.fromCreatedAt(),
-          normalizedFilters.toCreatedAtExclusive());
+          normalizedFilters.paymentStatuses().isEmpty()
+              ? DISABLED_PAYMENT_STATUS_FILTER
+              : normalizedFilters.paymentStatuses(),
+          normalizedFilters.fromCreatedAt() != null,
+          normalizedFilters.fromCreatedAt() == null
+              ? DISABLED_DATE_FILTER
+              : normalizedFilters.fromCreatedAt(),
+          normalizedFilters.toCreatedAtExclusive() != null,
+          normalizedFilters.toCreatedAtExclusive() == null
+              ? DISABLED_DATE_FILTER
+              : normalizedFilters.toCreatedAtExclusive());
     } catch (Exception ex) {
       log.error(
           "Admin orders query failed requestId={} adminId={} filters={}",
