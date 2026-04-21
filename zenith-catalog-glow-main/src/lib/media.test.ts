@@ -24,4 +24,9 @@ describe("resolveMediaUrl", () => {
       resolveMediaUrl("http://cdn.example.com/preview.png", "https://www.gadget69.in")
     ).toBe("");
   });
+
+  it("drops bare origin media URLs that would otherwise hit the site root", () => {
+    expect(resolveMediaUrl("https://www.gadget69.in", "https://www.gadget69.in")).toBe("");
+    expect(resolveMediaUrl("https://www.gadget69.in/", "https://www.gadget69.in")).toBe("");
+  });
 });

@@ -1,6 +1,7 @@
 package com.gadget69.catalog.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -163,5 +164,30 @@ class LegacySchemaRepairTest {
         Integer.class,
         1L);
     assertThat(quantity).isEqualTo(2);
+  }
+
+  @Test
+  void failsFastWhenExistingAdminOrderTablesStillMissCriticalColumns() {
+    jdbcTemplate.execute("""
+        CREATE TABLE customer_orders (
+          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+          customer_name VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP NOT NULL
+        )
+        """);
+    jdbcTemplate.execute("""
+        CREATE TABLE order_items (
+          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+          order_id BIGINT NOT NULL,
+          product_name VARCHAR(255) NOT NULL
+        )
+        """);
+
+    LegacySchemaRepair legacySchemaRepair = new LegacySchemaRepair(jdbcTemplate);
+
+    assertThatThrownBy(legacySchemaRepair::afterPropertiesSet)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("customer_orders")
+        .hasMessageContaining("address");
   }
 }

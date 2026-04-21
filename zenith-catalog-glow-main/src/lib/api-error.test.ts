@@ -1,5 +1,5 @@
 import type { AxiosError } from "axios";
-import { getErrorMessage } from "@/lib/api-error";
+import { getApiErrorDetails, getErrorMessage } from "@/lib/api-error";
 
 describe("getErrorMessage", () => {
   it("falls back to a friendlier message for generic 5xx responses", () => {
@@ -32,5 +32,24 @@ describe("getErrorMessage", () => {
     expect(getErrorMessage(error, "Failed to change password.")).toBe(
       "Current password is incorrect"
     );
+  });
+
+  it("extracts the backend request id alongside the fallback message", () => {
+    const error = {
+      isAxiosError: true,
+      message: "Request failed with status code 500",
+      response: {
+        status: 500,
+        data: {
+          message: "Unexpected server error",
+          requestId: "req-admin-orders-123",
+        },
+      },
+    } as AxiosError;
+
+    expect(getApiErrorDetails(error, "Failed to load orders.")).toEqual({
+      message: "Failed to load orders.",
+      requestId: "req-admin-orders-123",
+    });
   });
 });

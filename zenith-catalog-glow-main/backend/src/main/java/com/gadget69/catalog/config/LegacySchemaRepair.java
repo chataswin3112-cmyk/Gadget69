@@ -1,6 +1,8 @@
 package com.gadget69.catalog.config;
 
 import jakarta.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -27,6 +29,7 @@ public class LegacySchemaRepair {
     repairAdminUsers();
     repairCustomerOrders();
     repairOrderItems();
+    verifyAdminOrdersSchema();
   }
 
   private void repairAdminUsers() {
@@ -53,6 +56,8 @@ public class LegacySchemaRepair {
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS order_status VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN");
+    apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(255)");
+    apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS razorpay_payment_id VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS razorpay_signature VARCHAR(512)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS last_razorpay_event_id VARCHAR(255)");
     boolean legacyPhoneColumnExists = columnExists("customer_orders", "phone");
@@ -105,6 +110,73 @@ public class LegacySchemaRepair {
     apply("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_id BIGINT");
     apply("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_color VARCHAR(255)");
     apply("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_size VARCHAR(255)");
+  }
+
+  private void verifyAdminOrdersSchema() {
+    boolean customerOrdersExists = tableExists("customer_orders");
+    boolean orderItemsExists = tableExists("order_items");
+    if (!customerOrdersExists && !orderItemsExists) {
+      return;
+    }
+
+    requireTable("customer_orders");
+    requireColumns(
+        "customer_orders",
+        "customer_name",
+        "customer_phone",
+        "email",
+        "address",
+        "pincode",
+        "total_amount",
+        "currency",
+        "amount_paise",
+        "payment_status",
+        "order_status",
+        "razorpay_order_id",
+        "razorpay_payment_id",
+        "razorpay_signature",
+        "last_razorpay_event_id",
+        "created_at",
+        "updated_at",
+        "is_deleted");
+
+    requireTable("order_items");
+    requireColumns(
+        "order_items",
+        "order_id",
+        "product_id",
+        "product_name",
+        "quantity",
+        "price",
+        "variant_id",
+        "variant_color",
+        "variant_size");
+  }
+
+  private void requireTable(String tableName) {
+    if (!tableExists(tableName)) {
+      failSchemaVerification(
+          "Legacy schema repair could not prepare admin orders data. Required table '%s' is missing."
+              .formatted(tableName));
+    }
+  }
+
+  private void requireColumns(String tableName, String... columnNames) {
+    List<String> missingColumns =
+        Arrays.stream(columnNames)
+            .filter(columnName -> !columnExists(tableName, columnName))
+            .toList();
+
+    if (!missingColumns.isEmpty()) {
+      failSchemaVerification(
+          "Legacy schema repair could not prepare admin orders table '%s'. Missing required columns: %s"
+              .formatted(tableName, String.join(", ", missingColumns)));
+    }
+  }
+
+  private void failSchemaVerification(String message) {
+    log.error(message);
+    throw new IllegalStateException(message);
   }
 
   private void apply(String sql) {

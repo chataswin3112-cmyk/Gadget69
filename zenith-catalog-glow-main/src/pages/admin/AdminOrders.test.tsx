@@ -162,6 +162,75 @@ describe("AdminOrders", () => {
     clearIntervalSpy.mockRestore();
   });
 
+  it("pauses background polling after a failed load and resumes after a successful retry", async () => {
+    const intervalCallbacks: Array<() => void | Promise<void>> = [];
+    const setIntervalSpy = vi
+      .spyOn(window, "setInterval")
+      .mockImplementation(((callback: TimerHandler) => {
+        intervalCallbacks.push(callback as () => void | Promise<void>);
+        return 1 as unknown as number;
+      }) as typeof window.setInterval);
+    const clearIntervalSpy = vi.spyOn(window, "clearInterval").mockImplementation(() => {});
+
+    mockGetAdminOrders
+      .mockRejectedValueOnce({
+        isAxiosError: true,
+        message: "Request failed with status code 500",
+        response: {
+          status: 500,
+          data: {
+            message: "Unexpected server error",
+            requestId: "req-admin-orders-123",
+          },
+        },
+      })
+      .mockResolvedValue([
+        {
+          id: 65,
+          customerName: "Recovered",
+          phone: "9555555555",
+          email: "recovered@example.com",
+          address: "Signal Street",
+          pincode: "600050",
+          totalAmount: 3200,
+          paymentStatus: "SUCCESS",
+          orderStatus: "CONFIRMED",
+          createdAt: "2026-04-10T10:30:00",
+          items: [{ productId: 1, productName: "Alpha", quantity: 1, price: 3200 }],
+        },
+      ]);
+
+    render(
+      <MemoryRouter>
+        <AdminOrders />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Unable to load orders")).toBeInTheDocument();
+    expect(screen.getByText("Reference ID: req-admin-orders-123")).toBeInTheDocument();
+    expect(mockGetAdminOrders).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await intervalCallbacks[0]?.();
+    });
+
+    expect(mockGetAdminOrders).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => expect(mockGetAdminOrders).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText("Order #65")).toBeInTheDocument();
+
+    await act(async () => {
+      await intervalCallbacks[0]?.();
+    });
+
+    await waitFor(() => expect(mockGetAdminOrders).toHaveBeenCalledTimes(3));
+
+    setIntervalSpy.mockRestore();
+    clearIntervalSpy.mockRestore();
+  });
+
   it("pauses background polling while the page is hidden and refreshes when visible again", async () => {
     const intervalCallbacks: Array<() => void | Promise<void>> = [];
     const setIntervalSpy = vi

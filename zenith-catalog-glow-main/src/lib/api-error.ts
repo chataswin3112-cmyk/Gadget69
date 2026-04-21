@@ -5,21 +5,36 @@ const GENERIC_SERVER_MESSAGES = new Set([
   "Unexpected server error",
 ]);
 
-export const getErrorMessage = (error: unknown, fallback: string) => {
+const getApiErrorPayload = (error: unknown) => {
   if (axios.isAxiosError(error)) {
-    const serverMessage = (error.response?.data as { message?: string } | undefined)?.message?.trim();
+    return (error.response?.data as { message?: string; requestId?: string } | undefined) || undefined;
+  }
+
+  return undefined;
+};
+
+export const getApiErrorDetails = (error: unknown, fallback: string) => {
+  const payload = getApiErrorPayload(error);
+  const requestId = payload?.requestId?.trim() || null;
+
+  if (axios.isAxiosError(error)) {
+    const serverMessage = payload?.message?.trim();
     const status = error.response?.status;
 
     if (status && status >= 500 && (!serverMessage || GENERIC_SERVER_MESSAGES.has(serverMessage))) {
-      return fallback;
+      return { message: fallback, requestId };
     }
 
-    return serverMessage || error.message || fallback;
+    return { message: serverMessage || error.message || fallback, requestId };
   }
 
   if (error instanceof Error) {
-    return error.message;
+    return { message: error.message, requestId };
   }
 
-  return fallback;
+  return { message: fallback, requestId };
+};
+
+export const getErrorMessage = (error: unknown, fallback: string) => {
+  return getApiErrorDetails(error, fallback).message;
 };

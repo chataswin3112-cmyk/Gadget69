@@ -70,6 +70,10 @@ const isUnsafeAbsoluteMediaUrl = (candidateUrl: string, currentOrigin = resolveC
       return false;
     }
 
+    if (candidate.pathname === "/" && !candidate.search && !candidate.hash) {
+      return true;
+    }
+
     const apiOrigin = resolveApiOrigin();
     const allowedPrivateOrigins = new Set([currentOrigin, apiOrigin].filter(Boolean));
 

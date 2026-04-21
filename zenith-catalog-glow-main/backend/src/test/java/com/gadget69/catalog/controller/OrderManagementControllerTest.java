@@ -25,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -39,6 +40,9 @@ class OrderManagementControllerTest {
 
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   @MockBean
   private RazorpayPaymentService razorpayPaymentService;
@@ -182,6 +186,61 @@ class OrderManagementControllerTest {
         .andExpect(status().isBadRequest());
   }
 
+  @Test
+  void filtersAdminOrdersByDateRangeUsingWrappedResponse() throws Exception {
+    String token = loginAndExtractToken();
+    long productId = createProduct(token, "Date Filter Phone");
+
+    JsonNode mayOrder = createOrder(productId, "May Order", "9000001000", "may@example.com");
+    long mayOrderId = mayOrder.get("id").asLong();
+    updateOrderTimestamps(mayOrderId, "2026-05-10 09:15:00");
+
+    JsonNode juneOrder = createOrder(productId, "June Order", "9000002000", "june@example.com");
+    long juneOrderId = juneOrder.get("id").asLong();
+    updateOrderTimestamps(juneOrderId, "2026-06-10 10:45:00");
+
+    JsonNode fromDateOnlyResponse = readJson(
+        mockMvc.perform(get("/api/admin/orders")
+                .header("Authorization", "Bearer " + token)
+                .param("fromDate", "2026-05-01"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.appliedFilters.fromDate").value("2026-05-01"))
+            .andExpect(jsonPath("$.appliedFilters.toDate").value(org.hamcrest.Matchers.nullValue()))
+            .andReturn());
+
+    JsonNode fromDateOnlyItems = fromDateOnlyResponse.path("items");
+    assertEquals(fromDateOnlyItems.size(), fromDateOnlyResponse.path("total").asInt());
+    assertTrue(
+        StreamSupport.stream(fromDateOnlyItems.spliterator(), false)
+            .anyMatch(item -> item.path("id").asLong() == mayOrderId),
+        "Expected the fromDate filter to include the May order");
+    assertTrue(
+        StreamSupport.stream(fromDateOnlyItems.spliterator(), false)
+            .anyMatch(item -> item.path("id").asLong() == juneOrderId),
+        "Expected the fromDate filter to include the June order");
+
+    JsonNode boundedResponse = readJson(
+        mockMvc.perform(get("/api/admin/orders")
+                .header("Authorization", "Bearer " + token)
+                .param("fromDate", "2026-05-01")
+                .param("toDate", "2026-05-31"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.appliedFilters.fromDate").value("2026-05-01"))
+            .andExpect(jsonPath("$.appliedFilters.toDate").value("2026-05-31"))
+            .andReturn());
+
+    JsonNode boundedItems = boundedResponse.path("items");
+    assertEquals(boundedItems.size(), boundedResponse.path("total").asInt());
+    assertTrue(
+        StreamSupport.stream(boundedItems.spliterator(), false)
+            .anyMatch(item -> item.path("id").asLong() == mayOrderId),
+        "Expected the bounded date filter to keep the May order");
+    assertTrue(
+        StreamSupport.stream(boundedItems.spliterator(), false)
+            .noneMatch(item -> item.path("id").asLong() == juneOrderId),
+        "Expected the bounded date filter to exclude the June order");
+  }
+
   private long createProduct(String token, String productName) throws Exception {
     MvcResult createProductResult = mockMvc.perform(post("/api/admin/products")
             .header("Authorization", "Bearer " + token)
@@ -225,6 +284,18 @@ class OrderManagementControllerTest {
         .andReturn();
 
     return objectMapper.readTree(createOrderResult.getResponse().getContentAsString());
+  }
+
+  private void updateOrderTimestamps(long orderId, String timestamp) {
+    jdbcTemplate.update(
+        "UPDATE customer_orders SET created_at = CAST(? AS TIMESTAMP), updated_at = CAST(? AS TIMESTAMP) WHERE id = ?",
+        timestamp,
+        timestamp,
+        orderId);
+  }
+
+  private JsonNode readJson(MvcResult result) throws Exception {
+    return objectMapper.readTree(result.getResponse().getContentAsString());
   }
 
   private String loginAndExtractToken() throws Exception {

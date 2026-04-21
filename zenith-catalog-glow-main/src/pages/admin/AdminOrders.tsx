@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { getErrorMessage } from "@/lib/api-error";
+import { getApiErrorDetails } from "@/lib/api-error";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import MediaImage from "@/components/ui/media-image";
 import { cn } from "@/lib/utils";
@@ -228,6 +228,8 @@ const AdminOrders = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorRequestId, setErrorRequestId] = useState<string | null>(null);
+  const [isPollingPaused, setIsPollingPaused] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<OrderTab>("all");
@@ -248,11 +250,26 @@ const AdminOrders = () => {
       : false
   );
   const hasLoadedOrdersRef = useRef(false);
+  const pollingPausedRef = useRef(false);
 
   const productLookup = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
     [products]
   );
+
+  const syncPollingPaused = useCallback((paused: boolean) => {
+    pollingPausedRef.current = paused;
+    setIsPollingPaused(paused);
+  }, []);
+
+  const describeError = useCallback((value: unknown, fallback: string) => {
+    const { message, requestId } = getApiErrorDetails(value, fallback);
+    return {
+      message,
+      requestId,
+      description: requestId ? `${message} Reference ID: ${requestId}` : message,
+    };
+  }, []);
 
   const serverFilters = useMemo<OrderFilters>(
     () => ({
@@ -273,17 +290,22 @@ const AdminOrders = () => {
 
     try {
       setError(null);
+      setErrorRequestId(null);
       const data = await getAdminOrders(serverFilters);
       setOrders(data.filter((order) => !order.isDeleted));
       setLastUpdated(new Date());
       hasLoadedOrdersRef.current = true;
+      syncPollingPaused(false);
     } catch (loadError) {
-      setError(getErrorMessage(loadError, "Failed to load orders."));
+      const { message, requestId } = describeError(loadError, "Failed to load orders.");
+      setError(message);
+      setErrorRequestId(requestId);
+      syncPollingPaused(true);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [serverFilters]);
+  }, [describeError, serverFilters, syncPollingPaused]);
 
   useEffect(() => {
     void ensureProductsLoaded();
@@ -311,13 +333,19 @@ const AdminOrders = () => {
     void loadOrders();
 
     const refreshWhenVisible = () => {
-      if (typeof document === "undefined" || document.visibilityState === "visible") {
+      if (
+        !pollingPausedRef.current &&
+        (typeof document === "undefined" || document.visibilityState === "visible")
+      ) {
         void loadOrders();
       }
     };
 
     const intervalId = window.setInterval(() => {
-      if (typeof document === "undefined" || document.visibilityState === "visible") {
+      if (
+        !pollingPausedRef.current &&
+        (typeof document === "undefined" || document.visibilityState === "visible")
+      ) {
         void loadOrders();
       }
     }, AUTO_REFRESH_MS);
@@ -394,9 +422,10 @@ const AdminOrders = () => {
       });
       setEditMode(false);
     } catch (viewError) {
+      const { description } = describeError(viewError, "Please try again.");
       toast({
         title: "Unable to load order details",
-        description: getErrorMessage(viewError, "Please try again."),
+        description,
         variant: "destructive",
       });
       setDetailsOpen(false);
@@ -420,9 +449,10 @@ const AdminOrders = () => {
         description: `Status changed to ${normalizeOrderStatus(updated.orderStatus)}.`,
       });
     } catch (statusError) {
+      const { description } = describeError(statusError, "Please try again.");
       toast({
         title: "Failed to update status",
-        description: getErrorMessage(statusError, "Please try again."),
+        description,
         variant: "destructive",
       });
     } finally {
@@ -454,9 +484,10 @@ const AdminOrders = () => {
       });
       setEditMode(false);
     } catch (error) {
+      const { description } = describeError(error, "Please try again.");
       toast({
         title: "Failed to update details",
-        description: getErrorMessage(error, "Please try again."),
+        description,
         variant: "destructive",
       });
     } finally {
@@ -479,9 +510,10 @@ const AdminOrders = () => {
         description: "The order status has been set to CANCELLED.",
       });
     } catch (cancelError) {
+      const { description } = describeError(cancelError, "Please try again.");
       toast({
         title: "Failed to cancel order",
-        description: getErrorMessage(cancelError, "Please try again."),
+        description,
         variant: "destructive",
       });
     } finally {
@@ -504,9 +536,10 @@ const AdminOrders = () => {
         description: "The order has been removed from the active admin list.",
       });
     } catch (archiveError) {
+      const { description } = describeError(archiveError, "Please try again.");
       toast({
         title: "Failed to archive order",
-        description: getErrorMessage(archiveError, "Please try again."),
+        description,
         variant: "destructive",
       });
     } finally {
@@ -541,9 +574,10 @@ const AdminOrders = () => {
         description: "The order was removed permanently.",
       });
     } catch (deleteError) {
+      const { description } = describeError(deleteError, "Please try again.");
       toast({
         title: "Failed to delete order",
-        description: getErrorMessage(deleteError, "Please try again."),
+        description,
         variant: "destructive",
       });
     } finally {
@@ -721,7 +755,12 @@ const AdminOrders = () => {
                     {orders.length > 0 ? "Live refresh paused" : "Unable to load orders"}
                   </p>
                   <p className="mt-1 font-body">{error}</p>
-                  {orders.length > 0 && (
+                  {errorRequestId && (
+                    <p className="mt-1 text-xs font-body text-muted-foreground">
+                      Reference ID: {errorRequestId}
+                    </p>
+                  )}
+                  {orders.length > 0 && isPollingPaused && (
                     <p className="mt-1 text-xs font-body text-amber-800/80">
                       Showing the last successful snapshot while the server recovers.
                     </p>

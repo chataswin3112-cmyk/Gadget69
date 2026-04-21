@@ -71,7 +71,19 @@ class OrderManagementLegacySchemaCompatibilityTest {
     JsonNode order = createOrder(productId, "Riya", "9876543210", "riya@example.com");
     long orderId = order.get("id").asLong();
 
+    jdbcTemplate.update(
+        "UPDATE customer_orders SET created_at = CAST(? AS TIMESTAMP), updated_at = CAST(? AS TIMESTAMP) WHERE id = ?",
+        "2026-05-10 11:30:00",
+        "2026-05-10 11:30:00",
+        orderId);
+    jdbcTemplate.execute("ALTER TABLE customer_orders ADD COLUMN phone VARCHAR(255)");
+    jdbcTemplate.update("UPDATE customer_orders SET phone = ? WHERE id = ?", "9876543210", orderId);
+    jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS customer_phone");
     jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS email");
+    jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS order_status");
+    jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS payment_status");
+    jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS updated_at");
+    jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS is_deleted");
     jdbcTemplate.execute("ALTER TABLE order_items DROP COLUMN IF EXISTS variant_id");
     jdbcTemplate.execute("ALTER TABLE order_items DROP COLUMN IF EXISTS variant_color");
     jdbcTemplate.execute("ALTER TABLE order_items DROP COLUMN IF EXISTS variant_size");
@@ -88,6 +100,16 @@ class OrderManagementLegacySchemaCompatibilityTest {
         .andExpect(jsonPath("$.appliedFilters.paymentStatus").value(org.hamcrest.Matchers.nullValue()))
         .andExpect(jsonPath("$.appliedFilters.fromDate").value(org.hamcrest.Matchers.nullValue()))
         .andExpect(jsonPath("$.appliedFilters.toDate").value(org.hamcrest.Matchers.nullValue()));
+
+    mockMvc.perform(get("/api/admin/orders")
+            .header("Authorization", "Bearer " + token)
+            .param("fromDate", "2026-05-01")
+            .param("toDate", "2026-05-31"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].id").value(orderId))
+        .andExpect(jsonPath("$.total").value(1))
+        .andExpect(jsonPath("$.appliedFilters.fromDate").value("2026-05-01"))
+        .andExpect(jsonPath("$.appliedFilters.toDate").value("2026-05-31"));
 
     mockMvc.perform(get("/api/admin/orders/{id}", orderId)
             .header("Authorization", "Bearer " + token))
