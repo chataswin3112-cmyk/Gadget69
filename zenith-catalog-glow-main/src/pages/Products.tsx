@@ -1,4 +1,4 @@
-import { useState, useMemo, type CSSProperties } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
@@ -22,58 +22,84 @@ const sortOptions = [
   { key: "name", label: "Name A-Z" },
 ];
 
+const INITIAL_VISIBLE_PRODUCTS = 12;
+
 const Products = () => {
-  const { products: allProducts, sections } = useAdminData();
+  const {
+    products: allProducts,
+    sections,
+    ensureProductsLoaded,
+    ensureSectionsLoaded,
+    isLoading,
+  } = useAdminData();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeFilter = searchParams.get("filter") || "all";
 
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_PRODUCTS);
+
+  const deferredSearch = useDeferredValue(search);
+  const deferredSortBy = useDeferredValue(sortBy);
+  const deferredCategoryFilter = useDeferredValue(categoryFilter);
+
+  useEffect(() => {
+    void Promise.all([ensureProductsLoaded(), ensureSectionsLoaded()]);
+  }, [ensureProductsLoaded, ensureSectionsLoaded]);
 
   const filtered = useMemo(() => {
     let products = [...allProducts];
 
-    // Tab filter
     if (activeFilter === "new") {
-      products = products.filter((p) => p.is_new_launch);
+      products = products.filter((product) => product.is_new_launch);
     } else if (activeFilter === "best") {
-      products = products.filter((p) => p.is_best_seller);
+      products = products.filter((product) => product.is_best_seller);
     }
 
-    // Category filter
-    if (categoryFilter !== "all") {
-      products = products.filter((p) => p.sectionId === Number(categoryFilter));
+    if (deferredCategoryFilter !== "all") {
+      products = products.filter((product) => product.sectionId === Number(deferredCategoryFilter));
     }
 
-    // Search
-    if (search.trim()) {
-      const q = search.toLowerCase();
+    if (deferredSearch.trim()) {
+      const query = deferredSearch.toLowerCase();
       products = products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.model_number?.toLowerCase().includes(q) ||
-          p.sectionName?.toLowerCase().includes(q)
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.model_number?.toLowerCase().includes(query) ||
+          product.sectionName?.toLowerCase().includes(query)
       );
     }
 
-    // Sort
-    switch (sortBy) {
+    switch (deferredSortBy) {
       case "price-asc":
-        products.sort((a, b) => a.price - b.price);
+        products.sort((left, right) => left.price - right.price);
         break;
       case "price-desc":
-        products.sort((a, b) => b.price - a.price);
+        products.sort((left, right) => right.price - left.price);
         break;
       case "name":
-        products.sort((a, b) => a.name.localeCompare(b.name));
+        products.sort((left, right) => left.name.localeCompare(right.name));
         break;
       default:
-        products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        products.sort(
+          (left, right) =>
+            new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+        );
     }
 
     return products;
-  }, [allProducts, search, activeFilter, sortBy, categoryFilter]);
+  }, [activeFilter, allProducts, deferredCategoryFilter, deferredSearch, deferredSortBy]);
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_PRODUCTS);
+  }, [activeFilter, deferredCategoryFilter, deferredSearch, deferredSortBy]);
+
+  const visibleProducts = useMemo(
+    () => filtered.slice(0, visibleCount),
+    [filtered, visibleCount]
+  );
+  const hasMoreProducts = visibleCount < filtered.length;
 
   const handleFilterChange = (key: string) => {
     const nextSearchParams = new URLSearchParams(searchParams);
@@ -95,8 +121,7 @@ const Products = () => {
       <div className="section-container pt-8 pb-4">
         <SectionHeader title="Products" subtitle={`${filtered.length} products`} />
 
-        {/* Filter tabs */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="mb-6 flex flex-wrap gap-2">
           {filterTabs.map((tab) => (
             <button
               key={tab.key}
@@ -112,66 +137,84 @@ const Products = () => {
           ))}
         </div>
 
-        {/* Search + filters row */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+        <div className="flex flex-col gap-3 sm:flex-row mb-8">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search products..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring font-body"
+              onChange={(event) => setSearch(event.target.value)}
+              className="w-full rounded-lg border border-input bg-card py-2.5 pl-10 pr-4 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <select
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-lg border border-input bg-card text-sm font-body"
+            onChange={(event) => setCategoryFilter(event.target.value)}
+            className="rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body"
           >
             <option value="all">All Categories</option>
-            {sections.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
+            {sections.map((section) => (
+              <option key={section.id} value={section.id}>
+                {section.name}
               </option>
             ))}
           </select>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2.5 rounded-lg border border-input bg-card text-sm font-body"
+            onChange={(event) => setSortBy(event.target.value)}
+            className="rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body"
           >
-            {sortOptions.map((o) => (
-              <option key={o.key} value={o.key}>
-                {o.label}
+            {sortOptions.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.label}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* Product grid */}
       <div className="section-container pb-16">
-        {filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg font-body">No products found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
-            {filtered.map((product, i) => (
-              <div
-                key={product.id}
-                className="enter-fade-up"
-                style={
-                  {
-                    "--enter-delay": `${Math.min(i * 30, 180)}ms`,
-                  } as CSSProperties
-                }
-              >
-                <ProductCard product={product} />
-              </div>
+        {isLoading && allProducts.length === 0 ? (
+          <div className="grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="aspect-[0.78] animate-pulse rounded-2xl bg-secondary/40" />
             ))}
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-20 text-center">
+            <p className="text-lg font-body text-muted-foreground">No products found</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {visibleProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="enter-fade-up"
+                  style={
+                    {
+                      "--enter-delay": `${Math.min(index * 30, 180)}ms`,
+                    } as CSSProperties
+                  }
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+
+            {hasMoreProducts ? (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((current) => current + INITIAL_VISIBLE_PRODUCTS)}
+                  className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition hover:border-accent/40 hover:text-accent"
+                >
+                  Load More Products
+                </button>
+              </div>
+            ) : null}
+          </>
         )}
       </div>
 

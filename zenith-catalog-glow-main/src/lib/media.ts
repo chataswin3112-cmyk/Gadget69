@@ -93,7 +93,13 @@ const isUnsafeAbsoluteMediaUrl = (candidateUrl: string, currentOrigin = resolveC
   }
 };
 
-const optimizeCloudinaryUrl = (candidateUrl: string) => {
+const optimizeCloudinaryUrl = (
+  candidateUrl: string,
+  options?: {
+    width?: number;
+    height?: number;
+  }
+) => {
   try {
     const parsed = new URL(candidateUrl);
     if (parsed.hostname !== CLOUDINARY_HOST) {
@@ -113,12 +119,20 @@ const optimizeCloudinaryUrl = (candidateUrl: string) => {
     }
 
     const resourceType = segments[uploadIndex - 1];
-    const transformation =
+    const transforms =
       resourceType === "video"
-        ? "f_auto,q_auto,vc_auto"
-        : "f_auto,q_auto,dpr_auto";
+        ? ["f_auto", "q_auto", "vc_auto"]
+        : ["c_limit", "f_auto", "q_auto", "dpr_auto"];
 
-    segments.splice(uploadIndex + 1, 0, transformation);
+    if (typeof options?.width === "number" && options.width > 0) {
+      transforms.push(`w_${Math.round(options.width)}`);
+    }
+
+    if (typeof options?.height === "number" && options.height > 0) {
+      transforms.push(`h_${Math.round(options.height)}`);
+    }
+
+    segments.splice(uploadIndex + 1, 0, transforms.join(","));
     parsed.pathname = segments.join("/");
     return parsed.toString();
   } catch {
@@ -126,7 +140,14 @@ const optimizeCloudinaryUrl = (candidateUrl: string) => {
   }
 };
 
-export const resolveMediaUrl = (url?: string | null, currentOrigin = resolveCurrentOrigin()) => {
+const resolveNormalizedMediaUrl = (
+  url?: string | null,
+  currentOrigin = resolveCurrentOrigin(),
+  options?: {
+    width?: number;
+    height?: number;
+  }
+) => {
   if (!url) return "";
 
   const normalized = url.trim();
@@ -136,20 +157,35 @@ export const resolveMediaUrl = (url?: string | null, currentOrigin = resolveCurr
     if (isUnsafeAbsoluteMediaUrl(normalized, currentOrigin)) {
       return "";
     }
-    return optimizeCloudinaryUrl(normalized);
+    return optimizeCloudinaryUrl(normalized, options);
   }
 
   if (normalized.startsWith("/uploads/")) {
     const apiOrigin = resolveApiOrigin();
     const resolvedUploadUrl = apiOrigin ? `${apiOrigin}${normalized}` : normalized;
     if (/^(https?:|data:|blob:)/i.test(resolvedUploadUrl)) {
-      return isUnsafeAbsoluteMediaUrl(resolvedUploadUrl, currentOrigin) ? "" : resolvedUploadUrl;
+      return isUnsafeAbsoluteMediaUrl(resolvedUploadUrl, currentOrigin)
+        ? ""
+        : resolvedUploadUrl;
     }
     return resolvedUploadUrl;
   }
 
   return normalized;
 };
+
+export const resolveMediaUrl = (url?: string | null, currentOrigin = resolveCurrentOrigin()) => {
+  return resolveNormalizedMediaUrl(url, currentOrigin);
+};
+
+export const resolveResponsiveMediaUrl = (
+  url?: string | null,
+  options?: {
+    width?: number;
+    height?: number;
+  },
+  currentOrigin = resolveCurrentOrigin()
+) => resolveNormalizedMediaUrl(url, currentOrigin, options);
 
 export const uniqueMediaUrls = (urls: Array<string | null | undefined>) =>
   Array.from(

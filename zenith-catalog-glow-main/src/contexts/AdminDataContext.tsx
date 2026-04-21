@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Banner, CommunityMedia, Product, Review, Section, StoreSettings } from "@/types";
@@ -47,6 +48,16 @@ import {
 } from "@/api/reviewApi";
 import { resolveMediaUrl } from "@/lib/media";
 
+type AdminDataResourceKey =
+  | "sections"
+  | "products"
+  | "banners"
+  | "settings"
+  | "communityMedia"
+  | "reviews";
+
+type ResourceLoadMap = Record<AdminDataResourceKey, boolean>;
+
 interface AdminDataContextType {
   sections: Section[];
   products: Product[];
@@ -56,6 +67,12 @@ interface AdminDataContextType {
   reviews: Review[];
   isLoading: boolean;
   refreshAll: () => Promise<void>;
+  ensureSectionsLoaded: () => Promise<void>;
+  ensureProductsLoaded: () => Promise<void>;
+  ensureBannersLoaded: () => Promise<void>;
+  ensureSettingsLoaded: () => Promise<void>;
+  ensureCommunityMediaLoaded: () => Promise<void>;
+  ensureReviewsLoaded: () => Promise<void>;
   addSection: (section: Partial<Section>) => Promise<Section>;
   updateSection: (id: number, data: Partial<Section>) => Promise<Section>;
   deleteSection: (id: number) => Promise<void>;
@@ -73,6 +90,15 @@ interface AdminDataContextType {
   updateReview: (id: number, data: Partial<Review>) => Promise<Review>;
   deleteReview: (id: number) => Promise<void>;
 }
+
+const ADMIN_DATA_RESOURCES: AdminDataResourceKey[] = [
+  "sections",
+  "products",
+  "banners",
+  "settings",
+  "communityMedia",
+  "reviews",
+];
 
 const defaultSettings: StoreSettings = {
   id: 1,
@@ -105,11 +131,12 @@ const sortReviews = (items: Review[]) =>
   [...items].sort((a, b) => (b.date || "").localeCompare(a.date || "") || b.id - a.id);
 
 const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
-const CATALOG_CACHE_VERSION = 1;
+const CATALOG_CACHE_VERSION = 2;
 
 interface CatalogCacheSnapshot {
   banners: Banner[];
   communityMedia: CommunityMedia[];
+  loadedResources: AdminDataResourceKey[];
   products: Product[];
   reviews: Review[];
   sections: Section[];
@@ -117,6 +144,26 @@ interface CatalogCacheSnapshot {
   timestamp: number;
   version: number;
 }
+
+const emptyLoadedResourceMap = (): ResourceLoadMap => ({
+  sections: false,
+  products: false,
+  banners: false,
+  settings: false,
+  communityMedia: false,
+  reviews: false,
+});
+
+const buildLoadedResourceMap = (resources: AdminDataResourceKey[] = []): ResourceLoadMap => {
+  const next = emptyLoadedResourceMap();
+  resources.forEach((resource) => {
+    next[resource] = true;
+  });
+  return next;
+};
+
+const getLoadedResourceList = (state: ResourceLoadMap) =>
+  ADMIN_DATA_RESOURCES.filter((resource) => state[resource]);
 
 const getCatalogCacheKey = (isAuthenticated: boolean) =>
   `gadget69_catalog_cache_${isAuthenticated ? "admin" : "public"}`;
@@ -141,9 +188,16 @@ const loadCatalogCache = (isAuthenticated: boolean): CatalogCacheSnapshot | null
       return null;
     }
 
+    const loadedResources = Array.isArray(parsed.loadedResources)
+      ? parsed.loadedResources.filter((value): value is AdminDataResourceKey =>
+          ADMIN_DATA_RESOURCES.includes(value as AdminDataResourceKey)
+        )
+      : [];
+
     return {
       banners: Array.isArray(parsed.banners) ? parsed.banners : [],
       communityMedia: Array.isArray(parsed.communityMedia) ? parsed.communityMedia : [],
+      loadedResources,
       products: Array.isArray(parsed.products) ? parsed.products : [],
       reviews: Array.isArray(parsed.reviews) ? parsed.reviews : [],
       sections: Array.isArray(parsed.sections) ? parsed.sections : [],
@@ -176,9 +230,21 @@ const persistCatalogCache = (
   window.localStorage.setItem(getCatalogCacheKey(isAuthenticated), JSON.stringify(payload));
 };
 
-export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AdminDataProviderProps {
+  children: React.ReactNode;
+  eager?: boolean;
+}
+
+export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
+  children,
+  eager = true,
+}) => {
   const { isAuthenticated } = useAuth();
   const initialCache = useMemo(() => loadCatalogCache(isAuthenticated), [isAuthenticated]);
+  const initialLoadedResources = useMemo(
+    () => buildLoadedResourceMap(initialCache?.loadedResources),
+    [initialCache?.loadedResources]
+  );
   const [sections, setSections] = useState<Section[]>(initialCache?.sections ?? []);
   const [products, setProducts] = useState<Product[]>(initialCache?.products ?? []);
   const [banners, setBanners] = useState<Banner[]>(initialCache?.banners ?? []);
@@ -187,97 +253,179 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     initialCache?.communityMedia ?? []
   );
   const [reviews, setReviews] = useState<Review[]>(initialCache?.reviews ?? []);
-  const [isLoading, setIsLoading] = useState(!initialCache);
+  const [loadedResources, setLoadedResources] = useState<ResourceLoadMap>(initialLoadedResources);
+  const [activeLoads, setActiveLoads] = useState(0);
+  const inFlightLoadsRef = useRef<Partial<Record<AdminDataResourceKey, Promise<void>>>>({});
+  const loadedResourcesRef = useRef<ResourceLoadMap>(initialLoadedResources);
 
-  const applySnapshot = useCallback(
-    (snapshot: Omit<CatalogCacheSnapshot, "timestamp" | "version">) => {
-      startTransition(() => {
-        setSections(snapshot.sections);
-        setProducts(snapshot.products);
-        setBanners(snapshot.banners);
-        setSettings(snapshot.settings);
-        setCommunityMedia(snapshot.communityMedia);
-        setReviews(snapshot.reviews);
-        setIsLoading(false);
-      });
-    },
-    []
-  );
+  useEffect(() => {
+    loadedResourcesRef.current = loadedResources;
+  }, [loadedResources]);
 
-  const loadAll = useCallback(async (showLoader: boolean) => {
-    if (showLoader) {
-      setIsLoading(true);
-    }
+  const applyCache = useCallback((cache: CatalogCacheSnapshot | null) => {
+    const nextLoadedResources = buildLoadedResourceMap(cache?.loadedResources);
+    loadedResourcesRef.current = nextLoadedResources;
 
-    const safeFetch = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
-      try {
-        return await fn();
-      } catch {
-        return fallback;
-      }
+    startTransition(() => {
+      setSections(cache?.sections ?? []);
+      setProducts(cache?.products ?? []);
+      setBanners(cache?.banners ?? []);
+      setSettings(cache?.settings ?? defaultSettings);
+      setCommunityMedia(cache?.communityMedia ?? []);
+      setReviews(cache?.reviews ?? []);
+      setLoadedResources(nextLoadedResources);
+      setActiveLoads(0);
+    });
+  }, []);
+
+  const updateLoadedState = useCallback((resource: AdminDataResourceKey) => {
+    loadedResourcesRef.current = {
+      ...loadedResourcesRef.current,
+      [resource]: true,
     };
+    setLoadedResources((current) =>
+      current[resource] ? current : { ...current, [resource]: true }
+    );
+  }, []);
+
+  const runWithLoader = useCallback(async <T,>(showLoader: boolean, task: () => Promise<T>) => {
+    if (showLoader) {
+      setActiveLoads((current) => current + 1);
+    }
 
     try {
-      const [sectionsData, productsData, bannersData, settingsData, communityData, reviewsData] =
-        await Promise.all([
-          safeFetch(isAuthenticated ? getAdminSections : getSections, [] as Section[]),
-          safeFetch(isAuthenticated ? getAdminProducts : getProducts, [] as Product[]),
-          safeFetch(isAuthenticated ? getAdminBanners : getBanners, [] as Banner[]),
-          safeFetch(isAuthenticated ? getAdminSettings : getSettings, defaultSettings),
-          safeFetch(isAuthenticated ? getAdminCommunityMedia : getCommunityMedia, [] as CommunityMedia[]),
-          safeFetch(isAuthenticated ? getAdminReviews : getReviews, [] as Review[]),
-        ]);
-
-      const snapshot = {
-        sections: sortSections(sectionsData as Section[]),
-        products: sortProducts(productsData as Product[]),
-        banners: sortBanners(bannersData as Banner[]),
-        settings: settingsData as StoreSettings,
-        communityMedia: sortCommunity(communityData as CommunityMedia[]),
-        reviews: sortReviews(reviewsData as Review[]),
-      };
-
-      persistCatalogCache(isAuthenticated, snapshot);
-      applySnapshot(snapshot);
-    } catch (error) {
-      console.warn("Unexpected error loading catalog data", error);
-      applySnapshot({
-        sections: [],
-        products: [],
-        banners: [],
-        settings: defaultSettings,
-        communityMedia: [],
-        reviews: [],
-      });
+      return await task();
     } finally {
-      if (!showLoader) {
-        setIsLoading(false);
+      if (showLoader) {
+        setActiveLoads((current) => Math.max(0, current - 1));
       }
     }
-  }, [applySnapshot, isAuthenticated]);
+  }, []);
+
+  const loadResource = useCallback(
+    async (
+      resource: AdminDataResourceKey,
+      options: {
+        force?: boolean;
+        showLoader?: boolean;
+      } = {}
+    ) => {
+      const { force = false, showLoader = !loadedResourcesRef.current[resource] } = options;
+
+      if (!force && loadedResourcesRef.current[resource]) {
+        return;
+      }
+
+      const existingRequest = inFlightLoadsRef.current[resource];
+      if (existingRequest) {
+        return existingRequest;
+      }
+
+      const request = runWithLoader(showLoader, async () => {
+        try {
+          switch (resource) {
+            case "sections": {
+              const data = await (isAuthenticated ? getAdminSections : getSections)();
+              startTransition(() => setSections(sortSections(data)));
+              break;
+            }
+            case "products": {
+              const data = await (isAuthenticated ? getAdminProducts : getProducts)();
+              startTransition(() => setProducts(sortProducts(data)));
+              break;
+            }
+            case "banners": {
+              const data = await (isAuthenticated ? getAdminBanners : getBanners)();
+              startTransition(() => setBanners(sortBanners(data)));
+              break;
+            }
+            case "settings": {
+              const data = await (isAuthenticated ? getAdminSettings : getSettings)();
+              startTransition(() => setSettings(data));
+              break;
+            }
+            case "communityMedia": {
+              const data = await (
+                isAuthenticated ? getAdminCommunityMedia : getCommunityMedia
+              )();
+              startTransition(() => setCommunityMedia(sortCommunity(data)));
+              break;
+            }
+            case "reviews": {
+              const data = await (isAuthenticated ? getAdminReviews : getReviews)();
+              startTransition(() => setReviews(sortReviews(data)));
+              break;
+            }
+          }
+
+          updateLoadedState(resource);
+        } catch (error) {
+          console.warn(`Failed to load ${resource}`, error);
+          throw error;
+        } finally {
+          delete inFlightLoadsRef.current[resource];
+        }
+      });
+
+      inFlightLoadsRef.current[resource] = request;
+      return request;
+    },
+    [isAuthenticated, runWithLoader, updateLoadedState]
+  );
+
+  const ensureSectionsLoaded = useCallback(
+    () => loadResource("sections"),
+    [loadResource]
+  );
+  const ensureProductsLoaded = useCallback(
+    () => loadResource("products"),
+    [loadResource]
+  );
+  const ensureBannersLoaded = useCallback(
+    () => loadResource("banners"),
+    [loadResource]
+  );
+  const ensureSettingsLoaded = useCallback(
+    () => loadResource("settings"),
+    [loadResource]
+  );
+  const ensureCommunityMediaLoaded = useCallback(
+    () => loadResource("communityMedia"),
+    [loadResource]
+  );
+  const ensureReviewsLoaded = useCallback(
+    () => loadResource("reviews"),
+    [loadResource]
+  );
 
   const refreshAll = useCallback(async () => {
-    await loadAll(true);
-  }, [loadAll]);
+    await Promise.all(
+      ADMIN_DATA_RESOURCES.map((resource) =>
+        loadResource(resource, {
+          force: true,
+          showLoader: true,
+        })
+      )
+    );
+  }, [loadResource]);
 
   useEffect(() => {
     const cached = loadCatalogCache(isAuthenticated);
-    if (cached) {
-      applySnapshot({
-        sections: cached.sections,
-        products: cached.products,
-        banners: cached.banners,
-        settings: cached.settings,
-        communityMedia: cached.communityMedia,
-        reviews: cached.reviews,
-      });
-      void loadAll(false);
+    applyCache(cached);
+
+    if (!eager) {
       return;
     }
 
-    setIsLoading(true);
-    void loadAll(true);
-  }, [applySnapshot, isAuthenticated, loadAll]);
+    void Promise.all(
+      ADMIN_DATA_RESOURCES.map((resource) =>
+        loadResource(resource, {
+          force: Boolean(cached),
+          showLoader: !cached,
+        })
+      )
+    );
+  }, [applyCache, eager, isAuthenticated, loadResource]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -308,110 +456,137 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [settings.faviconUrl, settings.metaDescription, settings.siteTitle]);
 
   useEffect(() => {
-    if (isLoading) {
+    const loadedResourceList = getLoadedResourceList(loadedResources);
+    if (!loadedResourceList.length) {
       return;
     }
 
     persistCatalogCache(isAuthenticated, {
-      sections,
-      products,
       banners,
-      settings,
       communityMedia,
+      loadedResources: loadedResourceList,
+      products,
       reviews,
+      sections,
+      settings,
     });
-  }, [banners, communityMedia, isAuthenticated, isLoading, products, reviews, sections, settings]);
+  }, [
+    banners,
+    communityMedia,
+    isAuthenticated,
+    loadedResources,
+    products,
+    reviews,
+    sections,
+    settings,
+  ]);
 
   const addSection = useCallback(async (section: Partial<Section>) => {
     const created = await createSectionApi(section);
+    updateLoadedState("sections");
     setSections((prev) => sortSections([...prev, created]));
     return created;
-  }, []);
+  }, [updateLoadedState]);
 
   const updateSection = useCallback(async (id: number, data: Partial<Section>) => {
     const updated = await updateSectionApi(id, data);
+    updateLoadedState("sections");
     setSections((prev) => sortSections(prev.map((item) => (item.id === id ? updated : item))));
     return updated;
-  }, []);
+  }, [updateLoadedState]);
 
   const deleteSection = useCallback(async (id: number) => {
     await deleteSectionApi(id);
+    updateLoadedState("sections");
     setSections((prev) => prev.filter((item) => item.id !== id));
-  }, []);
+  }, [updateLoadedState]);
 
   const addProduct = useCallback(async (product: Partial<Product>) => {
     const created = await createProductApi(product);
+    updateLoadedState("products");
     setProducts((prev) => sortProducts([...prev, created]));
     return created;
-  }, []);
+  }, [updateLoadedState]);
 
   const updateProduct = useCallback(async (id: number, data: Partial<Product>) => {
     const updated = await updateProductApi(id, data);
+    updateLoadedState("products");
     setProducts((prev) => sortProducts(prev.map((item) => (item.id === id ? updated : item))));
     return updated;
-  }, []);
+  }, [updateLoadedState]);
 
   const deleteProduct = useCallback(async (id: number) => {
     await deleteProductApi(id);
+    updateLoadedState("products");
     setProducts((prev) => prev.filter((item) => item.id !== id));
-  }, []);
+  }, [updateLoadedState]);
 
   const addBanner = useCallback(async (banner: Partial<Banner>) => {
     const created = await createBannerApi(banner);
+    updateLoadedState("banners");
     setBanners((prev) => sortBanners([...prev, created]));
     return created;
-  }, []);
+  }, [updateLoadedState]);
 
   const updateBanner = useCallback(async (id: number, data: Partial<Banner>) => {
     const updated = await updateBannerApi(id, data);
+    updateLoadedState("banners");
     setBanners((prev) => sortBanners(prev.map((item) => (item.id === id ? updated : item))));
     return updated;
-  }, []);
+  }, [updateLoadedState]);
 
   const deleteBanner = useCallback(async (id: number) => {
     await deleteBannerApi(id);
+    updateLoadedState("banners");
     setBanners((prev) => prev.filter((item) => item.id !== id));
-  }, []);
+  }, [updateLoadedState]);
 
   const updateSettings = useCallback(async (data: Partial<StoreSettings>) => {
     const updated = await updateSettingsApi(data);
+    updateLoadedState("settings");
     setSettings(updated);
     return updated;
-  }, []);
+  }, [updateLoadedState]);
 
   const addCommunityMedia = useCallback(async (item: Partial<CommunityMedia>) => {
     const created = await createCommunityMediaApi(item);
+    updateLoadedState("communityMedia");
     setCommunityMedia((prev) => sortCommunity([...prev, created]));
     return created;
-  }, []);
+  }, [updateLoadedState]);
 
   const updateCommunityMedia = useCallback(async (id: number, data: Partial<CommunityMedia>) => {
     const updated = await updateCommunityMediaApi(id, data);
+    updateLoadedState("communityMedia");
     setCommunityMedia((prev) => sortCommunity(prev.map((item) => (item.id === id ? updated : item))));
     return updated;
-  }, []);
+  }, [updateLoadedState]);
 
   const deleteCommunityMedia = useCallback(async (id: number) => {
     await deleteCommunityMediaApi(id);
+    updateLoadedState("communityMedia");
     setCommunityMedia((prev) => prev.filter((item) => item.id !== id));
-  }, []);
+  }, [updateLoadedState]);
 
   const addReview = useCallback(async (review: Partial<Review>): Promise<Review> => {
     const created = await createReviewApi(review);
+    updateLoadedState("reviews");
     setReviews((prev) => sortReviews([...prev, created]));
     return created;
-  }, []);
+  }, [updateLoadedState]);
 
   const updateReview = useCallback(async (id: number, data: Partial<Review>): Promise<Review> => {
     const updated = await updateReviewApi(id, data);
+    updateLoadedState("reviews");
     setReviews((prev) => sortReviews(prev.map((item) => (item.id === id ? updated : item))));
     return updated;
-  }, []);
+  }, [updateLoadedState]);
 
   const deleteReview = useCallback(async (id: number) => {
     await deleteReviewApi(id);
+    updateLoadedState("reviews");
     setReviews((prev) => prev.filter((item) => item.id !== id));
-  }, []);
+  }, [updateLoadedState]);
 
   const value = useMemo(
     () => ({
@@ -421,8 +596,14 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       settings,
       communityMedia,
       reviews,
-      isLoading,
+      isLoading: activeLoads > 0,
       refreshAll,
+      ensureSectionsLoaded,
+      ensureProductsLoaded,
+      ensureBannersLoaded,
+      ensureSettingsLoaded,
+      ensureCommunityMediaLoaded,
+      ensureReviewsLoaded,
       addSection,
       updateSection,
       deleteSection,
@@ -447,8 +628,14 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       settings,
       communityMedia,
       reviews,
-      isLoading,
+      activeLoads,
       refreshAll,
+      ensureSectionsLoaded,
+      ensureProductsLoaded,
+      ensureBannersLoaded,
+      ensureSettingsLoaded,
+      ensureCommunityMediaLoaded,
+      ensureReviewsLoaded,
       addSection,
       updateSection,
       deleteSection,

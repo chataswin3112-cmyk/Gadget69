@@ -6,6 +6,7 @@ const {
   mockArchiveAdminOrder,
   mockCancelAdminOrder,
   mockDeleteAdminOrder,
+  mockEnsureProductsLoaded,
   mockGetAdminOrderById,
   mockGetAdminOrders,
   mockToast,
@@ -15,6 +16,7 @@ const {
   mockArchiveAdminOrder: vi.fn(),
   mockCancelAdminOrder: vi.fn(),
   mockDeleteAdminOrder: vi.fn(),
+  mockEnsureProductsLoaded: vi.fn(),
   mockGetAdminOrderById: vi.fn(),
   mockGetAdminOrders: vi.fn(),
   mockToast: vi.fn(),
@@ -43,16 +45,25 @@ vi.mock("@/components/admin/AdminLayout", () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+const setDocumentVisibility = (state: DocumentVisibilityState) => {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => state,
+  });
+};
+
 describe("AdminOrders", () => {
   beforeEach(() => {
     mockArchiveAdminOrder.mockReset();
     mockCancelAdminOrder.mockReset();
     mockDeleteAdminOrder.mockReset();
+    mockEnsureProductsLoaded.mockReset();
     mockGetAdminOrderById.mockReset();
     mockGetAdminOrders.mockReset();
     mockToast.mockReset();
     mockUpdateAdminOrderStatus.mockReset();
     mockUseAdminData.mockReset();
+    setDocumentVisibility("visible");
     mockUseAdminData.mockReturnValue({
       products: [
         {
@@ -70,7 +81,24 @@ describe("AdminOrders", () => {
           model_number: "SP-20",
         },
       ],
+      ensureProductsLoaded: mockEnsureProductsLoaded,
     });
+  });
+
+  it("renders a clean empty state without showing the server error banner", async () => {
+    mockGetAdminOrders.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter>
+        <AdminOrders />
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText("No orders match the current tab and filters.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Unexpected server error")).not.toBeInTheDocument();
+    expect(mockEnsureProductsLoaded).toHaveBeenCalledTimes(1);
   });
 
   it("auto-refreshes the order list every 30 seconds", async () => {
@@ -134,6 +162,59 @@ describe("AdminOrders", () => {
     clearIntervalSpy.mockRestore();
   });
 
+  it("pauses background polling while the page is hidden and refreshes when visible again", async () => {
+    const intervalCallbacks: Array<() => void | Promise<void>> = [];
+    const setIntervalSpy = vi
+      .spyOn(window, "setInterval")
+      .mockImplementation(((callback: TimerHandler) => {
+        intervalCallbacks.push(callback as () => void | Promise<void>);
+        return 1 as unknown as number;
+      }) as typeof window.setInterval);
+    const clearIntervalSpy = vi.spyOn(window, "clearInterval").mockImplementation(() => {});
+
+    mockGetAdminOrders.mockResolvedValue([
+      {
+        id: 18,
+        customerName: "Dev",
+        phone: "9000000001",
+        email: "dev@example.com",
+        address: "Main Street",
+        pincode: "600010",
+        totalAmount: 1200,
+        paymentStatus: "PENDING",
+        orderStatus: "PENDING",
+        createdAt: "2026-04-10T10:00:00",
+        items: [{ productId: 1, productName: "Alpha", quantity: 1, price: 1200 }],
+      },
+    ]);
+
+    render(
+      <MemoryRouter>
+        <AdminOrders />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Order #18")).toBeInTheDocument();
+    expect(mockGetAdminOrders).toHaveBeenCalledTimes(1);
+
+    setDocumentVisibility("hidden");
+    await act(async () => {
+      await intervalCallbacks[0]?.();
+    });
+
+    expect(mockGetAdminOrders).toHaveBeenCalledTimes(1);
+
+    setDocumentVisibility("visible");
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    await waitFor(() => expect(mockGetAdminOrders).toHaveBeenCalledTimes(2));
+
+    setIntervalSpy.mockRestore();
+    clearIntervalSpy.mockRestore();
+  });
+
   it("renders state-toned tabs, cards, badges, and clamped product names", async () => {
     mockGetAdminOrders.mockResolvedValue([
       {
@@ -185,6 +266,61 @@ describe("AdminOrders", () => {
     );
     expect(longName).toHaveAttribute("data-clamp", "2");
     expect(screen.getByAltText(longName.textContent || "")).toBeInTheDocument();
+  });
+
+  it("keeps rendering orders while product metadata loads later", async () => {
+    let currentProducts: Array<Record<string, unknown>> = [];
+    mockUseAdminData.mockImplementation(() => ({
+      products: currentProducts,
+      ensureProductsLoaded: mockEnsureProductsLoaded,
+    }));
+    mockGetAdminOrders.mockResolvedValue([
+      {
+        id: 91,
+        customerName: "Later Meta",
+        phone: "9222222222",
+        email: "later@example.com",
+        address: "Lake View",
+        pincode: "600090",
+        totalAmount: 5400,
+        paymentStatus: "SUCCESS",
+        orderStatus: "CONFIRMED",
+        createdAt: "2026-04-12T09:30:00",
+        items: [
+          {
+            productId: 1,
+            productName: "Alpha Phone",
+            quantity: 1,
+            price: 5400,
+          },
+        ],
+      },
+    ]);
+
+    const view = render(
+      <MemoryRouter>
+        <AdminOrders />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Order #91")).toBeInTheDocument();
+    expect(screen.getByText("Catalog item")).toBeInTheDocument();
+
+    currentProducts = [{
+      id: 1,
+      name: "Alpha Phone",
+      imageUrl: "https://example.com/alpha.png",
+      sectionName: "Phones",
+      model_number: "ZX-100",
+    }];
+    view.rerender(
+      <MemoryRouter>
+        <AdminOrders />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Phones - ZX-100")).toBeInTheDocument();
+    expect(screen.getByAltText("Alpha Phone")).toBeInTheDocument();
   });
 
   it("shows aligned multi-item cards in the order details dialog", async () => {

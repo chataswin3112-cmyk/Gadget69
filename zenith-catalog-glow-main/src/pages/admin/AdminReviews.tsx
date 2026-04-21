@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Review } from "@/types";
@@ -76,11 +76,15 @@ const StarPicker = ({
 );
 
 const AdminReviews = () => {
-  const { reviews, addReview, updateReview, deleteReview } = useAdminData();
+  const { reviews, addReview, updateReview, deleteReview, ensureReviewsLoaded } = useAdminData();
   const [editing, setEditing] = useState<Partial<Review> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void ensureReviewsLoaded();
+  }, [ensureReviewsLoaded]);
 
   const openNew = () => {
     setEditing({ ...emptyReview });

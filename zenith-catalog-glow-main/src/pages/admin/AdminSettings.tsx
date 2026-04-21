@@ -220,10 +220,14 @@ const ChangePasswordForm = () => {
 };
 
 const AdminSettings = () => {
-  const { settings, updateSettings } = useAdminData();
+  const { settings, updateSettings, ensureSettingsLoaded } = useAdminData();
   const [form, setForm] = useState({ ...settings });
   const [newAnnouncement, setNewAnnouncement] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void ensureSettingsLoaded();
+  }, [ensureSettingsLoaded]);
 
   useEffect(() => {
     setForm({ ...settings });

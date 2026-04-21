@@ -12,6 +12,10 @@ interface MediaFrameProps {
   padding?: string;
   objectFit?: "contain" | "cover";
   loading?: "lazy" | "eager";
+  sizes?: string;
+  optimizeWidth?: number;
+  optimizeHeight?: number;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 const MediaFrame = ({
@@ -22,6 +26,10 @@ const MediaFrame = ({
   padding = "p-4",
   objectFit = "contain",
   loading = "lazy",
+  sizes,
+  optimizeWidth,
+  optimizeHeight,
+  fetchPriority,
 }: MediaFrameProps) => {
   const hasVideo = isVideoUrl(src);
 
@@ -49,6 +57,10 @@ const MediaFrame = ({
         alt={alt}
         className={cn("w-full h-full", objectFit === "contain" ? "object-contain" : "object-cover")}
         loading={loading}
+        sizes={sizes}
+        optimizeWidth={optimizeWidth}
+        optimizeHeight={optimizeHeight}
+        fetchPriority={fetchPriority}
       />
     )}
     </div>

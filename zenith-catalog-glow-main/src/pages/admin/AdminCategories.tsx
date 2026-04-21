@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Section } from "@/types";
@@ -25,11 +25,15 @@ const emptySection: Partial<Section> = {
 };
 
 const AdminCategories = () => {
-  const { sections, addSection, updateSection, deleteSection } = useAdminData();
+  const { sections, addSection, updateSection, deleteSection, ensureSectionsLoaded } = useAdminData();
   const [editing, setEditing] = useState<Partial<Section> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void ensureSectionsLoaded();
+  }, [ensureSectionsLoaded]);
 
   const openNew = () => {
     setEditing({ ...emptySection });

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
@@ -57,7 +57,7 @@ const getProductMeta = (product: Product) => {
 };
 
 const AdminOffers = () => {
-  const { products, updateProduct, isLoading } = useAdminData();
+  const { products, updateProduct, isLoading, ensureProductsLoaded } = useAdminData();
   const [search, setSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<OfferFormState | null>(null);
@@ -73,6 +73,10 @@ const AdminOffers = () => {
       ),
     [products, search]
   );
+
+  useEffect(() => {
+    void ensureProductsLoaded();
+  }, [ensureProductsLoaded]);
 
   const openEditor = (product: Product) => {
     setSelectedProduct(product);

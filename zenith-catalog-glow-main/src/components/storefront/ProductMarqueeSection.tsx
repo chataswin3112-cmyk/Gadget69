@@ -10,10 +10,10 @@ const ProductMarqueeSection = () => {
   const { products } = useAdminData();
 
   const marqueeProducts = useMemo(
-    () => products.slice(0, Math.min(products.length, 8)),
+    () => products.slice(0, Math.min(products.length, 6)),
     [products]
   );
-  const mobileProducts = useMemo(() => marqueeProducts.slice(0, 6), [marqueeProducts]);
+  const mobileProducts = useMemo(() => marqueeProducts.slice(0, 4), [marqueeProducts]);
   const rowA = useMemo(() => [...marqueeProducts, ...marqueeProducts], [marqueeProducts]);
   const rowB = useMemo(() => {
     const reversed = [...marqueeProducts].reverse();
@@ -93,6 +93,8 @@ const CompactProductCard = ({ product }: { product: Product }) => {
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 220px, 240px"
+          optimizeWidth={640}
         />
         {hasOffer && (
           <span className="absolute left-2 top-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-foreground">

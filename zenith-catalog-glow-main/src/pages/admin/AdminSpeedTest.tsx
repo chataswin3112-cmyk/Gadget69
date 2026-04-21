@@ -3,7 +3,8 @@ import { Activity, Download, Gauge, RefreshCw, Wifi } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import gadget69Logo from "@/assets/gadget69-logo.png";
+
+const DOWNLOAD_TEST_ASSET = "/admin-speed-test-asset.svg";
 
 type ConnectionLike = {
   effectiveType?: string;
@@ -125,7 +126,7 @@ const AdminSpeedTest = () => {
 
       setStage("Testing download speed");
       const downloadStart = performance.now();
-      const downloadResponse = await fetch(`${gadget69Logo}?downloadTest=${Date.now()}`, {
+      const downloadResponse = await fetch(`${DOWNLOAD_TEST_ASSET}?downloadTest=${Date.now()}`, {
         cache: "no-store",
       });
       if (!downloadResponse.ok) {
@@ -198,7 +199,7 @@ const AdminSpeedTest = () => {
               <CardTitle className="text-3xl">{formatMetric(results.downloadMbps, "Mbps")}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Downloaded {formatMetric(results.transferSizeMb, "MB", 2)} from the current app asset.
+              Downloaded {formatMetric(results.transferSizeMb, "MB", 2)} from the lightweight admin probe asset.
             </CardContent>
           </Card>
 

@@ -220,8 +220,10 @@ const getProductMeta = (product?: Product) => {
   return metaParts.length ? metaParts.join(" - ") : "Catalog item";
 };
 
+const COMPACT_LAYOUT_QUERY = "(max-width: 767px)";
+
 const AdminOrders = () => {
-  const { products } = useAdminData();
+  const { products, ensureProductsLoaded } = useAdminData();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -239,6 +241,11 @@ const AdminOrders = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Order>>({});
+  const [isCompactLayout, setIsCompactLayout] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia(COMPACT_LAYOUT_QUERY).matches
+      : false
+  );
 
   const productLookup = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -269,11 +276,52 @@ const AdminOrders = () => {
   }, [serverFilters]);
 
   useEffect(() => {
+    void ensureProductsLoaded();
+  }, [ensureProductsLoaded]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(COMPACT_LAYOUT_QUERY);
+    const syncLayout = () => setIsCompactLayout(mediaQuery.matches);
+    syncLayout();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncLayout);
+      return () => mediaQuery.removeEventListener("change", syncLayout);
+    }
+
+    mediaQuery.addListener(syncLayout);
+    return () => mediaQuery.removeListener(syncLayout);
+  }, []);
+
+  useEffect(() => {
     void loadOrders();
+
+    const refreshWhenVisible = () => {
+      if (typeof document === "undefined" || document.visibilityState === "visible") {
+        void loadOrders();
+      }
+    };
+
     const intervalId = window.setInterval(() => {
-      void loadOrders();
+      if (typeof document === "undefined" || document.visibilityState === "visible") {
+        void loadOrders();
+      }
     }, AUTO_REFRESH_MS);
-    return () => window.clearInterval(intervalId);
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", refreshWhenVisible);
+    }
+
+    return () => {
+      window.clearInterval(intervalId);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", refreshWhenVisible);
+      }
+    };
   }, [loadOrders]);
 
   const filteredOrders = useMemo(() => {
@@ -618,199 +666,372 @@ const AdminOrders = () => {
           )}
 
           <div className="mt-5 overflow-hidden rounded-3xl border border-border/60">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border/60">
-                <thead className="bg-secondary/40">
-                  <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    <th className="px-5 py-4">Order ID</th>
-                    <th className="px-5 py-4">Customer</th>
-                    <th className="min-w-[22rem] px-5 py-4">Product</th>
-                    <th className="px-5 py-4">Amount</th>
-                    <th className="px-5 py-4">Payment</th>
-                    <th className="px-5 py-4">Status</th>
-                    <th className="px-5 py-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50 text-sm font-body">
-                  {isLoading ? (
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <tr key={index}>
-                        <td colSpan={7} className="px-5 py-5">
-                          <div className="h-14 animate-pulse rounded-2xl bg-secondary/40" />
-                        </td>
-                      </tr>
-                    ))
-                  ) : filteredOrders.length ? (
-                    filteredOrders.map((order) => {
-                      const paymentTone = getPaymentTone(order.paymentStatus);
-                      const orderTone = getOrderTone(order.orderStatus);
+            {isCompactLayout ? (
+              <div className="space-y-4 p-4">
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="h-52 animate-pulse rounded-2xl bg-secondary/35" />
+                  ))
+                ) : filteredOrders.length ? (
+                  filteredOrders.map((order) => {
+                    const paymentTone = getPaymentTone(order.paymentStatus);
+                    const orderTone = getOrderTone(order.orderStatus);
 
-                      return (
-                        <tr key={order.id}>
-                          <td className="px-5 py-4 align-top font-mono font-semibold text-foreground">
-                            <div>Order #{order.id}</div>
-                            <div className="mt-1 text-xs text-muted-foreground">
+                    return (
+                      <div
+                        key={order.id}
+                        className="space-y-4 rounded-[28px] border border-border/60 bg-background/90 p-4 shadow-premium"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="font-mono font-semibold text-foreground">Order #{order.id}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
                               {formatCreatedAt(order.createdAt)}
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 align-top">
-                            <div className="font-semibold text-foreground">
-                              {order.customerName}
-                            </div>
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              {order.phone}
-                            </div>
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              {order.email || "--"}
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 align-top">
-                            <div className="space-y-2">
-                              {order.items.map((item, index) => {
-                                const product = productLookup.get(item.productId);
-                                return (
-                                  <div
-                                    key={`${order.id}-${item.productId}-${index}`}
-                                    className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/80 p-3"
-                                  >
-                                    <MediaImage
-                                      src={product?.imageUrl}
-                                      alt={item.productName}
-                                      className="h-12 w-12 shrink-0 rounded-xl object-cover bg-muted/40"
-                                    />
-                                    <div className="min-w-0 flex-1">
-                                      <p
-                                        data-clamp="2"
-                                        className={cn(
-                                          "text-sm font-semibold text-foreground",
-                                          PRODUCT_NAME_CLAMP_CLASS
-                                        )}
-                                      >
-                                        {item.productName}
-                                      </p>
-                                      <p className="truncate text-xs text-muted-foreground">
-                                        {getProductMeta(product)}
-                                      </p>
-                                    </div>
-                                    <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-                                      x {item.quantity}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 align-top">
-                            <div className="font-semibold text-accent">
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-accent">
                               {formatCurrency(order.totalAmount)}
-                            </div>
-                            <div className="mt-1 text-xs text-muted-foreground">
+                            </p>
+                            <p className="mt-1 text-xs text-muted-foreground">
                               {totalQuantity(order)} item(s)
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 align-top">
-                            <span
-                              data-tone={paymentTone.tone}
-                              className={cn(
-                                "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                                paymentTone.badgeClassName
-                              )}
-                            >
-                              {normalizePaymentStatus(order.paymentStatus)}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 align-top">
-                            <div className="space-y-2">
-                              <span
-                                data-tone={orderTone.tone}
-                                className={cn(
-                                  "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                                  orderTone.badgeClassName
-                                )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-border/60 bg-secondary/15 p-3">
+                          <p className="font-semibold text-foreground">{order.customerName}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{order.phone}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{order.email || "--"}</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          {order.items.map((item, index) => {
+                            const product = productLookup.get(item.productId);
+                            return (
+                              <div
+                                key={`${order.id}-${item.productId}-${index}`}
+                                className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/85 p-3"
                               >
-                                {normalizeOrderStatus(order.orderStatus)}
-                              </span>
-                              <select
-                                value={normalizeOrderStatus(order.orderStatus)}
-                                disabled={busyAction === `status-${order.id}`}
-                                onChange={(event) =>
-                                  void handleStatusChange(order.id, event.target.value)
-                                }
-                                className="block min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
-                              >
-                                {STATUS_OPTIONS.map((status) => (
-                                  <option key={status} value={status}>
-                                    {status}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 align-top">
-                            <div className="flex flex-wrap gap-2">
-                              <Button
-                                size="sm"
-                                title="View order details"
-                                onClick={() => void handleViewDetails(order.id)}
-                                className="bg-blue-600 text-white hover:bg-blue-700 border-0"
-                              >
-                                <Eye className="mr-1.5 h-3.5 w-3.5" />
-                                View
-                              </Button>
-                              <Button
-                                size="sm"
-                                title="Cancel this order"
-                                disabled={
-                                  busyAction === `cancel-${order.id}` ||
-                                  normalizeOrderStatus(order.orderStatus) === "CANCELLED"
-                                }
-                                onClick={() => void handleCancelOrder(order)}
-                                className="bg-rose-600 text-white hover:bg-rose-700 border-0 disabled:opacity-50"
-                              >
-                                <XCircle className="mr-1.5 h-3.5 w-3.5" />
-                                Cancel
-                              </Button>
-                              <Button
-                                size="sm"
-                                title="Archive this order"
-                                disabled={busyAction === `archive-${order.id}`}
-                                onClick={() => void handleArchiveOrder(order)}
-                                className="bg-amber-500 text-white hover:bg-amber-600 border-0 disabled:opacity-50"
-                              >
-                                <Archive className="mr-1.5 h-3.5 w-3.5" />
-                                Archive
-                              </Button>
-                              <Button
-                                size="sm"
-                                title="Permanently delete order"
-                                disabled={busyAction === `delete-${order.id}`}
-                                onClick={() => void handleDeleteOrder(order)}
-                                variant="destructive"
-                              >
-                                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                                Delete
-                              </Button>
-                            </div>
-                            {!canDeleteOrder(order) && (
-                              <p className="mt-2 max-w-xs text-xs text-muted-foreground">
-                                Successful payments cannot be deleted. Use cancel or archive
-                                instead.
-                              </p>
+                                <MediaImage
+                                  src={product?.imageUrl}
+                                  alt={item.productName}
+                                  className="h-12 w-12 shrink-0 rounded-xl object-cover bg-muted/40"
+                                  optimizeWidth={160}
+                                  sizes="48px"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <p
+                                    data-clamp="2"
+                                    className={cn(
+                                      "text-sm font-semibold text-foreground",
+                                      PRODUCT_NAME_CLAMP_CLASS
+                                    )}
+                                  >
+                                    {item.productName}
+                                  </p>
+                                  <p className="truncate text-xs text-muted-foreground">
+                                    {getProductMeta(product)}
+                                  </p>
+                                </div>
+                                <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
+                                  x {item.quantity}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <span
+                            data-tone={paymentTone.tone}
+                            className={cn(
+                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                              paymentTone.badgeClassName
                             )}
+                          >
+                            {normalizePaymentStatus(order.paymentStatus)}
+                          </span>
+                          <span
+                            data-tone={orderTone.tone}
+                            className={cn(
+                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                              orderTone.badgeClassName
+                            )}
+                          >
+                            {normalizeOrderStatus(order.orderStatus)}
+                          </span>
+                        </div>
+
+                        <select
+                          value={normalizeOrderStatus(order.orderStatus)}
+                          disabled={busyAction === `status-${order.id}`}
+                          onChange={(event) => void handleStatusChange(order.id, event.target.value)}
+                          className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+                        >
+                          {STATUS_OPTIONS.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            title="View order details"
+                            onClick={() => void handleViewDetails(order.id)}
+                            className="bg-blue-600 text-white hover:bg-blue-700 border-0"
+                          >
+                            <Eye className="mr-1.5 h-3.5 w-3.5" />
+                            View
+                          </Button>
+                          <Button
+                            size="sm"
+                            title="Cancel this order"
+                            disabled={
+                              busyAction === `cancel-${order.id}` ||
+                              normalizeOrderStatus(order.orderStatus) === "CANCELLED"
+                            }
+                            onClick={() => void handleCancelOrder(order)}
+                            className="bg-rose-600 text-white hover:bg-rose-700 border-0 disabled:opacity-50"
+                          >
+                            <XCircle className="mr-1.5 h-3.5 w-3.5" />
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            title="Archive this order"
+                            disabled={busyAction === `archive-${order.id}`}
+                            onClick={() => void handleArchiveOrder(order)}
+                            className="bg-amber-500 text-white hover:bg-amber-600 border-0 disabled:opacity-50"
+                          >
+                            <Archive className="mr-1.5 h-3.5 w-3.5" />
+                            Archive
+                          </Button>
+                          <Button
+                            size="sm"
+                            title="Permanently delete order"
+                            disabled={busyAction === `delete-${order.id}`}
+                            onClick={() => void handleDeleteOrder(order)}
+                            variant="destructive"
+                          >
+                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                            Delete
+                          </Button>
+                        </div>
+
+                        {!canDeleteOrder(order) && (
+                          <p className="text-xs text-muted-foreground">
+                            Successful payments cannot be deleted. Use cancel or archive instead.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="px-5 py-12 text-center text-sm text-muted-foreground">
+                    No orders match the current tab and filters.
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-border/60">
+                  <thead className="bg-secondary/40">
+                    <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      <th className="px-5 py-4">Order ID</th>
+                      <th className="px-5 py-4">Customer</th>
+                      <th className="min-w-[22rem] px-5 py-4">Product</th>
+                      <th className="px-5 py-4">Amount</th>
+                      <th className="px-5 py-4">Payment</th>
+                      <th className="px-5 py-4">Status</th>
+                      <th className="px-5 py-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50 text-sm font-body">
+                    {isLoading ? (
+                      Array.from({ length: 5 }).map((_, index) => (
+                        <tr key={index}>
+                          <td colSpan={7} className="px-5 py-5">
+                            <div className="h-14 animate-pulse rounded-2xl bg-secondary/40" />
                           </td>
                         </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="px-5 py-12 text-center text-sm text-muted-foreground">
-                        No orders match the current tab and filters.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                      ))
+                    ) : filteredOrders.length ? (
+                      filteredOrders.map((order) => {
+                        const paymentTone = getPaymentTone(order.paymentStatus);
+                        const orderTone = getOrderTone(order.orderStatus);
+
+                        return (
+                          <tr key={order.id}>
+                            <td className="px-5 py-4 align-top font-mono font-semibold text-foreground">
+                              <div>Order #{order.id}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                {formatCreatedAt(order.createdAt)}
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 align-top">
+                              <div className="font-semibold text-foreground">
+                                {order.customerName}
+                              </div>
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                {order.phone}
+                              </div>
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                {order.email || "--"}
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 align-top">
+                              <div className="space-y-2">
+                                {order.items.map((item, index) => {
+                                  const product = productLookup.get(item.productId);
+                                  return (
+                                    <div
+                                      key={`${order.id}-${item.productId}-${index}`}
+                                      className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/80 p-3"
+                                    >
+                                      <MediaImage
+                                        src={product?.imageUrl}
+                                        alt={item.productName}
+                                        className="h-12 w-12 shrink-0 rounded-xl object-cover bg-muted/40"
+                                        optimizeWidth={160}
+                                        sizes="48px"
+                                      />
+                                      <div className="min-w-0 flex-1">
+                                        <p
+                                          data-clamp="2"
+                                          className={cn(
+                                            "text-sm font-semibold text-foreground",
+                                            PRODUCT_NAME_CLAMP_CLASS
+                                          )}
+                                        >
+                                          {item.productName}
+                                        </p>
+                                        <p className="truncate text-xs text-muted-foreground">
+                                          {getProductMeta(product)}
+                                        </p>
+                                      </div>
+                                      <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
+                                        x {item.quantity}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 align-top">
+                              <div className="font-semibold text-accent">
+                                {formatCurrency(order.totalAmount)}
+                              </div>
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                {totalQuantity(order)} item(s)
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 align-top">
+                              <span
+                                data-tone={paymentTone.tone}
+                                className={cn(
+                                  "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                  paymentTone.badgeClassName
+                                )}
+                              >
+                                {normalizePaymentStatus(order.paymentStatus)}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4 align-top">
+                              <div className="space-y-2">
+                                <span
+                                  data-tone={orderTone.tone}
+                                  className={cn(
+                                    "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                    orderTone.badgeClassName
+                                  )}
+                                >
+                                  {normalizeOrderStatus(order.orderStatus)}
+                                </span>
+                                <select
+                                  value={normalizeOrderStatus(order.orderStatus)}
+                                  disabled={busyAction === `status-${order.id}`}
+                                  onChange={(event) =>
+                                    void handleStatusChange(order.id, event.target.value)
+                                  }
+                                  className="block min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+                                >
+                                  {STATUS_OPTIONS.map((status) => (
+                                    <option key={status} value={status}>
+                                      {status}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 align-top">
+                              <div className="flex flex-wrap gap-2">
+                                <Button
+                                  size="sm"
+                                  title="View order details"
+                                  onClick={() => void handleViewDetails(order.id)}
+                                  className="bg-blue-600 text-white hover:bg-blue-700 border-0"
+                                >
+                                  <Eye className="mr-1.5 h-3.5 w-3.5" />
+                                  View
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  title="Cancel this order"
+                                  disabled={
+                                    busyAction === `cancel-${order.id}` ||
+                                    normalizeOrderStatus(order.orderStatus) === "CANCELLED"
+                                  }
+                                  onClick={() => void handleCancelOrder(order)}
+                                  className="bg-rose-600 text-white hover:bg-rose-700 border-0 disabled:opacity-50"
+                                >
+                                  <XCircle className="mr-1.5 h-3.5 w-3.5" />
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  title="Archive this order"
+                                  disabled={busyAction === `archive-${order.id}`}
+                                  onClick={() => void handleArchiveOrder(order)}
+                                  className="bg-amber-500 text-white hover:bg-amber-600 border-0 disabled:opacity-50"
+                                >
+                                  <Archive className="mr-1.5 h-3.5 w-3.5" />
+                                  Archive
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  title="Permanently delete order"
+                                  disabled={busyAction === `delete-${order.id}`}
+                                  onClick={() => void handleDeleteOrder(order)}
+                                  variant="destructive"
+                                >
+                                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                                  Delete
+                                </Button>
+                              </div>
+                              {!canDeleteOrder(order) && (
+                                <p className="mt-2 max-w-xs text-xs text-muted-foreground">
+                                  Successful payments cannot be deleted. Use cancel or archive
+                                  instead.
+                                </p>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                          No orders match the current tab and filters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>

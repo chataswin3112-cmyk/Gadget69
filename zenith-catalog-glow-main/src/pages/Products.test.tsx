@@ -4,7 +4,9 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import Products from "@/pages/Products";
 import { Product, Section } from "@/types";
 
-const { mockUseAdminData } = vi.hoisted(() => ({
+const { mockEnsureProductsLoaded, mockEnsureSectionsLoaded, mockUseAdminData } = vi.hoisted(() => ({
+  mockEnsureProductsLoaded: vi.fn(),
+  mockEnsureSectionsLoaded: vi.fn(),
   mockUseAdminData: vi.fn(),
 }));
 
@@ -134,10 +136,15 @@ const renderProductsPage = (initialEntry = "/products?filter=new") =>
 
 describe("Products", () => {
   beforeEach(() => {
+    mockEnsureProductsLoaded.mockReset();
+    mockEnsureSectionsLoaded.mockReset();
     mockUseAdminData.mockReset();
     mockUseAdminData.mockReturnValue({
       products,
       sections,
+      ensureProductsLoaded: mockEnsureProductsLoaded,
+      ensureSectionsLoaded: mockEnsureSectionsLoaded,
+      isLoading: false,
     });
   });
 
@@ -161,5 +168,7 @@ describe("Products", () => {
     expect(screen.getByText("Atlas Pro")).toBeInTheDocument();
     expect(screen.queryByText("Nova X")).not.toBeInTheDocument();
     expect(screen.queryByText("Core Lite")).not.toBeInTheDocument();
+    expect(mockEnsureProductsLoaded).toHaveBeenCalledTimes(1);
+    expect(mockEnsureSectionsLoaded).toHaveBeenCalledTimes(1);
   });
 });

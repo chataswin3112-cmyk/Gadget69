@@ -48,7 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  const { products, isLoading } = useAdminData();
+  const { products, isLoading, ensureProductsLoaded } = useAdminData();
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
@@ -123,6 +123,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return JSON.stringify(current) === JSON.stringify(nextItems) ? current : nextItems;
     });
   }, [isLoading, items.length, products]);
+
+  useEffect(() => {
+    if (items.length === 0 || products.length > 0) {
+      return;
+    }
+
+    void ensureProductsLoaded();
+  }, [ensureProductsLoaded, items.length, products.length]);
 
   const clearCart = useCallback(() => setItems([]), []);
 

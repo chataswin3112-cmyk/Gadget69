@@ -12,18 +12,76 @@ import SectionHeader from "@/components/storefront/SectionHeader";
 import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useCart } from "@/contexts/CartContext";
 import { useAdminData } from "@/contexts/AdminDataContext";
-import { getVariant } from "@/api/productApi";
+import { getProductById, getVariant } from "@/api/productApi";
 import { getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
 import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
-import { ProductMedia, VariantMedia } from "@/types";
+import { Product, ProductMedia, VariantMedia } from "@/types";
 
 type DisplayMedia = ProductMedia | VariantMedia;
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const productId = Number(id);
   const { addToCart } = useCart();
-  const { products: allProducts, isLoading } = useAdminData();
-  const product = allProducts.find((item) => item.id === Number(id));
+  const { products: allProducts, ensureProductsLoaded } = useAdminData();
+  const [remoteProduct, setRemoteProduct] = useState<Product | null>(null);
+  const [productLoading, setProductLoading] = useState(true);
+  const [productError, setProductError] = useState(false);
+  const cachedProduct = useMemo(
+    () => allProducts.find((item) => item.id === productId),
+    [allProducts, productId]
+  );
+  const product = cachedProduct ?? remoteProduct;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!Number.isFinite(productId)) {
+      setRemoteProduct(null);
+      setProductLoading(false);
+      setProductError(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (cachedProduct) {
+      setRemoteProduct(cachedProduct);
+      setProductLoading(false);
+      setProductError(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setProductLoading(true);
+    setProductError(false);
+
+    void getProductById(productId)
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+        setRemoteProduct(data);
+        setProductLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+        setRemoteProduct(null);
+        setProductLoading(false);
+        setProductError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cachedProduct, productId]);
+
+  useEffect(() => {
+    void ensureProductsLoaded();
+  }, [ensureProductsLoaded]);
 
   const variants = useMemo(() => product?.variants || [], [product?.variants]);
   const defaultVariant = useMemo(
@@ -126,7 +184,7 @@ const ProductDetails = () => {
     window.dispatchEvent(new Event("open-cart-drawer"));
   };
 
-  if (isLoading) {
+  if (productLoading && !product) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
@@ -134,7 +192,7 @@ const ProductDetails = () => {
     );
   }
 
-  if (!product) {
+  if (!product || productError) {
     return (
       <div className="min-h-screen bg-background">
         <AnnouncementBar />
@@ -199,6 +257,9 @@ const ProductDetails = () => {
                           padding="p-8"
                           className="rounded-2xl bg-secondary/20"
                           loading={index === 0 ? "eager" : "lazy"}
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                          optimizeWidth={1400}
+                          fetchPriority={index === 0 ? "high" : "low"}
                         />
                       )}
                     </CarouselItem>
@@ -232,7 +293,14 @@ const ProductDetails = () => {
                         <Play className="h-6 w-6 text-muted-foreground" />
                       </div>
                     ) : (
-                      <MediaFrame src={media.mediaUrl} alt="" padding="p-1" className="rounded-none" />
+                      <MediaFrame
+                        src={media.mediaUrl}
+                        alt=""
+                        padding="p-1"
+                        className="rounded-none"
+                        sizes="80px"
+                        optimizeWidth={240}
+                      />
                     )}
                   </button>
                 ))}

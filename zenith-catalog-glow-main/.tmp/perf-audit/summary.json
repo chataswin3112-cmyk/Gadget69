@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-04-21T03:46:48.296Z",
+  "frontendUrl": "http://127.0.0.1:4173",
+  "backendUrl": "http://127.0.0.1:8081",
+  "results": [
+    {
+      "route": "/",
+      "performance": 38,
+      "accessibility": 84,
+      "bestPractices": 100,
+      "seo": 92
+    },
+    {
+      "route": "/products",
+      "performance": 41,
+      "accessibility": 90,
+      "bestPractices": 100,
+      "seo": 100
+    },
+    {
+      "route": "/products/1",
+      "performance": 39,
+      "accessibility": 89,
+      "bestPractices": 100,
+      "seo": 100
+    },
+    {
+      "route": "/admin",
+      "performance": 50,
+      "accessibility": 88,
+      "bestPractices": 100,
+      "seo": 100
+    },
+    {
+      "route": "/admin/orders",
+      "performance": 71,
+      "accessibility": 88,
+      "bestPractices": 100,
+      "seo": 100
+    }
+  ]
+}

@@ -37,6 +37,15 @@ export const SECTION_BG_COLORS = [
 
 export function useScrollBgColor(dependencies: unknown[] = []) {
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isDesktop = window.innerWidth >= 768;
+
+    if (!isDesktop || prefersReducedMotion) {
+      document.body.style.backgroundColor = "";
+      document.documentElement.style.backgroundColor = "";
+      return;
+    }
+
     injectTransitionStyle();
 
     const defaultBg = "#faf9f7"; // site's base paper background

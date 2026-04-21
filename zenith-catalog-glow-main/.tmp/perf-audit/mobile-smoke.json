@@ -1,0 +1,74 @@
+{
+  "frontendUrl": "http://127.0.0.1:4173",
+  "backendUrl": "http://127.0.0.1:8081",
+  "productId": 1,
+  "generatedAt": "2026-04-21T03:44:55.602Z",
+  "results": [
+    {
+      "path": "/",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "FREE SHIPPING ON ORDERS OVER RS. 999\n✦\nNEW ARRIVALS EVERY WEEK\n✦\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\n✦\nFREE SHIPPING ON ORDERS OVER RS. 999\n✦\nNEW ARRIVALS EVERY WEEK\n✦\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\n✦\n\nPREMIUM ELECTRONICS\n\nNew Gadget Pro Max\nShop Now\n\nPREMIUM ELECTRONICS\n\nPure Sound, All Day\nExplore Audio\n\nBROWSE\n\nExplore Categories\nView All\n\nSmartphones\n\nEXPLORE\n\nLaptops\n\nEXPLORE\n\nAudio\n\nEXPLORE\n\nSALE\n\nSMARTPHONES\n\nGadget Pro Max\n\n₹114,999\nSALE\n\nLAPTOPS\n\nGadget Book Air\n\n₹134,999\n₹159,999\nSALE\n\nAUDIO\n\nGadget Pods Elite\n\n₹19,999\n₹24,999\nView All Products →",
+      "consoleErrors": [],
+      "requestFailures": [
+        "GET https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900 net::ERR_BLOCKED_BY_ORB"
+      ]
+    },
+    {
+      "path": "/products",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "FREE SHIPPING ON ORDERS OVER RS. 999\n✦\nNEW ARRIVALS EVERY WEEK\n✦\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\n✦\nFREE SHIPPING ON ORDERS OVER RS. 999\n✦\nNEW ARRIVALS EVERY WEEK\n✦\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\n✦\nProducts\n\n3 products\n\nAll Products\nNew Launches\nBest Sellers\nAll Categories\nSmartphones\nLaptops\nAudio\nNewest\nPrice: Low to High\nPrice: High to Low\nName A-Z\nQuick View\nNEW\nBESTSELLER\n-20%\n\nAUDIO\n\nGadget Pods Elite\n\nG69-PE-001\n\n₹19,999\n₹24,999\nQuick View\nBESTSELLER\n-16%\n\nLAPTOPS\n\nGadget Book Air\n\nG69-BA-001\n\n₹134,999\n₹159,999\nQuick View\nNEW\nBESTSELLER\n\nSMARTPHONES\n\nGadget Pro Max\n\nG69-PM-001\n\n₹114,999",
+      "consoleErrors": [],
+      "requestFailures": [
+        "GET https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900 net::ERR_BLOCKED_BY_ORB"
+      ]
+    },
+    {
+      "path": "/products/1",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "FREE SHIPPING ON ORDERS OVER RS. 999\n✦\nNEW ARRIVALS EVERY WEEK\n✦\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\n✦\nFREE SHIPPING ON ORDERS OVER RS. 999\n✦\nNEW ARRIVALS EVERY WEEK\n✦\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\n✦\nHome\nProducts\nGadget Pro Max\nPrevious slide\nNext slide\nSMARTPHONES\nGadget Pro Max\n\nG69-PM-001\n\nRs. 114,999\nIn Stock (25)\n\nTitanium flagship phone with pro-grade camera system.nice water headset\n\n1\nAdd to Cart",
+      "consoleErrors": [],
+      "requestFailures": [
+        "GET http://127.0.0.1:4173/uploads/videos/e0a87a15-7c9d-43af-951c-ba09efe6eadf.mp4 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "path": "/admin",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "Welcome back, Admin!\nToggle Sidebar\n\nAdmin Workspace\n\nCATALOG CONTROL CENTER\n\nGadget69\nDashboard\n\nRevenue, order conversion, and top-selling products in one place.\n\nManage Products\nManage Offers\nView Orders\nTotal Revenue\n\nRs. 0\n\nPaid Orders\n\n0\n\nConversion Rate\n\n0.00%\n\nTotal Orders\n\n0\n\nTotal Products\n\n3\n\nCategories\n\n3\n\nTop Selling Products\n\nRanked by paid-order units sold.\n\nNo paid orders yet, so top-selling products will appear here once sales start coming in.",
+      "consoleErrors": [],
+      "requestFailures": []
+    },
+    {
+      "path": "/admin/orders",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "Toggle Sidebar\n\nAdmin Workspace\n\nCATALOG CONTROL CENTER\n\nGadget69\nOrder Management\n\nTrack payments, manage fulfilment, and handle customer orders from one place.\n\nLast updated: 09:14:53\nRefresh\n\nALL ORDERS\n\n0\n\nComplete admin queue\n\nACTIVE ORDERS\n\n0\n\nConfirmed and processing\n\nDELIVERY ORDERS\n\n0\n\nShipped to delivered\n\nFAILED ORDERS\n\n0\n\nPayment issues\n\nPENDING ORDERS\n\n0\n\nAwaiting payment\n\nAll Orders\nActive Orders\nDelivery Orders\nFailed Orders\nPending Orders\nAll Payments\nPending\nSuccess\nFailed\nRefunded\nAll Statuses\nPENDING\nCONFIRMED\nPROCESSING\nSHIPPED\nOUT_FOR_DELIVERY\nDELIVERED\nCANCELLED\nNo orders match the current tab and filters.",
+      "consoleErrors": [],
+      "requestFailures": []
+    }
+  ]
+}

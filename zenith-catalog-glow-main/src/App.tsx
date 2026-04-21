@@ -1,12 +1,12 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { AdminDataProvider } from "@/contexts/AdminDataContext";
+import { AdminDataProvider, useAdminData } from "@/contexts/AdminDataContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminSessionGuard from "@/components/AdminSessionGuard";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -61,51 +61,84 @@ const queryClient = new QueryClient({
   },
 });
 
+const PublicRouteShell = () => (
+  <AdminDataProvider eager={false}>
+    <CartProvider>
+      <PublicSettingsBootstrap />
+      <Outlet />
+    </CartProvider>
+  </AdminDataProvider>
+);
+
+const PublicSettingsBootstrap = () => {
+  const { ensureSettingsLoaded } = useAdminData();
+
+  useEffect(() => {
+    void ensureSettingsLoaded();
+  }, [ensureSettingsLoaded]);
+
+  return null;
+};
+
+const AdminSettingsBootstrap = PublicSettingsBootstrap;
+
+const AdminRouteShell = () => (
+  <ProtectedRoute>
+    <AdminSessionGuard>
+      <AdminDataProvider eager={false}>
+        <AdminSettingsBootstrap />
+        <Outlet />
+      </AdminDataProvider>
+    </AdminSessionGuard>
+  </ProtectedRoute>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <AdminDataProvider>
-          <CartProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <ScrollToTop />
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/:id" element={<ProductDetails />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/categories/:id" element={<CategoryDetails />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                  <Route path="/checkout/failure" element={<CheckoutFailure />} />
-                  <Route path="/track-order" element={<TrackOrder />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/refund-policy" element={<RefundPolicy />} />
-                  <Route path="/shipping-policy" element={<ShippingPolicy />} />
-                  <Route path="/terms-and-conditions" element={<TermsOfService />} />
-                  <Route path="/admin" element={<AdminLogin />} />
-                  <Route path="/admin/dashboard" element={<ProtectedRoute><AdminSessionGuard><AdminDashboard /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/categories" element={<ProtectedRoute><AdminSessionGuard><AdminCategories /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/products" element={<ProtectedRoute><AdminSessionGuard><AdminProducts /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/offers" element={<ProtectedRoute><AdminSessionGuard><AdminOffers /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/orders" element={<ProtectedRoute><AdminSessionGuard><AdminOrders /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/banners" element={<ProtectedRoute><AdminSessionGuard><AdminBanners /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/media" element={<ProtectedRoute><AdminSessionGuard><AdminMedia /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/speed-test" element={<ProtectedRoute><AdminSessionGuard><AdminSpeedTest /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/settings" element={<ProtectedRoute><AdminSessionGuard><AdminSettings /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="/admin/reviews" element={<ProtectedRoute><AdminSessionGuard><AdminReviews /></AdminSessionGuard></ProtectedRoute>} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </CartProvider>
-        </AdminDataProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <ScrollToTop />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route element={<PublicRouteShell />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/categories/:id" element={<CategoryDetails />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/checkout/failure" element={<CheckoutFailure />} />
+                <Route path="/track-order" element={<TrackOrder />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                <Route path="/terms-and-conditions" element={<TermsOfService />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+
+              <Route path="/admin" element={<AdminLogin />} />
+
+              <Route element={<AdminRouteShell />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/categories" element={<AdminCategories />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/offers" element={<AdminOffers />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/banners" element={<AdminBanners />} />
+                <Route path="/admin/media" element={<AdminMedia />} />
+                <Route path="/admin/speed-test" element={<AdminSpeedTest />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/reviews" element={<AdminReviews />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

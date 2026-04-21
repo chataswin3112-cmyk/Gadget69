@@ -49,7 +49,7 @@ const ProductSectionRow = ({
         >
           <SectionHeader label={label} title={title} viewAllLink={viewAllLink} />
           <div className="grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {products.slice(0, 5).map((product) => (
+            {products.slice(0, 4).map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}

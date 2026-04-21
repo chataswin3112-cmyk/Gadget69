@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -68,7 +68,16 @@ const offerStatusClassName: Record<OfferStatus, string> = {
 };
 
 const AdminProducts = () => {
-  const { products, sections, addProduct, updateProduct, deleteProduct, isLoading } = useAdminData();
+  const {
+    products,
+    sections,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    isLoading,
+    ensureProductsLoaded,
+    ensureSectionsLoaded,
+  } = useAdminData();
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -84,6 +93,10 @@ const AdminProducts = () => {
       ),
     [products, search]
   );
+
+  useEffect(() => {
+    void Promise.all([ensureSectionsLoaded(), ensureProductsLoaded()]);
+  }, [ensureProductsLoaded, ensureSectionsLoaded]);
 
   const openNew = () => {
     const firstSectionId = sections[0]?.id ?? 1;

@@ -1,4 +1,4 @@
-import { type CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
@@ -9,7 +9,12 @@ import MediaFrame from "@/components/storefront/MediaFrame";
 import { useAdminData } from "@/contexts/AdminDataContext";
 
 const Categories = () => {
-  const { sections } = useAdminData();
+  const { sections, ensureSectionsLoaded } = useAdminData();
+
+  useEffect(() => {
+    void ensureSectionsLoaded();
+  }, [ensureSectionsLoaded]);
+
   const activeSections = sections.filter((s) => s.is_active !== false);
 
   return (
@@ -40,6 +45,8 @@ const Categories = () => {
                     objectFit="cover"
                     padding="p-0"
                     className="rounded-xl"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    optimizeWidth={960}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-5">

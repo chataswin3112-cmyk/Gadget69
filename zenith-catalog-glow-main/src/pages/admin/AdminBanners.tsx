@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Banner } from "@/types";
@@ -25,13 +25,17 @@ const emptyBanner: Partial<Banner> = {
 };
 
 const AdminBanners = () => {
-  const { banners, addBanner, updateBanner, deleteBanner } = useAdminData();
+  const { banners, addBanner, updateBanner, deleteBanner, ensureBannersLoaded } = useAdminData();
   const [editing, setEditing] = useState<Partial<Banner> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
   const sorted = [...banners].sort((a, b) => a.displayOrder - b.displayOrder);
+
+  useEffect(() => {
+    void ensureBannersLoaded();
+  }, [ensureBannersLoaded]);
 
   const openNew = () => {
     setEditing({ ...emptyBanner, displayOrder: banners.length });

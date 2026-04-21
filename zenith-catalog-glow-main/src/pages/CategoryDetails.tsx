@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from "react";
+import { useEffect, useMemo, type CSSProperties } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
@@ -11,7 +11,12 @@ import MediaImage from "@/components/ui/media-image";
 
 const CategoryDetails = () => {
   const { id } = useParams();
-  const { sections, products: allProducts } = useAdminData();
+  const { sections, products: allProducts, ensureProductsLoaded, ensureSectionsLoaded } = useAdminData();
+
+  useEffect(() => {
+    void Promise.all([ensureSectionsLoaded(), ensureProductsLoaded()]);
+  }, [ensureProductsLoaded, ensureSectionsLoaded]);
+
   const section = sections.find((s) => s.id === Number(id));
   const products = useMemo(
     () => allProducts.filter((p) => p.sectionId === Number(id)),
@@ -46,6 +51,8 @@ const CategoryDetails = () => {
             src={section.imageUrl}
             alt={section.name}
             className="w-full h-full object-cover"
+            sizes="100vw"
+            optimizeWidth={1600}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />

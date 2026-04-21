@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -69,11 +69,21 @@ const formatVideoMeta = (item: Partial<CommunityMedia>) => {
 };
 
 const AdminMedia = () => {
-  const { communityMedia, addCommunityMedia, updateCommunityMedia, deleteCommunityMedia } = useAdminData();
+  const {
+    communityMedia,
+    addCommunityMedia,
+    updateCommunityMedia,
+    deleteCommunityMedia,
+    ensureCommunityMediaLoaded,
+  } = useAdminData();
   const [editing, setEditing] = useState<Partial<CommunityMedia> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void ensureCommunityMediaLoaded();
+  }, [ensureCommunityMediaLoaded]);
 
   const openNew = () => {
     setEditing({ ...emptyMedia, displayOrder: communityMedia.length });
