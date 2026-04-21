@@ -26,6 +26,7 @@ public class LegacySchemaRepair implements InitializingBean {
   void repairLegacySchemas() {
     repairAdminUsers();
     repairCustomerOrders();
+    repairOrderItems();
   }
 
   private void repairAdminUsers() {
@@ -44,6 +45,7 @@ public class LegacySchemaRepair implements InitializingBean {
       return;
     }
 
+    apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS email VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS currency VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS amount_paise INTEGER");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(255)");
@@ -93,6 +95,16 @@ public class LegacySchemaRepair implements InitializingBean {
     if (columnExists("customer_orders", "is_deleted")) {
       apply("CREATE INDEX IF NOT EXISTS idx_customer_orders_is_deleted ON customer_orders (is_deleted)");
     }
+  }
+
+  private void repairOrderItems() {
+    if (!tableExists("order_items")) {
+      return;
+    }
+
+    apply("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_id BIGINT");
+    apply("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_color VARCHAR(255)");
+    apply("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_size VARCHAR(255)");
   }
 
   private void apply(String sql) {
