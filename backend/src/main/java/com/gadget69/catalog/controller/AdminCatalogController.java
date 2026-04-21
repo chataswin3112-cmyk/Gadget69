@@ -239,14 +239,6 @@ public class AdminCatalogController {
     return ResponseEntity.noContent().build();
   }
 
-  @GetMapping("/orders")
-  public List<ApiDtos.OrderResponse> adminOrders(HttpServletRequest httpRequest) {
-    authTokenService.requireAdmin(httpRequest);
-    return customerOrderRepository.findAllByOrderByCreatedAtDesc().stream()
-        .map(catalogMapper::toOrderResponse)
-        .toList();
-  }
-
   @PostMapping("/upload")
   public ApiDtos.UploadResponse upload(HttpServletRequest httpRequest,
       @RequestParam("file") MultipartFile file) {

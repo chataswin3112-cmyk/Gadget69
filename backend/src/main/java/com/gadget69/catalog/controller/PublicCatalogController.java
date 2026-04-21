@@ -11,9 +11,13 @@ import com.gadget69.catalog.repository.CustomerOrderRepository;
 import com.gadget69.catalog.repository.ProductRepository;
 import com.gadget69.catalog.repository.SectionRepository;
 import com.gadget69.catalog.repository.StoreSettingsRepository;
+import com.gadget69.catalog.service.AuthTokenService;
+import com.gadget69.catalog.service.OrderStateSupport;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -36,6 +41,7 @@ public class PublicCatalogController {
   private final CommunityMediaRepository communityMediaRepository;
   private final CustomerOrderRepository customerOrderRepository;
   private final CatalogMapper catalogMapper;
+  private final AuthTokenService authTokenService;
 
   @GetMapping("/health")
   public Map<String, Object> health() {
@@ -88,6 +94,39 @@ public class PublicCatalogController {
 
   @PostMapping("/create-order")
   public ApiDtos.OrderResponse createOrder(@RequestBody ApiDtos.CreateOrderRequest request) {
+    return createOrderInternal(request);
+  }
+
+  @PostMapping("/orders")
+  public ApiDtos.OrderResponse createOrderAlias(@RequestBody ApiDtos.CreateOrderRequest request) {
+    return createOrderInternal(request);
+  }
+
+  @GetMapping("/orders/{id}")
+  public ApiDtos.OrderResponse getOrderById(
+      HttpServletRequest request,
+      @PathVariable Long id,
+      @RequestParam(value = "phone", required = false) String phone) {
+    CustomerOrder order = customerOrderRepository.findByIdAndIsDeletedFalse(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+    String authorization = request.getHeader("Authorization");
+    if (authorization != null && !authorization.isBlank()) {
+      authTokenService.requireAdmin(request);
+      return catalogMapper.toOrderResponse(order);
+    }
+
+    String normalizedPhone = requiredValue(phone, "Phone number is required")
+        .replaceAll("[^0-9]", "");
+    String orderPhone = order.getPhone() == null ? "" : order.getPhone().replaceAll("[^0-9]", "");
+    if (!orderPhone.equals(normalizedPhone)) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found");
+    }
+
+    return catalogMapper.toOrderResponse(order);
+  }
+
+  private ApiDtos.OrderResponse createOrderInternal(ApiDtos.CreateOrderRequest request) {
     if (request == null || request.items() == null || request.items().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order items are required");
     }
@@ -95,12 +134,15 @@ public class PublicCatalogController {
     CustomerOrder order = new CustomerOrder();
     order.setCustomerName(requiredValue(request.customerName(), "Customer name is required"));
     order.setPhone(requiredValue(request.phone(), "Phone number is required"));
+    order.setEmail(request.email() == null || request.email().isBlank()
+        ? null
+        : request.email().trim().toLowerCase(Locale.ROOT));
     order.setAddress(requiredValue(request.address(), "Address is required"));
     order.setPincode(requiredValue(request.pincode(), "Pincode is required"));
     order.setTotalAmount(request.totalAmount());
-    order.setPaymentStatus(request.paymentStatus() == null || request.paymentStatus().isBlank()
-        ? "PENDING"
-        : request.paymentStatus().trim().toUpperCase());
+    order.setPaymentStatus(OrderStateSupport.normalizePaymentStatus(request.paymentStatus()));
+    order.setOrderStatus("PENDING");
+    order.setCurrency("INR");
     order.setRazorpayOrderId("G69-ORDER-" + System.currentTimeMillis());
 
     for (ApiDtos.OrderItemPayload itemPayload : request.items()) {
@@ -108,6 +150,9 @@ public class PublicCatalogController {
       orderItem.setOrder(order);
       orderItem.setProductId(itemPayload.productId());
       orderItem.setProductName(requiredValue(itemPayload.productName(), "Product name is required"));
+      orderItem.setVariantId(itemPayload.variantId());
+      orderItem.setVariantColor(itemPayload.variantColor());
+      orderItem.setVariantSize(itemPayload.variantSize());
       orderItem.setQuantity(itemPayload.quantity() == null ? 1 : itemPayload.quantity());
       orderItem.setPrice(itemPayload.price());
       order.getItems().add(orderItem);
@@ -120,7 +165,10 @@ public class PublicCatalogController {
   public ApiDtos.OrderResponse verifyPayment(@RequestBody ApiDtos.PaymentVerifyRequest request) {
     CustomerOrder order = customerOrderRepository.findById(request.orderId())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
-    order.setPaymentStatus("PAID");
+    order.setPaymentStatus("SUCCESS");
+    if ("PENDING".equals(OrderStateSupport.normalizeOrderStatus(order.getOrderStatus()))) {
+      order.setOrderStatus("CONFIRMED");
+    }
     order.setRazorpayPaymentId(request.razorpayPaymentId());
     order.setRazorpayOrderId(request.razorpayOrderId());
     return catalogMapper.toOrderResponse(customerOrderRepository.save(order));

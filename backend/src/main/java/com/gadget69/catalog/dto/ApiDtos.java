@@ -179,6 +179,9 @@ public final class ApiDtos {
   public record OrderItemPayload(
       Long productId,
       String productName,
+      Long variantId,
+      String variantColor,
+      String variantSize,
       Integer quantity,
       BigDecimal price
   ) {}
@@ -186,6 +189,7 @@ public final class ApiDtos {
   public record CreateOrderRequest(
       String customerName,
       String phone,
+      String email,
       String address,
       String pincode,
       BigDecimal totalAmount,
@@ -204,13 +208,30 @@ public final class ApiDtos {
       Long id,
       String customerName,
       String phone,
+      String email,
       String address,
       String pincode,
       BigDecimal totalAmount,
       String paymentStatus,
+      String orderStatus,
       String razorpayOrderId,
       String razorpayPaymentId,
       String createdAt,
-      List<OrderItemPayload> items
+      String updatedAt,
+      List<OrderItemPayload> items,
+      String currency,
+      Integer amountPaise,
+      String razorpayKeyId,
+      Boolean isDeleted
+  ) {}
+
+  public record UpdateOrderStatusRequest(String orderStatus) {}
+
+  public record UpdateOrderDetailsRequest(
+      String customerName,
+      String phone,
+      String email,
+      String address,
+      String pincode
   ) {}
 }

@@ -9,6 +9,7 @@ import com.gadget69.catalog.entity.OrderItem;
 import com.gadget69.catalog.entity.Product;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.entity.StoreSettings;
+import com.gadget69.catalog.service.OrderStateSupport;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -119,14 +120,21 @@ public class CatalogMapper {
         order.getId(),
         order.getCustomerName(),
         order.getPhone(),
+        order.getEmail(),
         order.getAddress(),
         order.getPincode(),
         order.getTotalAmount(),
-        order.getPaymentStatus(),
+        OrderStateSupport.normalizePaymentStatus(order.getPaymentStatus()),
+        OrderStateSupport.normalizeOrderStatus(order.getOrderStatus()),
         order.getRazorpayOrderId(),
         order.getRazorpayPaymentId(),
         order.getCreatedAt() == null ? null : order.getCreatedAt().toString(),
-        items
+        order.getUpdatedAt() == null ? null : order.getUpdatedAt().toString(),
+        items,
+        order.getCurrency(),
+        order.getAmountPaise(),
+        null,
+        order.isDeleted()
     );
   }
 
@@ -134,6 +142,9 @@ public class CatalogMapper {
     return new ApiDtos.OrderItemPayload(
         orderItem.getProductId(),
         orderItem.getProductName(),
+        orderItem.getVariantId(),
+        orderItem.getVariantColor(),
+        orderItem.getVariantSize(),
         orderItem.getQuantity(),
         orderItem.getPrice()
     );

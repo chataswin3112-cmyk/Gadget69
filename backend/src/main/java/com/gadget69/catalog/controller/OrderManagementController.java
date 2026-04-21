@@ -1,0 +1,208 @@
+package com.gadget69.catalog.controller;
+
+import com.gadget69.catalog.dto.ApiDtos;
+import com.gadget69.catalog.entity.CustomerOrder;
+import com.gadget69.catalog.mapper.CatalogMapper;
+import com.gadget69.catalog.repository.CustomerOrderRepository;
+import com.gadget69.catalog.service.AuthTokenService;
+import com.gadget69.catalog.service.OrderStateSupport;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+@RestController
+@RequestMapping("/api/admin/orders")
+@RequiredArgsConstructor
+public class OrderManagementController {
+
+  private static final String NO_FILTER_SENTINEL = "__NO_FILTER__";
+
+  private final AuthTokenService authTokenService;
+  private final CustomerOrderRepository customerOrderRepository;
+  private final CatalogMapper catalogMapper;
+
+  @GetMapping
+  @Transactional(readOnly = true)
+  public List<ApiDtos.OrderResponse> getAllOrders(
+      HttpServletRequest request,
+      @RequestParam(value = "orderStatus", required = false) String orderStatus,
+      @RequestParam(value = "paymentStatus", required = false) String paymentStatus,
+      @RequestParam(value = "fromDate", required = false) String fromDate,
+      @RequestParam(value = "toDate", required = false) String toDate) {
+    authTokenService.requireAdmin(request);
+
+    LocalDate from = parseDate(fromDate, "fromDate");
+    LocalDate to = parseDate(toDate, "toDate");
+    if (from != null && to != null && from.isAfter(to)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "fromDate cannot be after toDate");
+    }
+
+    Set<String> orderStatuses = parseStatuses(orderStatus, true);
+    Set<String> paymentStatuses = parseStatuses(paymentStatus, false);
+    LocalDateTime fromCreatedAt = from == null ? null : from.atStartOfDay();
+    LocalDateTime toCreatedAtExclusive = to == null ? null : to.plusDays(1).atStartOfDay();
+
+    return customerOrderRepository.findAdminOrders(
+            queryValues(orderStatuses),
+            !orderStatuses.isEmpty(),
+            queryValues(paymentStatuses),
+            !paymentStatuses.isEmpty(),
+            fromCreatedAt,
+            toCreatedAtExclusive)
+        .stream()
+        .map(catalogMapper::toOrderResponse)
+        .toList();
+  }
+
+  @GetMapping("/{id}")
+  @Transactional(readOnly = true)
+  public ApiDtos.OrderResponse getOrder(HttpServletRequest request, @PathVariable Long id) {
+    authTokenService.requireAdmin(request);
+    return catalogMapper.toOrderResponse(getActiveOrder(id));
+  }
+
+  @PutMapping("/{id}/status")
+  public ApiDtos.OrderResponse updateOrderStatus(
+      HttpServletRequest request,
+      @PathVariable Long id,
+      @RequestBody ApiDtos.UpdateOrderStatusRequest updateRequest) {
+    authTokenService.requireAdmin(request);
+
+    String requestedStatus = updateRequest == null ? null : updateRequest.orderStatus();
+    if (requestedStatus == null || requestedStatus.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order status is required");
+    }
+
+    String normalizedStatus = OrderStateSupport.normalizeOrderStatus(requestedStatus);
+    if (!OrderStateSupport.ADMIN_ORDER_STATUSES.contains(normalizedStatus)) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Invalid order status. Must be one of: PENDING, CONFIRMED, PROCESSING, SHIPPED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED");
+    }
+
+    CustomerOrder order = getActiveOrder(id);
+    order.setOrderStatus(normalizedStatus);
+    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
+  }
+
+  @PutMapping("/{id}/details")
+  public ApiDtos.OrderResponse updateOrderDetails(
+      HttpServletRequest request,
+      @PathVariable Long id,
+      @RequestBody ApiDtos.UpdateOrderDetailsRequest updateRequest) {
+    authTokenService.requireAdmin(request);
+
+    if (updateRequest == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Update payload is required");
+    }
+
+    String customerName = requiredValue(updateRequest.customerName(), "Customer name is required");
+    String phone = requiredValue(updateRequest.phone(), "Phone number is required");
+    String email = requiredValue(updateRequest.email(), "Email is required");
+    String address = requiredValue(updateRequest.address(), "Address is required");
+    String pincode = requiredValue(updateRequest.pincode(), "Pincode is required");
+
+    CustomerOrder order = getActiveOrder(id);
+    order.setCustomerName(customerName);
+    order.setPhone(phone);
+    order.setEmail(email);
+    order.setAddress(address);
+    order.setPincode(pincode);
+    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
+  }
+
+  @PutMapping("/{id}/cancel")
+  public ApiDtos.OrderResponse cancelOrder(HttpServletRequest request, @PathVariable Long id) {
+    authTokenService.requireAdmin(request);
+
+    CustomerOrder order = getActiveOrder(id);
+    order.setOrderStatus("CANCELLED");
+    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
+  }
+
+  @PutMapping("/{id}/archive")
+  public ApiDtos.OrderResponse archiveOrder(HttpServletRequest request, @PathVariable Long id) {
+    authTokenService.requireAdmin(request);
+
+    CustomerOrder order = getActiveOrder(id);
+    order.setDeleted(true);
+    return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteOrder(HttpServletRequest request, @PathVariable Long id) {
+    authTokenService.requireAdmin(request);
+
+    CustomerOrder order = getActiveOrder(id);
+    if (!OrderStateSupport.canDeleteOrder(order.getPaymentStatus())) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Delete is allowed only for FAILED or PENDING payments. Successful payments can only be cancelled or archived.");
+    }
+
+    customerOrderRepository.delete(order);
+    return ResponseEntity.noContent().build();
+  }
+
+  private CustomerOrder getActiveOrder(Long id) {
+    return customerOrderRepository.findByIdAndIsDeletedFalse(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+  }
+
+  private Set<String> parseStatuses(String rawStatuses, boolean orderStatus) {
+    if (rawStatuses == null || rawStatuses.isBlank()) {
+      return Set.of();
+    }
+
+    Set<String> normalized = Arrays.stream(rawStatuses.split(","))
+        .map(String::trim)
+        .filter(value -> !value.isBlank())
+        .map(value -> orderStatus
+            ? OrderStateSupport.normalizeOrderStatus(value)
+            : OrderStateSupport.normalizePaymentStatus(value))
+        .collect(java.util.stream.Collectors.toSet());
+
+    if (orderStatus && normalized.stream().anyMatch(status -> !OrderStateSupport.ADMIN_ORDER_STATUSES.contains(status))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more order statuses are invalid");
+    }
+    return normalized;
+  }
+
+  private LocalDate parseDate(String rawDate, String fieldName) {
+    if (rawDate == null || rawDate.isBlank()) {
+      return null;
+    }
+    try {
+      return LocalDate.parse(rawDate.trim());
+    } catch (Exception ex) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, fieldName + " must be in YYYY-MM-DD format");
+    }
+  }
+
+  private Set<String> queryValues(Set<String> statuses) {
+    return statuses.isEmpty() ? Set.of(NO_FILTER_SENTINEL) : statuses;
+  }
+
+  private String requiredValue(String value, String message) {
+    if (value == null || value.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    }
+    return value.trim();
+  }
+}
