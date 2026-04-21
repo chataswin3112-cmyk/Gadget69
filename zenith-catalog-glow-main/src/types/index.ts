@@ -131,6 +131,29 @@ export interface OrderFilters {
   toDate?: string;
 }
 
+export interface AdminOrdersResponse {
+  items: Order[];
+  total: number;
+  appliedFilters: OrderFilters;
+}
+
+export interface ApiErrorResponse {
+  code?: string;
+  message?: string;
+  requestId?: string;
+}
+
+export type AdminOrdersLoadStatus = "loading" | "success" | "empty" | "error";
+
+export interface AdminOrdersPageState {
+  status: AdminOrdersLoadStatus;
+  items: Order[];
+  total: number;
+  filters: OrderFilters;
+  errorMessage: string | null;
+  requestId: string | null;
+}
+
 export interface Order {
   id?: number;
   customerName: string;

@@ -308,6 +308,25 @@ public final class ApiDtos {
       Boolean isDeleted
   ) {}
 
+  public record AdminOrdersAppliedFilters(
+      String orderStatus,
+      String paymentStatus,
+      String fromDate,
+      String toDate
+  ) {}
+
+  public record AdminOrdersResponse(
+      List<OrderResponse> items,
+      Integer total,
+      AdminOrdersAppliedFilters appliedFilters
+  ) {}
+
+  public record ApiErrorResponse(
+      String code,
+      String message,
+      String requestId
+  ) {}
+
   public record UpdateOrderStatusRequest(String orderStatus) {}
 
   public record UpdateOrderDetailsRequest(

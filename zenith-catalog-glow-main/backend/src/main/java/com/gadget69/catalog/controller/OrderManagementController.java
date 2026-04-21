@@ -2,6 +2,7 @@ package com.gadget69.catalog.controller;
 
 import com.gadget69.catalog.config.InputSanitizer;
 import com.gadget69.catalog.dto.ApiDtos;
+import com.gadget69.catalog.entity.AdminUser;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.mapper.CatalogMapper;
 import com.gadget69.catalog.repository.CustomerOrderRepository;
@@ -13,8 +14,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,43 +37,76 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class OrderManagementController {
 
+  private static final Logger log = LoggerFactory.getLogger(OrderManagementController.class);
+  private static final Set<String> ADMIN_PAYMENT_STATUSES =
+      Set.of("PENDING", "SUCCESS", "FAILED", "REFUNDED");
+
   private final AuthTokenService authTokenService;
   private final CustomerOrderRepository customerOrderRepository;
   private final CatalogMapper catalogMapper;
   private final EmailNotificationService emailNotificationService;
-  private static final String NO_FILTER_SENTINEL = "__NO_FILTER__";
 
   @GetMapping
   @Transactional(readOnly = true)
-  public List<ApiDtos.OrderResponse> getAllOrders(
+  public ResponseEntity<ApiDtos.AdminOrdersResponse> getAllOrders(
       HttpServletRequest request,
       @RequestParam(value = "orderStatus", required = false) String orderStatus,
       @RequestParam(value = "paymentStatus", required = false) String paymentStatus,
       @RequestParam(value = "fromDate", required = false) String fromDate,
       @RequestParam(value = "toDate", required = false) String toDate) {
-    authTokenService.requireAdmin(request);
+    String requestId = ApiRequestContext.ensureRequestId(request);
+    AdminUser adminUser = authTokenService.requireAdmin(request);
+    NormalizedAdminOrderFilters normalizedFilters =
+        normalizeAdminOrderFilters(orderStatus, paymentStatus, fromDate, toDate);
 
-    LocalDate from = parseDate(fromDate, "fromDate");
-    LocalDate to = parseDate(toDate, "toDate");
-    if (from != null && to != null && from.isAfter(to)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "fromDate cannot be after toDate");
+    List<CustomerOrder> orders;
+    try {
+      orders = customerOrderRepository.findAdminOrders(
+          normalizedFilters.orderStatuses(),
+          !normalizedFilters.orderStatuses().isEmpty(),
+          normalizedFilters.paymentStatuses(),
+          !normalizedFilters.paymentStatuses().isEmpty(),
+          normalizedFilters.fromCreatedAt(),
+          normalizedFilters.toCreatedAtExclusive());
+    } catch (Exception ex) {
+      log.error(
+          "Admin orders query failed requestId={} adminId={} filters={}",
+          requestId,
+          adminUser.getId(),
+          normalizedFilters.logDescription(),
+          ex);
+      throw new AdminOrdersLoadException(requestId, ex);
     }
 
-    Set<String> orderStatuses = parseStatuses(orderStatus, true);
-    Set<String> paymentStatuses = parseStatuses(paymentStatus, false);
-    LocalDateTime fromCreatedAt = from == null ? null : from.atStartOfDay();
-    LocalDateTime toCreatedAtExclusive = to == null ? null : to.plusDays(1).atStartOfDay();
+    List<ApiDtos.OrderResponse> items;
+    try {
+      items = orders.stream().map(catalogMapper::toOrderResponse).toList();
+    } catch (Exception ex) {
+      log.error(
+          "Admin orders serialization failed requestId={} adminId={} filters={}",
+          requestId,
+          adminUser.getId(),
+          normalizedFilters.logDescription(),
+          ex);
+      throw new AdminOrdersLoadException(requestId, ex);
+    }
 
-    return customerOrderRepository.findAdminOrders(
-            queryValues(orderStatuses),
-            !orderStatuses.isEmpty(),
-            queryValues(paymentStatuses),
-            !paymentStatuses.isEmpty(),
-            fromCreatedAt,
-            toCreatedAtExclusive)
-        .stream()
-        .map(catalogMapper::toOrderResponse)
-        .toList();
+    log.info(
+        "Admin orders loaded requestId={} adminId={} filters={} total={}",
+        requestId,
+        adminUser.getId(),
+        normalizedFilters.logDescription(),
+        items.size());
+
+    ApiDtos.AdminOrdersResponse responseBody =
+        new ApiDtos.AdminOrdersResponse(
+            items,
+            items.size(),
+            normalizedFilters.toResponse());
+
+    return ResponseEntity.ok()
+        .header(ApiRequestContext.REQUEST_ID_HEADER, requestId)
+        .body(responseBody);
   }
 
   @GetMapping("/{id}")
@@ -193,38 +230,59 @@ public class OrderManagementController {
     return normalizedStatus;
   }
 
-  private Set<String> parseStatuses(String rawStatuses, boolean orderStatus) {
+  private NormalizedAdminOrderFilters normalizeAdminOrderFilters(
+      String rawOrderStatus,
+      String rawPaymentStatus,
+      String rawFromDate,
+      String rawToDate) {
+    Set<String> orderStatuses =
+        normalizeStatuses(rawOrderStatus, true, OrderStateSupport.ADMIN_ORDER_STATUSES);
+    Set<String> paymentStatuses =
+        normalizeStatuses(rawPaymentStatus, false, ADMIN_PAYMENT_STATUSES);
+
+    LocalDate from = parseDateSafely(rawFromDate);
+    LocalDate to = parseDateSafely(rawToDate);
+    if (from != null && to != null && from.isAfter(to)) {
+      from = null;
+      to = null;
+    }
+
+    return new NormalizedAdminOrderFilters(
+        orderStatuses,
+        paymentStatuses,
+        from,
+        to,
+        from == null ? null : from.atStartOfDay(),
+        to == null ? null : to.plusDays(1).atStartOfDay());
+  }
+
+  private Set<String> normalizeStatuses(
+      String rawStatuses,
+      boolean orderStatus,
+      Set<String> allowedValues) {
     if (rawStatuses == null || rawStatuses.isBlank()) {
       return Set.of();
     }
 
-    Set<String> normalized = Arrays.stream(rawStatuses.split(","))
+    return Arrays.stream(rawStatuses.split(","))
         .map(String::trim)
         .filter(value -> !value.isBlank())
         .map(value -> orderStatus
             ? OrderStateSupport.normalizeOrderStatus(value)
             : OrderStateSupport.normalizePaymentStatus(value))
-        .collect(java.util.stream.Collectors.toSet());
-
-    if (orderStatus && normalized.stream().anyMatch(status -> !OrderStateSupport.ADMIN_ORDER_STATUSES.contains(status))) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more order statuses are invalid");
-    }
-    return normalized;
+        .filter(allowedValues::contains)
+        .collect(java.util.stream.Collectors.toUnmodifiableSet());
   }
 
-  private LocalDate parseDate(String rawDate, String fieldName) {
+  private LocalDate parseDateSafely(String rawDate) {
     if (rawDate == null || rawDate.isBlank()) {
       return null;
     }
     try {
       return LocalDate.parse(rawDate.trim());
     } catch (Exception ex) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, fieldName + " must be in YYYY-MM-DD format");
+      return null;
     }
-  }
-
-  private Set<String> queryValues(Set<String> statuses) {
-    return statuses.isEmpty() ? Set.of(NO_FILTER_SENTINEL) : statuses;
   }
 
   private void sendStatusNotificationIfNeeded(CustomerOrder order) {
@@ -239,5 +297,36 @@ public class OrderManagementController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
     return value.trim();
+  }
+
+  private record NormalizedAdminOrderFilters(
+      Set<String> orderStatuses,
+      Set<String> paymentStatuses,
+      LocalDate fromDate,
+      LocalDate toDate,
+      LocalDateTime fromCreatedAt,
+      LocalDateTime toCreatedAtExclusive) {
+
+    private ApiDtos.AdminOrdersAppliedFilters toResponse() {
+      return new ApiDtos.AdminOrdersAppliedFilters(
+          join(orderStatuses),
+          join(paymentStatuses),
+          fromDate == null ? null : fromDate.toString(),
+          toDate == null ? null : toDate.toString());
+    }
+
+    private String logDescription() {
+      return String.format(
+          Locale.ROOT,
+          "{orderStatus=%s,paymentStatus=%s,fromDate=%s,toDate=%s}",
+          join(orderStatuses),
+          join(paymentStatuses),
+          fromDate == null ? "null" : fromDate,
+          toDate == null ? "null" : toDate);
+    }
+
+    private static String join(Set<String> values) {
+      return values.isEmpty() ? null : String.join(",", values);
+    }
   }
 }

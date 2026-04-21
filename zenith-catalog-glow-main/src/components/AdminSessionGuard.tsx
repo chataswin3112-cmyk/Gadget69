@@ -28,7 +28,7 @@ const AdminSessionGuard: React.FC<AdminSessionGuardProps> = ({ children }) => {
   const doLogout = useCallback(() => {
     setShowWarning(false);
     logout();
-    navigate("/admin");
+    navigate("/admin/login");
   }, [logout, navigate]);
 
   const resetTimers = useCallback(() => {

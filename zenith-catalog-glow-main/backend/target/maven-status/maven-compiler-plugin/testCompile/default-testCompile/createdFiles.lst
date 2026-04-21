@@ -4,6 +4,7 @@ com\gadget69\catalog\config\LocalEnvLoaderTest.class
 com\gadget69\catalog\config\RateLimitFilterTest.class
 com\gadget69\catalog\controller\CommunityVideoUploadSignatureEndpointTest.class
 com\gadget69\catalog\service\RazorpayPaymentServiceTest.class
+com\gadget69\catalog\service\SeedDataServiceTest.class
 com\gadget69\catalog\config\LegacySchemaRepairTest.class
 com\gadget69\catalog\config\RazorpayEnvironmentBindingTest.class
 com\gadget69\catalog\controller\UploadImageControllerTest.class

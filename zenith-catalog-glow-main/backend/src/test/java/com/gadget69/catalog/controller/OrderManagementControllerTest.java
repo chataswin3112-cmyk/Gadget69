@@ -3,6 +3,8 @@ package com.gadget69.catalog.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gadget69.catalog.service.RazorpayPaymentService;
 import com.gadget69.catalog.service.RazorpayPaymentService.RazorpayOrder;
 import java.math.BigDecimal;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,12 +102,25 @@ class OrderManagementControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.customerName").value("Riya"));
 
-    mockMvc.perform(get("/api/admin/orders")
+    MvcResult adminOrdersResult = mockMvc.perform(get("/api/admin/orders")
             .header("Authorization", "Bearer " + token)
             .param("paymentStatus", "SUCCESS")
             .param("orderStatus", "CONFIRMED"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].id").value(orderId));
+        .andExpect(jsonPath("$.appliedFilters.paymentStatus").value("SUCCESS"))
+        .andExpect(jsonPath("$.appliedFilters.orderStatus").value("CONFIRMED"))
+        .andExpect(jsonPath("$.appliedFilters.fromDate").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.appliedFilters.toDate").value(org.hamcrest.Matchers.nullValue()))
+        .andReturn();
+
+    JsonNode adminOrders = objectMapper.readTree(adminOrdersResult.getResponse().getContentAsString());
+    JsonNode adminOrderItems = adminOrders.path("items");
+    assertEquals(adminOrderItems.size(), adminOrders.path("total").asInt());
+    assertTrue(
+        StreamSupport.stream(adminOrderItems.spliterator(), false)
+            .anyMatch(item -> item.path("id").asLong() == orderId
+                && "Riya".equals(item.path("customerName").asText())),
+        "Expected the created order to be present in the wrapped admin orders response");
 
     mockMvc.perform(put("/api/admin/orders/{id}/status", orderId)
             .header("Authorization", "Bearer " + token)

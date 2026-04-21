@@ -81,8 +81,13 @@ class OrderManagementLegacySchemaCompatibilityTest {
     mockMvc.perform(get("/api/admin/orders")
             .header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].id").value(orderId))
-        .andExpect(jsonPath("$[0].items[0].productName").value("Legacy Schema Phone"));
+        .andExpect(jsonPath("$.items[0].id").value(orderId))
+        .andExpect(jsonPath("$.items[0].items[0].productName").value("Legacy Schema Phone"))
+        .andExpect(jsonPath("$.total").value(1))
+        .andExpect(jsonPath("$.appliedFilters.orderStatus").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.appliedFilters.paymentStatus").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.appliedFilters.fromDate").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.appliedFilters.toDate").value(org.hamcrest.Matchers.nullValue()));
 
     mockMvc.perform(get("/api/admin/orders/{id}", orderId)
             .header("Authorization", "Bearer " + token))

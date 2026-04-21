@@ -94,7 +94,7 @@ describe("Admin sidebar branding", () => {
     fireEvent.click(logoutButton[logoutButton.length - 1] as HTMLElement);
 
     expect(mockLogout).toHaveBeenCalledTimes(1);
-    expect(mockNavigate).toHaveBeenCalledWith("/admin");
+    expect(mockNavigate).toHaveBeenCalledWith("/admin/login");
   });
 
   it("renders a logo-only mobile header treatment in the admin layout", async () => {

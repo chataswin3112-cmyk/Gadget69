@@ -156,7 +156,7 @@ public class CatalogMapper {
   }
 
   public ApiDtos.OrderResponse toOrderResponse(CustomerOrder order) {
-    List<ApiDtos.OrderItemPayload> items = order.getItems().stream()
+    List<ApiDtos.OrderItemPayload> items = (order.getItems() == null ? List.<OrderItem>of() : order.getItems()).stream()
         .map(this::toOrderItemPayload)
         .toList();
 

@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import type { Order, OrderFilters } from "@/types";
+import type { AdminOrdersResponse, Order, OrderFilters } from "@/types";
 
 export const createOrder = async (orderData: Partial<Order>): Promise<Order> => {
   const res = await apiClient.post("/orders", orderData);
@@ -17,8 +17,8 @@ export const verifyPayment = async (paymentData: {
 };
 
 export const getAdminOrders = async (filters: OrderFilters = {}): Promise<Order[]> => {
-  const res = await apiClient.get("/admin/orders", { params: filters });
-  return res.data;
+  const res = await apiClient.get<AdminOrdersResponse>("/admin/orders", { params: filters });
+  return res.data.items;
 };
 
 export const getAdminOrderById = async (orderId: number): Promise<Order> => {

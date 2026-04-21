@@ -59,6 +59,7 @@ com\gadget69\catalog\config\WebConfig.class
 com\gadget69\catalog\config\AppProperties.class
 com\gadget69\catalog\config\DatasourceBootstrap$Mode.class
 com\gadget69\catalog\entity\OrderItem.class
+com\gadget69\catalog\controller\ApiExceptionHandler$1.class
 com\gadget69\catalog\repository\ReviewRepository.class
 com\gadget69\catalog\dto\ApiDtos$AdminLoginResponse.class
 com\gadget69\catalog\service\UploadStorageService$StoredFile.class
