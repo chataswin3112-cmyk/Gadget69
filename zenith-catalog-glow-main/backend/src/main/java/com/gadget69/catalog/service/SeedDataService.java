@@ -63,19 +63,38 @@ public class SeedDataService implements ApplicationRunner {
   private void seedAdmin() {
     AdminUser adminUser = adminUserRepository.findByEmailIgnoreCase("admin@gadget69.com")
         .orElseGet(AdminUser::new);
-    adminUser.setName("Gadget69 Admin");
-    adminUser.setEmail("admin@gadget69.com");
-    adminUser.setPasswordHash(authTokenService.encodePassword("Admin@123"));
-    if (adminUser.getTokenVersion() == null) {
-        adminUser.setTokenVersion(0);
+    boolean created = adminUser.getId() == null;
+    boolean changed = false;
+
+    if (adminUser.getName() == null || adminUser.getName().isBlank()) {
+      adminUser.setName("Gadget69 Admin");
+      changed = true;
     }
-    adminUserRepository.save(adminUser);
-    System.out.println("""
-        ADMIN CREDENTIALS RESET
-        Email: admin@gadget69.com
-        Password: Admin@123
-        Change this password immediately after first login.
-        """);
+    if (adminUser.getEmail() == null || adminUser.getEmail().isBlank()) {
+      adminUser.setEmail("admin@gadget69.com");
+      changed = true;
+    }
+    if (adminUser.getPasswordHash() == null || adminUser.getPasswordHash().isBlank()) {
+      adminUser.setPasswordHash(authTokenService.encodePassword("Admin@123"));
+      changed = true;
+    }
+    if (adminUser.getTokenVersion() == null) {
+      adminUser.setTokenVersion(0);
+      changed = true;
+    }
+
+    if (created || changed) {
+      adminUserRepository.save(adminUser);
+    }
+
+    if (created) {
+      LOGGER.warn("""
+          Initial admin account seeded
+          Email: admin@gadget69.com
+          Password: Admin@123
+          Change this password immediately after first login.
+          """);
+    }
   }
 
   private void seedCatalog() {

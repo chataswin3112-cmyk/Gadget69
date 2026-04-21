@@ -9,6 +9,11 @@ import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
 import { adminLogin, resetPasswordWithSecretKey } from "@/api/adminApi";
 import { getErrorMessage } from "@/lib/api-error";
 import { CheckCircle2, Eye, EyeOff, KeyRound, Lock, ShieldCheck, X } from "lucide-react";
+import {
+  ADMIN_PASSWORD_HINT,
+  ADMIN_PASSWORD_PLACEHOLDER,
+  isStrongAdminPassword,
+} from "@/lib/admin-password";
 
 /* ─── Forgot Password Modal ──────────────────────────── */
 const ForgotPasswordModal = ({ onClose }: { onClose: () => void }) => {
@@ -26,8 +31,8 @@ const ForgotPasswordModal = ({ onClose }: { onClose: () => void }) => {
       toast.error("Enter the secret key");
       return;
     }
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (!isStrongAdminPassword(newPassword)) {
+      toast.error(ADMIN_PASSWORD_HINT);
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -110,7 +115,7 @@ const ForgotPasswordModal = ({ onClose }: { onClose: () => void }) => {
                     type={showPwd ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Min 6 characters"
+                    placeholder={ADMIN_PASSWORD_PLACEHOLDER}
                     required
                     className="pr-10"
                   />
@@ -120,6 +125,7 @@ const ForgotPasswordModal = ({ onClose }: { onClose: () => void }) => {
                     {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                <p className="text-xs font-body text-muted-foreground">{ADMIN_PASSWORD_HINT}</p>
               </div>
 
               {/* Confirm Password */}
@@ -177,6 +183,9 @@ const AdminLogin = () => {
   const isLockedOut = lockoutRemaining > 0;
 
   const startLockout = () => {
+    if (lockoutTimer.current) {
+      clearInterval(lockoutTimer.current);
+    }
     let remaining = LOCKOUT_SECONDS;
     setLockoutRemaining(remaining);
     lockoutTimer.current = setInterval(() => {
@@ -189,17 +198,43 @@ const AdminLogin = () => {
     }, 1000);
   };
 
+  useEffect(() => {
+    return () => {
+      if (lockoutTimer.current) {
+        clearInterval(lockoutTimer.current);
+      }
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLockedOut) return;
     setErrorMsg("");
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await adminLogin({ email, password });
+      const response = await adminLogin({ email: email.trim(), password });
       login(response.token);
       toast.success("Welcome back, Admin!");
       navigate("/admin/dashboard");
-    } catch (error) {
+    } catch (error: unknown) {
+      // Always reset loading first
+      setLoading(false);
+
+      // Detect network / proxy errors (backend offline)
+      const isNetworkError =
+        !((error as { response?: unknown }).response) &&
+        ((error as { code?: string }).code === "ERR_NETWORK" ||
+          (error as { code?: string }).code === "ECONNREFUSED" ||
+          (error as { message?: string }).message?.includes("Network Error") ||
+          (error as { message?: string }).message?.includes("ENOBUFS"));
+
+      if (isNetworkError) {
+        const msg = "Cannot connect to server. Please make sure the backend is running.";
+        setErrorMsg(msg);
+        toast.error(msg);
+        return;
+      }
+
       const newCount = attemptCount + 1;
       setAttemptCount(newCount);
       if (newCount >= MAX_LOGIN_ATTEMPTS) {
@@ -215,8 +250,6 @@ const AdminLogin = () => {
           toast.warning(`${MAX_LOGIN_ATTEMPTS - newCount} attempt(s) remaining before lockout.`);
         }
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -227,11 +260,11 @@ const AdminLogin = () => {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-2">
+            <div className="mb-4 flex items-center justify-center">
               <img
                 src={gadget69Wordmark}
                 alt="Gadget69"
-                className="h-10 w-auto"
+                className="h-32 w-auto max-w-full"
                 decoding="async"
                 {...{ fetchpriority: "high" }}
               />
@@ -318,6 +351,11 @@ const AdminLogin = () => {
             >
               {loading ? "Signing in..." : isLockedOut ? `Locked (${lockoutRemaining}s)` : "Sign In"}
             </Button>
+
+            <p className="text-center text-xs font-body text-muted-foreground">
+              Seeded default credentials apply only on the first backend start. If the password
+              changed later, use the latest one or reset it with the admin secret key.
+            </p>
           </form>
         </div>
       </div>

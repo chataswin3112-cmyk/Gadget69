@@ -101,6 +101,7 @@ describe("AdminOffers", () => {
           offer: false,
         },
       ],
+      ensureProductsLoaded: vi.fn(),
       updateProduct: vi.fn(),
       isLoading: false,
     });

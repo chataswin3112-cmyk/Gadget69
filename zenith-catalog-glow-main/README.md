@@ -25,10 +25,12 @@ Main features:
 - Razorpay Standard Checkout order creation, checkout verification, and webhook reconciliation
 - Order creation and admin order listing
 
-Default admin login:
+Initial admin login on first backend start:
 
 - Email: `admin@gadget69.com`
 - Password: `Admin@123`
+
+After the admin password is changed, later restarts keep the updated password instead of resetting it.
 
 Catalog maintenance:
 

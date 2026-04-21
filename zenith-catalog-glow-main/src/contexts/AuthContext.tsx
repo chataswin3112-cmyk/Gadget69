@@ -11,10 +11,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = "mzflow_admin_token";
 
+const decodeBase64Url = (value: string) => {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const paddingLength = normalized.length % 4;
+  const padded =
+    paddingLength === 0 ? normalized : `${normalized}${"=".repeat(4 - paddingLength)}`;
+  return atob(padded);
+};
+
 /** Decodes the Base64-encoded token and checks if it is still valid. */
-function isTokenExpired(token: string): boolean {
+export function isTokenExpired(token: string): boolean {
   try {
-    const decoded = atob(token.replace(/-/g, "+").replace(/_/g, "/"));
+    const decoded = decodeBase64Url(token);
     // Format: id:email:expiresAt:tokenVersion:signature
     const parts = decoded.split(":");
     if (parts.length < 3) return true;

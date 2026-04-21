@@ -9,11 +9,12 @@ import {
   MessageSquare,
   Package,
   Settings,
+  ShieldCheck,
   ShoppingBag,
   Tag,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
+import gadget69Logo from "@/assets/gadget69-logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +27,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+
+const gadget69Mark = "/favicon.svg";
 
 const menuItems = [
   { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
@@ -53,32 +56,52 @@ const AdminSidebar = () => {
   };
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border/70 px-3 py-4">
+    <Sidebar collapsible="icon" variant="floating" className="border-r-0">
+      <SidebarHeader className="px-3 py-4">
         {collapsed ? (
-          <div className="flex justify-center">
-            <img src={gadget69Wordmark} alt="Gadget69" className="h-7 w-auto" decoding="async" />
+          <div className="flex justify-center rounded-2xl border border-sidebar-border/80 bg-sidebar-accent/60 px-2 py-3 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-sidebar-border/60 bg-sidebar shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+              <img src={gadget69Mark} alt="Gadget69 logo mark" className="h-8 w-8" decoding="async" />
+            </div>
           </div>
         ) : (
-          <div className="flex items-center gap-3">
-            <img src={gadget69Wordmark} alt="Gadget69" className="h-8 w-auto" decoding="async" />
-            <div className="flex flex-col leading-none">
-              <span className="font-heading text-xl font-bold text-foreground">Gadget69</span>
-              <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
+          <div className="rounded-2xl border border-sidebar-border/80 bg-sidebar-accent/45 p-3 shadow-sm">
+            <div className="rounded-[1.15rem] border border-sidebar-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,240,232,0.94))] px-6 py-5 shadow-[0_12px_30px_rgba(0,0,0,0.16)]">
+              <img
+                src={gadget69Logo}
+                alt="Gadget69 logo"
+                className="h-32 w-auto max-w-full"
+                decoding="async"
+              />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sidebar-foreground">
                 Admin Panel
+              </span>
+              <span className="inline-flex rounded-full border border-sidebar-border/70 bg-sidebar px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sidebar-primary">
+                Control Room
               </span>
             </div>
           </div>
         )}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-1 pb-2">
         <SidebarGroup>
+          {!collapsed && (
+            <p className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-sidebar-foreground/60">
+              Workspace
+            </p>
+          )}
           <SidebarGroupContent className="pt-2">
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.url}
+                    className="text-sidebar-foreground/90 [&>svg]:text-sidebar-foreground/72 hover:[&>svg]:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent/90 data-[active=true]:text-sidebar-accent-foreground data-[active=true]:[&>svg]:text-sidebar-primary"
+                  >
                     <NavLink to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
@@ -91,10 +114,25 @@ const AdminSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="mt-auto">
+        {!collapsed && (
+          <div className="rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/45 p-3 text-xs text-sidebar-foreground/72">
+            <div className="flex items-center gap-2 font-semibold text-sidebar-foreground">
+              <ShieldCheck className="h-4 w-4 text-sidebar-primary" />
+              Admin session protected
+            </div>
+            <p className="mt-1 leading-5">
+              Changes sync against the live catalog APIs, so review updates carefully before
+              publish.
+            </p>
+          </div>
+        )}
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout}>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="text-sidebar-foreground/90 [&>svg]:text-sidebar-foreground/72 hover:[&>svg]:text-sidebar-accent-foreground"
+            >
               <LogOut className="h-4 w-4" />
               {!collapsed && <span>Logout</span>}
             </SidebarMenuButton>

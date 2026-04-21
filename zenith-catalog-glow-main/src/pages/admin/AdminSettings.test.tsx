@@ -45,6 +45,7 @@ describe("AdminSettings", () => {
         announcementItems: [],
         whatsappNumber: "8825602356",
       },
+      ensureSettingsLoaded: vi.fn(),
       updateSettings: vi.fn(),
     });
   });
@@ -67,6 +68,7 @@ describe("AdminSettings", () => {
         announcementItems: [],
         whatsappNumber: "8825602356",
       },
+      ensureSettingsLoaded: vi.fn(),
       updateSettings,
     });
 
@@ -86,9 +88,12 @@ describe("AdminSettings", () => {
     fireEvent.change(screen.getByPlaceholderText("Your current password"), {
       target: { value: "Admin@123" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Min 8 chars, uppercase, number, special char"), {
+    fireEvent.change(
+      screen.getByPlaceholderText("Min 8 chars, uppercase, lowercase, number, special char"),
+      {
       target: { value: "NewPass@123" },
-    });
+      }
+    );
     fireEvent.change(screen.getByPlaceholderText("Re-enter new password"), {
       target: { value: "NewPass@123" },
     });

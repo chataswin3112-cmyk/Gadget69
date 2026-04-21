@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Archive, Eye, RefreshCw, Trash2, XCircle } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import {
@@ -226,6 +226,7 @@ const AdminOrders = () => {
   const { products, ensureProductsLoaded } = useAdminData();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
@@ -246,6 +247,7 @@ const AdminOrders = () => {
       ? window.matchMedia(COMPACT_LAYOUT_QUERY).matches
       : false
   );
+  const hasLoadedOrdersRef = useRef(false);
 
   const productLookup = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -263,15 +265,23 @@ const AdminOrders = () => {
   );
 
   const loadOrders = useCallback(async () => {
+    if (hasLoadedOrdersRef.current) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+
     try {
       setError(null);
       const data = await getAdminOrders(serverFilters);
       setOrders(data.filter((order) => !order.isDeleted));
       setLastUpdated(new Date());
+      hasLoadedOrdersRef.current = true;
     } catch (loadError) {
       setError(getErrorMessage(loadError, "Failed to load orders."));
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [serverFilters]);
 
@@ -338,6 +348,20 @@ const AdminOrders = () => {
       })),
     [orders]
   );
+
+  const hasActiveFilters =
+    Boolean(filters.fromDate) ||
+    Boolean(filters.toDate) ||
+    filters.paymentStatus !== "ALL" ||
+    filters.orderStatus !== "ALL";
+
+  const clearFilters = () =>
+    setFilters({
+      fromDate: "",
+      toDate: "",
+      paymentStatus: "ALL",
+      orderStatus: "ALL",
+    });
 
   const mergeOrder = useCallback((updatedOrder: Order) => {
     setOrders((current) => {
@@ -541,16 +565,19 @@ const AdminOrders = () => {
           <div className="flex items-center gap-3">
             {lastUpdated && (
               <span className="text-xs font-body text-muted-foreground">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+                {isRefreshing
+                  ? "Refreshing snapshot..."
+                  : `Last updated: ${lastUpdated.toLocaleTimeString()}`}
               </span>
             )}
             <Button
               variant="outline"
               onClick={() => void loadOrders()}
+              disabled={isRefreshing}
               className="flex items-center gap-2"
             >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
+              <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
+              {isRefreshing ? "Refreshing..." : "Refresh"}
             </Button>
           </div>
         </div>
@@ -659,9 +686,58 @@ const AdminOrders = () => {
             </div>
           </div>
 
+          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-border/60 bg-secondary/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs font-body text-muted-foreground">
+              <span className="font-semibold text-foreground">
+                {filteredOrders.length.toLocaleString()}
+              </span>{" "}
+              order(s) match the current queue view.
+            </p>
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="h-8 justify-start px-0 text-xs font-semibold text-muted-foreground hover:text-foreground sm:px-3"
+              >
+                Clear filters
+              </Button>
+            )}
+          </div>
+
           {error && (
-            <div className="mt-5 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm font-body text-destructive">
-              {error}
+            <div
+              className={cn(
+                "mt-5 rounded-2xl border px-4 py-4 text-sm shadow-sm",
+                orders.length > 0
+                  ? "border-amber-200/80 bg-amber-50/80 text-amber-950"
+                  : "border-destructive/20 bg-destructive/5 text-destructive"
+              )}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-semibold">
+                    {orders.length > 0 ? "Live refresh paused" : "Unable to load orders"}
+                  </p>
+                  <p className="mt-1 font-body">{error}</p>
+                  {orders.length > 0 && (
+                    <p className="mt-1 text-xs font-body text-amber-800/80">
+                      Showing the last successful snapshot while the server recovers.
+                    </p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void loadOrders()}
+                  disabled={isRefreshing}
+                  className="w-full shrink-0 sm:w-auto"
+                >
+                  Retry
+                </Button>
+              </div>
             </div>
           )}
 

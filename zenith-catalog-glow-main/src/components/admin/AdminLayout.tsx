@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
+import gadget69Logo from "@/assets/gadget69-logo.png";
 import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
 
@@ -26,9 +26,13 @@ const AdminHeader = () => {
           Secure admin access
         </div>
         {isMobile && (
-          <div className="flex items-center gap-2">
-            <img src={gadget69Wordmark} alt="Gadget69" className="h-7 w-auto" decoding="async" />
-            <span className="font-heading text-sm font-bold text-foreground">Gadget69</span>
+          <div className="flex items-center rounded-full border border-border/70 bg-background/90 px-3 py-1.5 shadow-sm">
+            <img
+              src={gadget69Logo}
+              alt="Gadget69 logo"
+              className="h-8 w-auto max-w-[9rem]"
+              decoding="async"
+            />
           </div>
         )}
       </div>
@@ -39,12 +43,15 @@ const AdminHeader = () => {
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-[linear-gradient(180deg,hsl(var(--background)),hsl(var(--secondary)/0.24))]">
         <AdminSidebar />
-        <SidebarInset className="min-h-screen">
+        <SidebarInset className="min-h-screen bg-transparent">
           <AdminHeader />
-          <main className="flex-1 overflow-auto bg-background p-6">
-            {children}
+          <main className="relative flex-1 overflow-auto">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_62%)]" />
+            <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </div>

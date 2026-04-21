@@ -10,27 +10,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import {
+  ADMIN_PASSWORD_HINT,
+  ADMIN_PASSWORD_PLACEHOLDER,
+  checkAdminPasswordStrength,
+} from "@/lib/admin-password";
 
 /* ─── Password Strength Helper ────────────────────────── */
-const checkPasswordStrength = (pwd: string) => {
-  const checks = {
-    length: pwd.length >= 8,
-    uppercase: /[A-Z]/.test(pwd),
-    lowercase: /[a-z]/.test(pwd),
-    number: /\d/.test(pwd),
-    special: /[@$!%*?&#^()_+=-]/.test(pwd),
-  };
-  const score = Object.values(checks).filter(Boolean).length;
-  return { checks, score };
-};
-
 const STRENGTH_LABELS = ["", "Very Weak", "Weak", "Fair", "Good", "Strong"];
 const STRENGTH_COLORS = ["", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
 const STRENGTH_TEXT = ["", "text-red-500", "text-orange-500", "text-yellow-500", "text-blue-500", "text-green-500"];
 
 const PasswordStrengthMeter = ({ password }: { password: string }) => {
   if (!password) return null;
-  const { checks, score } = checkPasswordStrength(password);
+  const { checks, score } = checkAdminPasswordStrength(password);
   return (
     <div className="space-y-2">
       {/* Strength bar */}
@@ -74,7 +67,7 @@ const ChangePasswordForm = () => {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const { score } = checkPasswordStrength(newPassword);
+  const { score } = checkAdminPasswordStrength(newPassword);
   const isPasswordStrong = score === 5;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -172,7 +165,7 @@ const ChangePasswordForm = () => {
               type={showNew ? "text" : "password"}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Min 8 chars, uppercase, number, special char"
+              placeholder={ADMIN_PASSWORD_PLACEHOLDER}
               required
               className="pr-10"
             />
@@ -182,6 +175,7 @@ const ChangePasswordForm = () => {
               {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+          <p className="text-xs font-body text-muted-foreground">{ADMIN_PASSWORD_HINT}</p>
           {/* Live strength meter */}
           <PasswordStrengthMeter password={newPassword} />
         </div>

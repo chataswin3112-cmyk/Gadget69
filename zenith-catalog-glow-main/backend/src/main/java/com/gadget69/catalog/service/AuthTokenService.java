@@ -92,9 +92,6 @@ public class AuthTokenService {
     if (secretKey == null || secretKey.isBlank()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Secret key is required");
     }
-    if (newPassword == null || newPassword.length() < 6) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 6 characters");
-    }
     // Resolve configured secret with null-safe fallback to prevent NPE
     String configuredSecret = (appProperties.getAdminSecret() != null && !appProperties.getAdminSecret().isBlank())
         ? appProperties.getAdminSecret()

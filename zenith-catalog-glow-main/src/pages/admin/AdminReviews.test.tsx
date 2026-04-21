@@ -64,6 +64,7 @@ describe("AdminReviews", () => {
     mockUseAdminData.mockReturnValue({
       reviews,
       addReview: vi.fn(),
+      ensureReviewsLoaded: vi.fn(),
       updateReview: vi.fn().mockResolvedValue(undefined),
       deleteReview: vi.fn().mockResolvedValue(undefined),
     });
@@ -82,6 +83,7 @@ describe("AdminReviews", () => {
     mockUseAdminData.mockReturnValue({
       reviews,
       addReview: vi.fn(),
+      ensureReviewsLoaded: vi.fn(),
       updateReview,
       deleteReview: vi.fn().mockResolvedValue(undefined),
     });
@@ -110,6 +112,7 @@ describe("AdminReviews", () => {
     mockUseAdminData.mockReturnValue({
       reviews,
       addReview: vi.fn(),
+      ensureReviewsLoaded: vi.fn(),
       updateReview: vi.fn().mockResolvedValue(undefined),
       deleteReview,
     });

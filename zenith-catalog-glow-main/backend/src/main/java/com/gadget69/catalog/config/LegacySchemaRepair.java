@@ -1,6 +1,6 @@
 package com.gadget69.catalog.config;
 
-import org.springframework.beans.factory.InitializingBean;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LegacySchemaRepair implements InitializingBean {
+public class LegacySchemaRepair {
 
   private static final Logger log = LoggerFactory.getLogger(LegacySchemaRepair.class);
 
@@ -18,7 +18,7 @@ public class LegacySchemaRepair implements InitializingBean {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  @Override
+  @PostConstruct
   public void afterPropertiesSet() {
     repairLegacySchemas();
   }
