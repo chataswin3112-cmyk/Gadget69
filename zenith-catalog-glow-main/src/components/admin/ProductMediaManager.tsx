@@ -156,7 +156,7 @@ const ProductMediaManager = ({ value, onChange }: ProductMediaManagerProps) => {
           <Button
             type="button"
             variant="outline"
-            className="mt-4"
+            className="mt-4 w-full sm:w-auto"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
           >
@@ -281,7 +281,7 @@ const ProductMediaManager = ({ value, onChange }: ProductMediaManagerProps) => {
                         type="button"
                         variant={media.isPrimary ? "default" : "outline"}
                         size="sm"
-                        className="w-full md:w-auto whitespace-nowrap"
+                        className="w-full whitespace-nowrap md:w-auto"
                         onClick={() => setPrimary(index)}
                       >
                         {media.isPrimary ? "✓ Primary" : "Set Primary"}
@@ -290,7 +290,7 @@ const ProductMediaManager = ({ value, onChange }: ProductMediaManagerProps) => {
                   ) : null}
                 </div>
 
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" size="icon" onClick={() => moveMedia(index, -1)}>
                       <ArrowUp className="h-4 w-4" />

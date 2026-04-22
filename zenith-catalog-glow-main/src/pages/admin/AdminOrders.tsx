@@ -220,7 +220,7 @@ const getProductMeta = (product?: Product) => {
   return metaParts.length ? metaParts.join(" - ") : "Catalog item";
 };
 
-const COMPACT_LAYOUT_QUERY = "(max-width: 767px)";
+const COMPACT_LAYOUT_QUERY = "(max-width: 1023px)";
 
 const AdminOrders = () => {
   const { products, ensureProductsLoaded } = useAdminData();
@@ -588,7 +588,7 @@ const AdminOrders = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Order Management</h1>
             <p className="mt-1 text-sm font-body text-muted-foreground">
@@ -639,8 +639,8 @@ const AdminOrders = () => {
           ))}
         </div>
 
-        <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-premium">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0 rounded-3xl border border-border/60 bg-card p-5 shadow-premium">
+          <div className="min-w-0 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OrderTab)}>
               <TabsList className="h-auto flex-wrap justify-start rounded-2xl bg-secondary/40 p-1">
                 {(Object.entries(ORDER_VIEW_TONES) as Array<[OrderTab, ViewTone]>).map(
@@ -780,7 +780,7 @@ const AdminOrders = () => {
             </div>
           )}
 
-          <div className="mt-5 overflow-hidden rounded-3xl border border-border/60">
+          <div className="mt-5 min-w-0 overflow-hidden rounded-3xl border border-border/60">
             {isCompactLayout ? (
               <div className="space-y-4 p-4">
                 {isLoading ? (
@@ -951,7 +951,7 @@ const AdminOrders = () => {
                 )}
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="max-w-full overflow-x-auto">
                 <table className="min-w-full divide-y divide-border/60">
                   <thead className="bg-secondary/40">
                     <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -1169,21 +1169,22 @@ const AdminOrders = () => {
             </div>
           ) : selectedOrder ? (
             <div className="grid gap-4">
-              <div className="flex justify-between items-center mb-2">
+              <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-lg font-bold">Order Details</h3>
                 {!editMode ? (
-                  <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
+                  <Button variant="outline" size="sm" onClick={() => setEditMode(true)} className="w-full sm:w-auto">
                     Edit Details
                   </Button>
                 ) : (
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setEditMode(false)}>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button variant="ghost" size="sm" onClick={() => setEditMode(false)} className="w-full sm:w-auto">
                       Cancel
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => void handleUpdateDetails()}
                       disabled={busyAction === `details-${selectedOrder.id}`}
+                      className="w-full sm:w-auto"
                     >
                       {busyAction === `details-${selectedOrder.id}` ? "Saving..." : "Save Changes"}
                     </Button>

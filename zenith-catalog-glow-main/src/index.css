@@ -362,6 +362,38 @@
       aspect-ratio: 21 / 9;
     }
   }
+
+  .admin-page-header {
+    @apply flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between;
+  }
+
+  .admin-page-actions {
+    @apply flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center;
+  }
+
+  .admin-actions-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .admin-table-scroll {
+    @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
+  }
+
+  .admin-dialog-grid {
+    @apply grid gap-4;
+  }
+
+  .admin-dialog-grid-2 {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+  }
+
+  .admin-inline-switches {
+    @apply flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6;
+  }
+
+  .admin-action-button {
+    @apply w-full sm:w-auto;
+  }
 }
 
 @keyframes announcement-scroll {
@@ -551,7 +583,30 @@ textarea {
 
   /* Prevent marquee animation jank on mobile */
   .announcement-scroll {
-    animation-duration: 20s;
+    animation-duration: 28s;
+  }
+
+  .announcement-shimmer-overlay,
+  .animate-marquee-left,
+  .animate-marquee-right,
+  .animate-product-left,
+  .animate-product-right,
+  .animate-hero-float {
+    animation: none !important;
+  }
+
+  .home-hero-content {
+    backdrop-filter: blur(12px);
+  }
+
+  .home-hero-nav {
+    backdrop-filter: blur(10px);
+  }
+
+  .media-frame img,
+  .home-product-card,
+  .home-section-panel {
+    transition-duration: 220ms;
   }
 }
 

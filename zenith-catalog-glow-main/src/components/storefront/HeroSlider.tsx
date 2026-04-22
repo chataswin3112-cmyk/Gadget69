@@ -5,14 +5,18 @@ import { useAdminData } from "@/contexts/AdminDataContext";
 import { resolveMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import MediaImage from "@/components/ui/media-image";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const AUTO_PLAY_MS = 3000;
+const DESKTOP_AUTO_PLAY_MS = 3000;
+const MOBILE_AUTO_PLAY_MS = 4500;
 
 const HeroSlider = () => {
   const { banners: allBanners } = useAdminData();
+  const isMobile = useIsMobile();
   const banners = useMemo(() => allBanners.filter((banner) => banner.isActive), [allBanners]);
   const [current, setCurrent] = useState(0);
   const [progressActive, setProgressActive] = useState(false);
+  const autoPlayMs = isMobile ? MOBILE_AUTO_PLAY_MS : DESKTOP_AUTO_PLAY_MS;
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % banners.length);
@@ -45,13 +49,13 @@ const HeroSlider = () => {
     });
     const timeoutId = window.setTimeout(() => {
       next();
-    }, AUTO_PLAY_MS);
+    }, autoPlayMs);
 
     return () => {
       window.cancelAnimationFrame(animationFrameId);
       window.clearTimeout(timeoutId);
     };
-  }, [current, banners.length, next]);
+  }, [autoPlayMs, current, banners.length, next]);
 
   if (!banners.length) {
     return null;
@@ -78,13 +82,14 @@ const HeroSlider = () => {
                 alt={banner.title || "Banner"}
                 className={cn(
                   "h-full w-full object-cover transition-transform ease-out",
-                  index === current ? "scale-110" : "scale-100"
+                  index === current ? (isMobile ? "scale-100" : "scale-110") : "scale-100"
                 )}
-                style={{ transitionDuration: index === current ? "7000ms" : "700ms" }}
+                style={{ transitionDuration: index === current ? (isMobile ? "600ms" : "7000ms") : "700ms" }}
                 loading={index === current ? "eager" : "lazy"}
                 decoding="async"
                 fetchPriority={index === current ? "high" : undefined}
                 sizes="100vw"
+                optimizeWidth={isMobile ? 900 : 1600}
               />
             </picture>
             <div className="home-hero-overlay absolute inset-0" />
@@ -92,7 +97,7 @@ const HeroSlider = () => {
               <div className="section-container">
                 <div className="home-hero-content" data-animate="hero-slide">
                   <p className="home-hero-kicker">Premium Electronics</p>
-                  <div className={cn("space-y-3 sm:space-y-4", index === current && "animate-hero-float")}>
+                  <div className={cn("space-y-3 sm:space-y-4", index === current && !isMobile && "animate-hero-float")}>
                     {banner.title && (
                       <h2 className="font-heading text-xl font-bold leading-tight text-white drop-shadow-sm sm:text-3xl md:text-5xl lg:text-6xl">
                         {banner.title}
@@ -119,14 +124,14 @@ const HeroSlider = () => {
           <button
             onClick={prev}
             aria-label="Previous banner"
-            className="home-hero-nav absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full p-2 transition"
+            className="home-hero-nav absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full p-2 transition sm:left-4"
           >
             <ChevronLeft className="h-5 w-5 text-foreground" />
           </button>
           <button
             onClick={next}
             aria-label="Next banner"
-            className="home-hero-nav absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full p-2 transition"
+            className="home-hero-nav absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full p-2 transition sm:right-4"
           >
             <ChevronRight className="h-5 w-5 text-foreground" />
           </button>
@@ -152,7 +157,7 @@ const HeroSlider = () => {
                         : "0%",
                     transition:
                       index === current
-                        ? `width ${AUTO_PLAY_MS}ms linear`
+                        ? `width ${autoPlayMs}ms linear`
                         : "width 0.3s ease",
                   }}
                 />

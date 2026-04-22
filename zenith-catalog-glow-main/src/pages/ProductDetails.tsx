@@ -214,7 +214,7 @@ const ProductDetails = () => {
       <Navbar />
 
       <div className="section-container pb-2 pt-6">
-        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground font-body">
+        <nav className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground font-body">
           <Link to="/" className="hover:text-accent">
             Home
           </Link>
@@ -397,19 +397,19 @@ const ProductDetails = () => {
                   {Object.entries(product.specifications).map(([key, value], index) => (
                     <div
                       key={key}
-                      className={`flex border-b border-border px-4 py-3 last:border-b-0 ${
+                      className={`flex flex-col gap-1 border-b border-border px-4 py-3 last:border-b-0 sm:flex-row sm:gap-0 ${
                         index % 2 === 0 ? "bg-muted/30" : "bg-card"
                       }`}
                     >
-                      <span className="w-1/3 shrink-0 font-medium text-muted-foreground">{key}</span>
-                      <span className="w-2/3 break-words text-foreground">{value}</span>
+                      <span className="shrink-0 font-medium text-muted-foreground sm:w-1/3">{key}</span>
+                      <span className="break-words text-foreground sm:w-2/3">{value}</span>
                     </div>
                   ))}
                 </div>
               </div>
             ) : null}
 
-            <div className="mt-auto flex flex-wrap items-center gap-3">
+            <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <div className="flex items-center rounded-lg border border-input">
                 <button
                   type="button"
@@ -431,7 +431,7 @@ const ProductDetails = () => {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={stock <= 0}
-                className="flex min-w-[160px] flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-w-[160px] w-full flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 <ShoppingBag className="h-5 w-5" />
                 Add to Cart

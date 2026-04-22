@@ -45,11 +45,11 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-[linear-gradient(180deg,hsl(var(--background)),hsl(var(--secondary)/0.24))]">
         <AdminSidebar />
-        <SidebarInset className="min-h-screen bg-transparent">
+        <SidebarInset className="min-h-screen min-w-0 bg-transparent">
           <AdminHeader />
-          <main className="relative flex-1 overflow-auto">
+          <main className="relative flex-1 min-w-0 overflow-auto">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_62%)]" />
-            <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+            <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] min-w-0 w-full max-w-[1600px] flex-col gap-5 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
               {children}
             </div>
           </main>

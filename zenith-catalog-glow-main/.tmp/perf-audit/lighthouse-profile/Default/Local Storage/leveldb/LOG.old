@@ -1,2 +1,3 @@
-2026/04/21-09:11:05.765 2a04 Creating DB C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\.tmp\perf-audit\lighthouse-profile\Default\Local Storage\leveldb since it was missing.
-2026/04/21-09:11:05.798 2a04 Reusing MANIFEST C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\.tmp\perf-audit\lighthouse-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/22-00:13:37.728 29a0 Reusing MANIFEST C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\.tmp\perf-audit\lighthouse-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/22-00:13:37.743 29a0 Recovering log #3
+2026/04/22-00:13:37.745 29a0 Reusing old log C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\.tmp\perf-audit\lighthouse-profile\Default\Local Storage\leveldb/000003.log 

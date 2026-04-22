@@ -156,7 +156,7 @@ const AdminSpeedTest = () => {
   return (
     <AdminLayout>
       <div className="space-y-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Speed Test</h1>
             <p className="mt-1 text-sm font-body text-muted-foreground">
@@ -164,7 +164,7 @@ const AdminSpeedTest = () => {
             </p>
           </div>
 
-          <Button onClick={() => void runSpeedTest()} disabled={isRunning}>
+          <Button onClick={() => void runSpeedTest()} disabled={isRunning} className="admin-action-button">
             {isRunning ? <RefreshCw className="animate-spin" /> : <Gauge />}
             {isRunning ? "Running Test..." : "Start Speed Test"}
           </Button>
@@ -183,7 +183,7 @@ const AdminSpeedTest = () => {
                 <Activity className="h-4 w-4 text-accent" />
                 Latency
               </CardDescription>
-              <CardTitle className="text-3xl">{formatMetric(results.pingMs, "ms")}</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl">{formatMetric(results.pingMs, "ms")}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               Average of 3 app reachability checks.
@@ -196,7 +196,7 @@ const AdminSpeedTest = () => {
                 <Download className="h-4 w-4 text-accent" />
                 Download
               </CardDescription>
-              <CardTitle className="text-3xl">{formatMetric(results.downloadMbps, "Mbps")}</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl">{formatMetric(results.downloadMbps, "Mbps")}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               Downloaded {formatMetric(results.transferSizeMb, "MB", 2)} from the lightweight admin probe asset.
@@ -209,7 +209,7 @@ const AdminSpeedTest = () => {
                 <Wifi className="h-4 w-4 text-accent" />
                 Browser Estimate
               </CardDescription>
-              <CardTitle className="text-3xl">{formatMetric(connection.downlinkMbps, "Mbps")}</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl">{formatMetric(connection.downlinkMbps, "Mbps")}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               {connection.effectiveType} network, RTT {formatMetric(connection.rttMs, "ms", 0)}.
@@ -219,7 +219,7 @@ const AdminSpeedTest = () => {
           <Card className="shadow-premium">
             <CardHeader className="pb-3">
               <CardDescription>Status</CardDescription>
-              <CardTitle className="text-2xl">{connection.online ? "Online" : "Offline"}</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">{connection.online ? "Online" : "Offline"}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               {connection.saveData ? "Data saver is enabled." : "Data saver is disabled."}

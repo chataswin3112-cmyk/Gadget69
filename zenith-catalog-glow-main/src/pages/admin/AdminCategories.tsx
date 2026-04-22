@@ -83,19 +83,19 @@ const AdminCategories = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Categories</h1>
             <p className="text-muted-foreground font-body text-sm mt-1">{sections.length} categories</p>
           </div>
-          <Button onClick={openNew} className="bg-accent text-accent-foreground hover:bg-accent/90">
+          <Button onClick={openNew} className="admin-action-button bg-accent text-accent-foreground hover:bg-accent/90">
             <Plus className="h-4 w-4 mr-2" /> Add Category
           </Button>
         </div>
 
         <div className="bg-card rounded-xl shadow-premium overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="admin-table-scroll">
+            <table className="min-w-[720px] w-full">
               <thead>
                 <tr className="border-b border-border text-left">
                   <th className="p-4 text-xs text-muted-foreground uppercase font-body">Image</th>
@@ -165,7 +165,7 @@ const AdminCategories = () => {
               <Label className="font-body">Sort Order</Label>
               <Input type="number" value={editing?.sort_order || 0} onChange={(event) => setEditing((prev) => prev ? { ...prev, sort_order: parseInt(event.target.value, 10) || 0 } : prev)} />
             </div>
-            <div className="flex items-center gap-6">
+            <div className="admin-inline-switches">
               <div className="flex items-center gap-2">
                 <Switch checked={editing?.is_active !== false} onCheckedChange={(value) => setEditing((prev) => prev ? { ...prev, is_active: value } : prev)} />
                 <Label className="font-body text-sm">Active</Label>

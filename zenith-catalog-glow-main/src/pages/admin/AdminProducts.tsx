@@ -165,22 +165,22 @@ const AdminProducts = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Products</h1>
             <p className="mt-1 text-sm text-muted-foreground font-body">{products.length} products</p>
           </div>
-          <div className="flex gap-3">
+          <div className="admin-page-actions">
             <Input
               placeholder="Search products..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="w-52"
+              className="w-full sm:w-52"
             />
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="admin-action-button">
               <Link to="/admin/offers">Manage Offers</Link>
             </Button>
-            <Button onClick={openNew} className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button onClick={openNew} className="admin-action-button bg-accent text-accent-foreground hover:bg-accent/90">
               <Plus className="mr-2 h-4 w-4" />
               Add Product
             </Button>
@@ -188,8 +188,8 @@ const AdminProducts = () => {
         </div>
 
         <div className="overflow-hidden rounded-xl bg-card shadow-premium">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="admin-table-scroll">
+            <table className="min-w-[860px] w-full">
               <thead>
                 <tr className="border-b border-border text-left">
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Image</th>
@@ -274,10 +274,10 @@ const AdminProducts = () => {
 
           {editing ? (
             <Tabs defaultValue="details" className="space-y-6">
-              <TabsList className="h-auto flex-wrap justify-start rounded-2xl bg-secondary/40 p-1">
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="media">Media</TabsTrigger>
-                <TabsTrigger value="variants">Variants</TabsTrigger>
+              <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl bg-secondary/40 p-1 scrollbar-hide">
+                <TabsTrigger value="details" className="shrink-0">Details</TabsTrigger>
+                <TabsTrigger value="media" className="shrink-0">Media</TabsTrigger>
+                <TabsTrigger value="variants" className="shrink-0">Variants</TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="space-y-6">
@@ -417,7 +417,7 @@ const AdminProducts = () => {
                     <Label className="font-body">Specifications</Label>
                     <div className="space-y-2">
                       {Object.entries(editing.specifications || {}).map(([key, specValue], index, entries) => (
-                        <div key={`${key}-${index}`} className="flex gap-2">
+                        <div key={`${key}-${index}`} className="flex flex-col gap-2 sm:flex-row">
                           <Input
                             value={key}
                             placeholder="Key"
@@ -448,7 +448,7 @@ const AdminProducts = () => {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="text-destructive"
+                            className="self-end text-destructive sm:self-auto"
                             onClick={() => {
                               const nextEntries = entries.filter((_, entryIndex) => entryIndex !== index);
                               setEditing((current) =>

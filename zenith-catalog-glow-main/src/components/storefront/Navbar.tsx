@@ -91,13 +91,13 @@ const Navbar = () => {
           scrolled ? "glass-solid" : "glass"
         )}
       >
-        <div className="section-container flex h-[4.5rem] items-center justify-between md:h-24">
+        <div className="section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24">
           <div className="flex flex-shrink-0 items-center">
             <Link to="/" aria-label="Gadget 69 home" className="flex min-w-0 flex-shrink-0 items-center overflow-visible">
               <StorefrontBrandLockup
                 imageSrc={gadget69Wordmark}
                 tone="dark"
-                imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
+                imageClassName="h-[6.75rem] sm:h-[9rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
                 labelClassName="text-base sm:text-lg md:text-xl"
                 loading="eager"
                 fetchPriority="high"
@@ -185,14 +185,14 @@ const Navbar = () => {
 
         {mobileOpen ? (
           <div className="glass border-t border-border md:hidden">
-            <div className="flex flex-col gap-4 p-4">
+            <div className="flex max-h-[calc(100svh-4.25rem)] flex-col gap-3 overflow-y-auto p-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "rounded-lg px-3 py-2.5 text-sm font-medium text-black transition-colors font-body",
+                    "rounded-lg px-3 py-3 text-sm font-medium text-black transition-colors font-body",
                     isLinkActive(link.to) && "bg-black/[0.06]"
                   )}
                 >

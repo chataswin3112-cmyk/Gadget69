@@ -98,28 +98,28 @@ const AdminBanners = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Banners</h1>
             <p className="text-muted-foreground font-body text-sm mt-1">Hero slider banners</p>
           </div>
-          <Button onClick={openNew} className="bg-accent text-accent-foreground hover:bg-accent/90">
+          <Button onClick={openNew} className="admin-action-button bg-accent text-accent-foreground hover:bg-accent/90">
             <Plus className="h-4 w-4 mr-2" /> Add Banner
           </Button>
         </div>
 
         <div className="grid gap-4">
           {sorted.map((banner, index) => (
-            <div key={banner.id} className="bg-card rounded-xl shadow-premium overflow-hidden flex">
-              <MediaImage src={banner.desktopImageUrl} alt={banner.title || "Banner"} className="w-48 h-28 object-cover" />
-              <div className="flex-1 p-4 flex items-center justify-between">
-                <div>
+            <div key={banner.id} className="flex flex-col overflow-hidden rounded-xl bg-card shadow-premium sm:flex-row">
+              <MediaImage src={banner.desktopImageUrl} alt={banner.title || "Banner"} className="h-40 w-full object-cover sm:h-28 sm:w-48" />
+              <div className="flex flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                   <p className="font-medium font-body">{banner.title || "Untitled"}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {banner.ctaText && `CTA: ${banner.ctaText}`} - Order: {banner.displayOrder}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="admin-actions-row sm:justify-end">
                   <Switch checked={banner.isActive} onCheckedChange={(value) => updateBanner(banner.id, { isActive: value })} />
                   <Button variant="ghost" size="sm" onClick={() => moveOrder(banner.id, -1)} disabled={index === 0}>
                     <ArrowUp className="h-3.5 w-3.5" />
@@ -164,7 +164,7 @@ const AdminBanners = () => {
               placeholder="Optional mobile image"
               onChange={(value) => setEditing((prev) => prev ? { ...prev, mobileImageUrl: value } : prev)}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="admin-dialog-grid-2">
               <div className="space-y-2">
                 <Label className="font-body">CTA Text</Label>
                 <Input value={editing?.ctaText || ""} onChange={(event) => setEditing((prev) => prev ? { ...prev, ctaText: event.target.value } : prev)} />
@@ -174,12 +174,12 @@ const AdminBanners = () => {
                 <Input value={editing?.ctaLink || ""} onChange={(event) => setEditing((prev) => prev ? { ...prev, ctaLink: event.target.value } : prev)} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="admin-dialog-grid-2">
               <div className="space-y-2">
                 <Label className="font-body">Display Order</Label>
                 <Input type="number" value={editing?.displayOrder || 0} onChange={(event) => setEditing((prev) => prev ? { ...prev, displayOrder: parseInt(event.target.value, 10) || 0 } : prev)} />
               </div>
-              <div className="flex items-end gap-2">
+              <div className="flex items-center gap-2 sm:items-end">
                 <Switch checked={editing?.isActive !== false} onCheckedChange={(value) => setEditing((prev) => prev ? { ...prev, isActive: value } : prev)} />
                 <Label className="font-body text-sm">Active</Label>
               </div>

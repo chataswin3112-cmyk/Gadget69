@@ -134,22 +134,22 @@ const AdminMedia = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Community Media</h1>
             <p className="mt-1 font-body text-sm text-muted-foreground">
               Manage homepage reels, images, and videos.
             </p>
           </div>
-          <Button onClick={openNew} className="bg-accent text-accent-foreground hover:bg-accent/90">
+          <Button onClick={openNew} className="admin-action-button bg-accent text-accent-foreground hover:bg-accent/90">
             <Plus className="mr-2 h-4 w-4" /> Add Media
           </Button>
         </div>
 
         <div className="grid gap-4">
           {communityMedia.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-premium">
-              <div className={`${item.mediaType === "VIDEO" ? "aspect-video w-40" : "h-28 w-24"} shrink-0 overflow-hidden rounded-xl bg-secondary/30`}>
+            <div key={item.id} className="flex flex-col gap-4 rounded-xl bg-card p-4 shadow-premium sm:flex-row sm:items-center">
+              <div className={`${item.mediaType === "VIDEO" ? "aspect-video w-full sm:w-40" : "h-40 w-full sm:h-28 sm:w-24"} shrink-0 overflow-hidden rounded-xl bg-secondary/30`}>
                 <MediaImage
                   src={item.thumbnailUrl || item.imageUrl || "/placeholder.svg"}
                   alt={item.title || item.caption || "Media item"}
@@ -168,7 +168,7 @@ const AdminMedia = () => {
                 ) : null}
                 <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{item.caption}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="admin-actions-row sm:justify-end">
                 <Switch
                   checked={item.isActive}
                   onCheckedChange={(value) => updateCommunityMedia(item.id, { isActive: value })}
@@ -196,7 +196,7 @@ const AdminMedia = () => {
             <DialogTitle className="font-heading">{isNew ? "Add Media Item" : "Edit Media Item"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="admin-dialog-grid-2">
               <div className="col-span-2 space-y-2">
                 <Label className="font-body">Title</Label>
                 <Input
@@ -301,7 +301,7 @@ const AdminMedia = () => {
                   }
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="col-span-2 flex items-center gap-2">
                 <Switch
                   checked={editing?.isActive !== false}
                   onCheckedChange={(value) =>

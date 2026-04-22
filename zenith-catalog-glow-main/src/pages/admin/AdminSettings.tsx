@@ -41,7 +41,7 @@ const PasswordStrengthMeter = ({ password }: { password: string }) => {
         {STRENGTH_LABELS[score]}
       </p>
       {/* Requirements checklist */}
-      <div className="grid grid-cols-2 gap-1 text-xs font-body text-muted-foreground">
+      <div className="grid grid-cols-1 gap-1 text-xs font-body text-muted-foreground sm:grid-cols-2">
         {([
           [checks.length, "8+ characters"],
           [checks.uppercase, "Uppercase letter"],
@@ -117,7 +117,7 @@ const ChangePasswordForm = () => {
             </p>
           </div>
         </div>
-        <Button variant="outline" onClick={() => setDone(false)}>Change Again</Button>
+        <Button variant="outline" onClick={() => setDone(false)} className="w-full sm:w-auto">Change Again</Button>
       </div>
     );
   }
@@ -203,7 +203,7 @@ const ChangePasswordForm = () => {
         <Button
           type="submit"
           disabled={loading || !isPasswordStrong || (!!confirmPassword && newPassword !== confirmPassword)}
-          className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+          className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90 sm:w-auto"
         >
           <KeyRound className="h-4 w-4" />
           {loading ? "Changing..." : "Change Password"}
@@ -267,7 +267,7 @@ const AdminSettings = () => {
 
         <ChangePasswordForm />
 
-        <div className="space-y-6 rounded-xl bg-card p-6 shadow-premium">
+        <div className="space-y-6 rounded-xl bg-card p-4 shadow-premium sm:p-6">
           <div className="space-y-2">
             <Label className="font-body">Site Title</Label>
             <Input
@@ -327,7 +327,7 @@ const AdminSettings = () => {
             <Label className="font-body">Announcement Items</Label>
             <div className="space-y-2">
               {form.announcementItems.map((item, index) => (
-                <div key={`${item}-${index}`} className="flex items-center gap-2">
+                <div key={`${item}-${index}`} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <span className="flex-1 rounded-md bg-muted px-3 py-2 font-body text-sm">{item}</span>
                   <Button variant="ghost" size="sm" onClick={() => removeAnnouncement(index)}>
                     <X className="h-3.5 w-3.5" />
@@ -335,14 +335,14 @@ const AdminSettings = () => {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 value={newAnnouncement}
                 onChange={(event) => setNewAnnouncement(event.target.value)}
                 placeholder="New announcement..."
                 onKeyDown={(event) => event.key === "Enter" && addAnnouncement()}
               />
-              <Button variant="outline" size="sm" onClick={addAnnouncement}>
+              <Button variant="outline" size="sm" onClick={addAnnouncement} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -402,7 +402,7 @@ const AdminSettings = () => {
           <Button
             onClick={save}
             disabled={saving}
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
+            className="w-full bg-accent text-accent-foreground hover:bg-accent/90 sm:w-auto"
           >
             {saving ? "Saving..." : "Save Settings"}
           </Button>

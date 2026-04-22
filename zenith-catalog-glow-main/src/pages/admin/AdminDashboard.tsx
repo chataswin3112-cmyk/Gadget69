@@ -64,21 +64,21 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
       <div className="space-y-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Dashboard</h1>
             <p className="mt-1 text-sm font-body text-muted-foreground">
               Revenue, order conversion, and top-selling products in one place.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
+          <div className="admin-page-actions">
+            <Button asChild className="admin-action-button bg-accent text-accent-foreground hover:bg-accent/90">
               <Link to="/admin/products">Manage Products</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="admin-action-button">
               <Link to="/admin/offers">Manage Offers</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="admin-action-button">
               <Link to="/admin/orders">View Orders</Link>
             </Button>
           </div>
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
           ) : stats?.topSellingProducts.length ? (
             <div className="divide-y divide-border">
               {stats.topSellingProducts.slice(0, 5).map((item, index) => (
-                <div key={item.productId} className="flex items-center justify-between gap-4 p-4">
+                <div key={item.productId} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       #{index + 1}

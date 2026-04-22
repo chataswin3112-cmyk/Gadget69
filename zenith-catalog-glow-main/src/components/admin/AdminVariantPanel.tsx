@@ -323,12 +323,12 @@ const AdminVariantPanel = ({ productId }: AdminVariantPanelProps) => {
             Set as default variant
           </label>
 
-          <div className="flex gap-2">
-            <Button type="button" onClick={handleSaveVariant} disabled={savingVariant}>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button type="button" onClick={handleSaveVariant} disabled={savingVariant} className="w-full sm:w-auto">
               {savingVariant ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {editingId ? "Update Variant" : "Save Variant"}
             </Button>
-            <Button type="button" variant="ghost" onClick={resetForm}>
+            <Button type="button" variant="ghost" onClick={resetForm} className="w-full sm:w-auto">
               Cancel
             </Button>
           </div>
@@ -347,7 +347,7 @@ const AdminVariantPanel = ({ productId }: AdminVariantPanelProps) => {
         <div className="space-y-4">
           {variants.map((variant) => (
             <div key={variant.id} className="overflow-hidden rounded-2xl border border-border bg-card">
-              <div className="flex items-center gap-4 p-4">
+              <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
                 <div
                   className="h-10 w-10 rounded-full border border-border"
                   style={{ backgroundColor: variant.hexCode || "#000000" }}
@@ -374,7 +374,7 @@ const AdminVariantPanel = ({ productId }: AdminVariantPanelProps) => {
                     {variant.sku ? `  SKU: ${variant.sku}` : ""}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="admin-actions-row sm:justify-end">
                   <Button type="button" variant="ghost" size="sm" onClick={() => startEdit(variant)}>
                     Edit
                   </Button>
@@ -417,12 +417,12 @@ const AdminVariantPanel = ({ productId }: AdminVariantPanelProps) => {
                             />
                           )}
                         </div>
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-xs font-semibold text-foreground">{media.mediaRole}</p>
                             <p className="text-xs text-muted-foreground">{media.mediaType}</p>
                           </div>
-                          <div className="flex gap-1">
+                          <div className="admin-actions-row">
                             {media.mediaType === "IMAGE" ? (
                               <Button
                                 type="button"

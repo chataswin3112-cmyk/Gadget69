@@ -129,21 +129,21 @@ const AdminOffers = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Offers</h1>
             <p className="mt-1 text-sm font-body text-muted-foreground">
               Schedule product offers with automatic start and end dates.
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="admin-page-actions">
             <Input
               placeholder="Search products..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="w-56"
+              className="w-full sm:w-56"
             />
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="admin-action-button">
               <Link to="/admin/products">Back to Products</Link>
             </Button>
           </div>
@@ -226,7 +226,7 @@ const AdminOffers = () => {
                         </span>
                       </td>
                       <td className="p-4">
-                        <div className="flex items-center gap-3">
+                        <div className="admin-actions-row">
                           <Button
                             size="sm"
                             variant="outline"
@@ -273,12 +273,14 @@ const AdminOffers = () => {
                     Offer stays visible only between the selected dates.
                   </p>
                 </div>
-                <Switch
-                  checked={form.enabled}
-                  onCheckedChange={(checked) =>
-                    setForm((prev) => (prev ? { ...prev, enabled: checked } : prev))
-                  }
-                />
+                <div className="shrink-0">
+                  <Switch
+                    checked={form.enabled}
+                    onCheckedChange={(checked) =>
+                      setForm((prev) => (prev ? { ...prev, enabled: checked } : prev))
+                    }
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

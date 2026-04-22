@@ -137,7 +137,7 @@ const AdminReviews = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="admin-page-header">
           <div>
             <h1 className="font-heading text-2xl font-bold">Reviews</h1>
             <p className="text-muted-foreground font-body text-sm mt-1">
@@ -146,7 +146,7 @@ const AdminReviews = () => {
           </div>
           <Button
             onClick={openNew}
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
+            className="admin-action-button bg-accent text-accent-foreground hover:bg-accent/90"
           >
             <Plus className="h-4 w-4 mr-2" /> Add Review
           </Button>
@@ -164,7 +164,7 @@ const AdminReviews = () => {
             {reviews.map((review) => (
               <div
                 key={review.id}
-                className="flex items-start gap-4 rounded-xl bg-card shadow-sm border border-border/60 p-4"
+                className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-4 shadow-sm sm:flex-row sm:items-start"
               >
                 <ReviewAvatar review={review} />
 
@@ -191,7 +191,7 @@ const AdminReviews = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="admin-actions-row flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="sm"

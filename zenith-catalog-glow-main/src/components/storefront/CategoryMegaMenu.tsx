@@ -80,7 +80,7 @@ const CategoryMegaMenu = () => {
           <div className="col-span-3">
             <div className="rounded-xl overflow-hidden aspect-square bg-secondary/30">
               <MediaImage
-                src={activeSections.find(s => s.id === hoveredId)?.imageUrl || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"}
+                src={activeSections.find(s => s.id === hoveredId)?.imageUrl || "/placeholder.svg"}
                 alt="Category"
                 className="w-full h-full object-cover"
               />
