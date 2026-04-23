@@ -25,6 +25,7 @@ import { getApiErrorDetails } from "@/lib/api-error";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import MediaImage from "@/components/ui/media-image";
 import { cn } from "@/lib/utils";
+import { scheduleIdleTask } from "@/lib/idle";
 
 const AUTO_REFRESH_MS = 30000;
 const STATUS_OPTIONS = [
@@ -220,6 +221,29 @@ const getProductMeta = (product?: Product) => {
   return metaParts.length ? metaParts.join(" - ") : "Catalog item";
 };
 
+const OrderItemThumbnail = ({
+  imageUrl,
+  alt,
+  optimizeWidth,
+  sizes,
+}: {
+  imageUrl?: string;
+  alt: string;
+  optimizeWidth?: number;
+  sizes?: string;
+}) =>
+  imageUrl ? (
+    <MediaImage
+      src={imageUrl}
+      alt={alt}
+      className="h-12 w-12 shrink-0 rounded-xl object-cover bg-muted/40"
+      optimizeWidth={optimizeWidth}
+      sizes={sizes}
+    />
+  ) : (
+    <div className="h-12 w-12 shrink-0 rounded-xl bg-muted/30" aria-hidden="true" />
+  );
+
 const COMPACT_LAYOUT_QUERY = "(max-width: 1023px)";
 
 const AdminOrders = () => {
@@ -308,7 +332,11 @@ const AdminOrders = () => {
   }, [describeError, serverFilters, syncPollingPaused]);
 
   useEffect(() => {
-    void ensureProductsLoaded();
+    const cancelProductHydration = scheduleIdleTask(() => {
+      void ensureProductsLoaded();
+    }, 1200);
+
+    return cancelProductHydration;
   }, [ensureProductsLoaded]);
 
   useEffect(() => {
@@ -828,10 +856,9 @@ const AdminOrders = () => {
                                 key={`${order.id}-${item.productId}-${index}`}
                                 className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/85 p-3"
                               >
-                                <MediaImage
-                                  src={product?.imageUrl}
+                                <OrderItemThumbnail
+                                  imageUrl={product?.imageUrl}
                                   alt={item.productName}
-                                  className="h-12 w-12 shrink-0 rounded-xl object-cover bg-muted/40"
                                   optimizeWidth={160}
                                   sizes="48px"
                                 />
@@ -1006,10 +1033,9 @@ const AdminOrders = () => {
                                       key={`${order.id}-${item.productId}-${index}`}
                                       className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/80 p-3"
                                     >
-                                      <MediaImage
-                                        src={product?.imageUrl}
+                                      <OrderItemThumbnail
+                                        imageUrl={product?.imageUrl}
                                         alt={item.productName}
-                                        className="h-12 w-12 shrink-0 rounded-xl object-cover bg-muted/40"
                                         optimizeWidth={160}
                                         sizes="48px"
                                       />
@@ -1151,7 +1177,8 @@ const AdminOrders = () => {
         </div>
       </div>
 
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+      {detailsOpen ? (
+        <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
@@ -1333,11 +1360,15 @@ const AdminOrders = () => {
                         className="flex items-start justify-between gap-4 rounded-2xl border border-border/60 bg-background/85 px-4 py-3"
                       >
                         <div className="flex min-w-0 items-start gap-3">
-                          <MediaImage
-                            src={product?.imageUrl}
-                            alt={item.productName}
-                            className="h-14 w-14 shrink-0 rounded-xl object-cover bg-muted/40"
-                          />
+                          {product?.imageUrl ? (
+                            <MediaImage
+                              src={product.imageUrl}
+                              alt={item.productName}
+                              className="h-14 w-14 shrink-0 rounded-xl object-cover bg-muted/40"
+                            />
+                          ) : (
+                            <div className="h-14 w-14 shrink-0 rounded-xl bg-muted/30" aria-hidden="true" />
+                          )}
                           <div className="min-w-0">
                             <p
                               data-clamp="2"
@@ -1373,7 +1404,8 @@ const AdminOrders = () => {
             </p>
           )}
         </DialogContent>
-      </Dialog>
+        </Dialog>
+      ) : null}
     </AdminLayout>
   );
 };

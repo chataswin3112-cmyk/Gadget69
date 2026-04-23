@@ -94,7 +94,7 @@ const CompactProductCard = ({ product }: { product: Product }) => {
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 220px, 240px"
-          optimizeWidth={640}
+          optimizeWidth={160}
         />
         {hasOffer && (
           <span className="absolute left-2 top-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-foreground">

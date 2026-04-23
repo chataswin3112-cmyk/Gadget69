@@ -70,7 +70,9 @@ const AdminSidebar = () => {
               <img
                 src={gadget69Logo}
                 alt="Gadget69 logo"
-                className="h-32 w-auto max-w-full"
+                className="h-32 w-32 max-w-full object-contain"
+                width={1024}
+                height={1024}
                 decoding="async"
               />
             </div>

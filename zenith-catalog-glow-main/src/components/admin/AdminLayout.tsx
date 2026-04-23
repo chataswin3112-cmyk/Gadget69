@@ -31,6 +31,8 @@ const AdminHeader = () => {
               src={gadget69Logo}
               alt="Gadget69 logo"
               className="h-8 w-auto max-w-[9rem]"
+              width={1024}
+              height={1024}
               decoding="async"
             />
           </div>

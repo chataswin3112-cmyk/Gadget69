@@ -15,6 +15,9 @@ const adminEmail = process.env.PERF_ADMIN_EMAIL || "admin@gadget69.com";
 const adminPassword = process.env.PERF_ADMIN_PASSWORD || "Admin@123";
 const useExistingBackend = process.env.PERF_USE_EXISTING_BACKEND === "1";
 
+const quoteChromeFlagValue = (value) =>
+  /[\s()"]/u.test(value) ? `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"` : value;
+
 await mkdir(tmpDir, { recursive: true });
 
 const spawnCommand = (command, args, options = {}) =>
@@ -121,6 +124,11 @@ const seedAdminProfile = async (profileDir) => {
 
   const page = await browser.newPage();
   await page.goto("/admin", { waitUntil: "domcontentloaded" });
+  if (page.url().includes("/admin/dashboard")) {
+    await browser.close();
+    return;
+  }
+
   await page.fill('input[type="email"]', adminEmail);
   await page.fill('input[type="password"]', adminPassword);
   await Promise.all([
@@ -131,7 +139,10 @@ const seedAdminProfile = async (profileDir) => {
 };
 
 const runLighthouseAudit = async (routePath, outputFile, profileDir) => {
-  const chromeFlags = [`--headless=new`, `--user-data-dir=${profileDir}`];
+  const chromeFlags = [
+    `--headless=new`,
+    `--user-data-dir=${quoteChromeFlagValue(profileDir)}`,
+  ];
   const result = await spawnCapture(
     process.platform === "win32" ? "npx.cmd" : "npx",
     [
@@ -206,7 +217,7 @@ try {
     { path: "/", label: "home" },
     { path: "/products", label: "products" },
     ...(productId ? [{ path: `/products/${productId}`, label: "product-details" }] : []),
-    { path: "/admin", label: "admin-login" },
+    { path: "/admin/dashboard", label: "admin-dashboard" },
     { path: "/admin/orders", label: "admin-orders" },
   ];
 

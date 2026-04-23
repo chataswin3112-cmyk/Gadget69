@@ -71,7 +71,7 @@ const ProductCard = ({ product, animationPreset, className, drift }: ProductCard
           className="bg-secondary/30"
           padding="p-6"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 25vw, 20vw"
-          optimizeWidth={720}
+          optimizeWidth={320}
         />
 
         {/* Quick View overlay */}

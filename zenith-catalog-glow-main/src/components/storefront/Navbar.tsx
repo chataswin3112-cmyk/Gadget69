@@ -97,7 +97,7 @@ const Navbar = () => {
               <StorefrontBrandLockup
                 imageSrc={gadget69Wordmark}
                 tone="dark"
-                imageClassName="h-[6.75rem] sm:h-[9rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
+                imageClassName="h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem] md:h-[12rem] md:w-[12rem] lg:h-[13rem] lg:w-[13rem] object-contain"
                 labelClassName="text-base sm:text-lg md:text-xl"
                 loading="eager"
                 fetchPriority="high"
@@ -105,7 +105,7 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center gap-2 lg:flex">
             {navLinks.map((link) => (
               <div
                 key={link.to}
@@ -140,7 +140,7 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <button
               aria-label="Search"
-              className="hidden h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition-all duration-200 hover:bg-black/[0.06] hover:text-foreground md:flex"
+              className="hidden h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition-all duration-200 hover:bg-black/[0.06] hover:text-foreground lg:flex"
             >
               <Search className="h-4 w-4" />
             </button>
@@ -162,7 +162,7 @@ const Navbar = () => {
             </button>
 
             <button
-              className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/[0.06] md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/[0.06] lg:hidden"
               onClick={() => setMobileOpen((current) => !current)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
             >
@@ -176,7 +176,7 @@ const Navbar = () => {
             <div
               onMouseEnter={() => setMegaMenuOpen(true)}
               onMouseLeave={() => setMegaMenuOpen(false)}
-              className="hidden md:block"
+              className="hidden lg:block"
             >
               <CategoryMegaMenu />
             </div>
@@ -184,7 +184,7 @@ const Navbar = () => {
         ) : null}
 
         {mobileOpen ? (
-          <div className="glass border-t border-border md:hidden">
+          <div className="glass border-t border-border lg:hidden">
             <div className="flex max-h-[calc(100svh-4.25rem)] flex-col gap-3 overflow-y-auto p-4">
               {navLinks.map((link) => (
                 <Link

@@ -26,7 +26,13 @@ const Contact = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    toast.success("Message sent! We will get back to you soon.");
+    const subject = encodeURIComponent(`Gadget69 contact request from ${form.name}`);
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`
+    );
+
+    window.location.href = `mailto:${supportEmail}?subject=${subject}&body=${body}`;
+    toast.success("Opening your email app with your message.");
     setForm({ name: "", email: "", message: "" });
   };
 

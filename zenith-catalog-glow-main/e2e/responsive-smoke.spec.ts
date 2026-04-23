@@ -42,6 +42,16 @@ const createMockState = () => ({
       show_in_top_category: false,
       sort_order: 1,
     },
+    {
+      id: 3,
+      name: "Wearables",
+      description: "Smart accessories",
+      imageUrl: "/placeholder.svg",
+      is_active: true,
+      show_in_explore: true,
+      show_in_top_category: true,
+      sort_order: 2,
+    },
   ],
   banners: [
     {
@@ -125,6 +135,39 @@ const createMockState = () => ({
       },
       variants: [],
     },
+    {
+      id: 3,
+      name: "Orbit Watch",
+      description: "Everyday smartwatch with wellness tracking.",
+      price: 22999,
+      stockQuantity: 9,
+      sectionId: 3,
+      sectionName: "Wearables",
+      imageUrl: "/placeholder.svg",
+      media: [
+        {
+          id: 13,
+          mediaUrl: "/placeholder.svg",
+          mediaType: "IMAGE",
+          mediaRole: "MAIN",
+          displayOrder: 0,
+          isPrimary: true,
+        },
+      ],
+      galleryImages: [],
+      model_number: "ORB-03",
+      is_new_launch: false,
+      is_best_seller: false,
+      is_featured: false,
+      is_hero_featured: false,
+      offer: false,
+      createdAt: "2026-04-08T10:00:00.000Z",
+      status: "ACTIVE",
+      specifications: {
+        Battery: "36 hours",
+      },
+      variants: [],
+    },
   ],
   communityMedia: [
     {
@@ -170,8 +213,8 @@ const createMockState = () => ({
     paidOrders: 18,
     totalRevenue: 640000,
     conversionRate: 75,
-    totalProducts: 2,
-    totalSections: 2,
+    totalProducts: 3,
+    totalSections: 3,
     totalBanners: 1,
     totalCommunityMedia: 1,
     topSellingProducts: [{ productId: 1, productName: "Atlas Pro", unitsSold: 8, revenue: 599992 }],
@@ -416,6 +459,27 @@ test.beforeEach(async ({ page }) => {
 test("public storefront flows remain responsive across devices", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "New Launches" })).toBeVisible();
+  const homeSectionHeadings = page.locator("section h2");
+  await expect(homeSectionHeadings.filter({ hasText: /^Phones$/ })).toBeVisible();
+  await expect(homeSectionHeadings.filter({ hasText: /^Audio$/ })).toBeVisible();
+  await expect(homeSectionHeadings.filter({ hasText: /^Wearables$/ })).toBeVisible();
+  await page.evaluate(() => {
+    window.scrollTo({ top: Math.max(window.innerHeight * 2, document.body.scrollHeight / 2) });
+  });
+  await expect(homeSectionHeadings.filter({ hasText: /^Join The Clan$/ })).toBeVisible({ timeout: 15_000 });
+  const headingLayout = await homeSectionHeadings.evaluateAll((elements) =>
+    elements.map((element) => ({
+      text: element.textContent?.trim() || "",
+      top: element.getBoundingClientRect().top + window.scrollY,
+    }))
+  );
+  const findHeading = (text: string) => headingLayout.find((entry) => entry.text === text);
+  expect(findHeading("Top Categories")?.top ?? -1).toBeGreaterThanOrEqual(0);
+  expect(findHeading("Phones")?.top ?? -1).toBeGreaterThan(findHeading("Top Categories")?.top ?? -1);
+  expect(findHeading("Audio")?.top ?? -1).toBeGreaterThan(findHeading("Phones")?.top ?? -1);
+  expect(findHeading("Wearables")?.top ?? -1).toBeGreaterThan(findHeading("Audio")?.top ?? -1);
+  expect(findHeading("Join The Clan")?.top ?? -1).toBeGreaterThan(findHeading("Wearables")?.top ?? -1);
+  expect((findHeading("Join The Clan")?.top ?? 0) - (findHeading("Wearables")?.top ?? 0)).toBeLessThan(1000);
   await expect(page.locator('a[href="/products/1"] h3').first()).toContainText("Atlas Pro");
   await expectNoHorizontalOverflow(page);
 
@@ -433,6 +497,13 @@ test("public storefront flows remain responsive across devices", async ({ page }
   await expect(page.getByRole("heading", { name: "Atlas Pro" })).toBeVisible();
   await page.getByRole("button", { name: /add to cart/i }).click();
   await expect(page.getByText(/cart \(1\)/i)).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/track-order");
+  await expect(page.getByRole("heading", { name: "Track your Gadget69 order" })).toBeVisible();
+  await expect(page.getByPlaceholder("12345")).toBeVisible();
+  await expect(page.getByPlaceholder("+91 98765 43210")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Track Order" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 

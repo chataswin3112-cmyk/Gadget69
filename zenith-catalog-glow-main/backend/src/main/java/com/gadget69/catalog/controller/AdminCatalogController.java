@@ -455,9 +455,11 @@ public class AdminCatalogController {
       StoreSettings settings = new StoreSettings();
       settings.setSiteTitle("Gadget69");
       settings.setAnnouncementItems(List.of());
+      settings.setInstagramUrl("https://www.instagram.com/gadget69_tuty/");
       settings.setWhatsappNumber("919361586278");
       settings.setShopPhone("9361586278");
       settings.setSupportEmail("natrajganesh2000@gmail.com");
+      settings.setContactUrl("/contact");
       return storeSettingsRepository.save(settings);
     });
   }

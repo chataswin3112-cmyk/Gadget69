@@ -1,8 +1,10 @@
 import { createServer } from "node:http";
 import { existsSync, createReadStream } from "node:fs";
 import { mkdir, stat } from "node:fs/promises";
+import { pipeline } from "node:stream/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createBrotliCompress, createGzip, constants as zlibConstants } from "node:zlib";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -29,6 +31,9 @@ const contentTypes = {
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
 };
+
+const immutableAssetPattern = /[.-][A-Za-z0-9_-]{6,}\.(css|gif|ico|jpe?g|js|json|png|svg|webp)$/i;
+const compressibleExtensions = new Set([".css", ".html", ".js", ".json", ".svg"]);
 
 const readRequestBody = async (request) => {
   const chunks = [];
@@ -87,12 +92,76 @@ const proxyRequest = async (request, response) => {
   await writeFetchResponse(proxied, response);
 };
 
-const serveFile = async (targetPath, response) => {
+const resolveCacheControl = (targetPath) => {
+  const filename = path.basename(targetPath);
+
+  if (filename === "index.html") {
+    return "no-cache";
+  }
+
+  if (immutableAssetPattern.test(filename)) {
+    return "public, max-age=31536000, immutable";
+  }
+
+  return "public, max-age=3600";
+};
+
+const resolveEncoding = (request, extension) => {
+  if (!compressibleExtensions.has(extension)) {
+    return null;
+  }
+
+  const accepted = request.headers["accept-encoding"] || "";
+  if (typeof accepted !== "string") {
+    return null;
+  }
+
+  if (accepted.includes("br")) {
+    return "br";
+  }
+
+  if (accepted.includes("gzip")) {
+    return "gzip";
+  }
+
+  return null;
+};
+
+const serveFile = async (request, targetPath, response) => {
   const extension = path.extname(targetPath).toLowerCase();
-  response.writeHead(200, {
+  const encoding = resolveEncoding(request, extension);
+  const headers = {
     "Content-Type": contentTypes[extension] || "application/octet-stream",
-  });
-  createReadStream(targetPath).pipe(response);
+    "Cache-Control": resolveCacheControl(targetPath),
+    Vary: "Accept-Encoding",
+  };
+
+  if (encoding) {
+    headers["Content-Encoding"] = encoding;
+  }
+
+  response.writeHead(200, headers);
+
+  const source = createReadStream(targetPath);
+  if (encoding === "br") {
+    await pipeline(
+      source,
+      createBrotliCompress({
+        params: {
+          [zlibConstants.BROTLI_PARAM_QUALITY]: 4,
+        },
+      }),
+      response
+    );
+    return;
+  }
+
+  if (encoding === "gzip") {
+    await pipeline(source, createGzip({ level: 6 }), response);
+    return;
+  }
+
+  await pipeline(source, response);
 };
 
 const resolveStaticPath = async (requestPath) => {
@@ -119,7 +188,7 @@ const server = createServer(async (request, response) => {
     }
 
     const filePath = await resolveStaticPath(url);
-    await serveFile(filePath, response);
+    await serveFile(request, filePath, response);
   } catch (error) {
     response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
     response.end(error instanceof Error ? error.message : "Server error");

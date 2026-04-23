@@ -18,6 +18,8 @@ C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\b
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\PaymentEmailNotificationFlowTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\ReviewEndpointsTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\controller\UploadImageControllerTest.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\repository\CustomerOrderRepositoryTest.java
+C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\service\CatalogSyncServiceTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\service\EmailNotificationServiceTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\service\OtpServiceTest.java
 C:\Users\Admin\Downloads\zenith-catalog-glow-main (1)\zenith-catalog-glow-main\backend\src\test\java\com\gadget69\catalog\service\ProductPricingServiceTest.java

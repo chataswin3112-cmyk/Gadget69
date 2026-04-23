@@ -39,7 +39,7 @@ const Footer = () => {
             imageSrc={footerLogoSrc}
             tone="light"
             className="mb-3 overflow-visible"
-            imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
+            imageClassName="h-[9rem] w-[9rem] sm:h-[11rem] sm:w-[11rem] md:h-[12rem] md:w-[12rem] lg:h-[13rem] lg:w-[13rem] object-contain"
             labelClassName="text-lg"
             fetchPriority="low"
           />
@@ -111,7 +111,7 @@ const Footer = () => {
               imageSrc={footerLogoSrc}
               tone="light"
               className="mb-4 overflow-visible"
-              imageClassName="h-[9rem] sm:h-[11rem] md:h-[12rem] lg:h-[13rem] w-auto object-contain"
+              imageClassName="h-[9rem] w-[9rem] sm:h-[11rem] sm:w-[11rem] md:h-[12rem] md:w-[12rem] lg:h-[13rem] lg:w-[13rem] object-contain"
               labelClassName="text-xl"
               fetchPriority="low"
             />

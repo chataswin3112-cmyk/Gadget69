@@ -52,7 +52,7 @@ const CategoryDetails = () => {
             alt={section.name}
             className="w-full h-full object-cover"
             sizes="100vw"
-            optimizeWidth={1600}
+            optimizeWidth={800}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />

@@ -60,7 +60,7 @@ describe("AdminSpeedTest", () => {
     expect(await screen.findByText("Test completed")).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Connection looks healthy for normal admin usage\.|Connection is usable, but large media uploads may feel slow\./
+        /Connection looks healthy for normal admin usage\.|Connection is usable, but large media uploads may feel slow\.|Connection is on the slower side\. Expect delays on media-heavy actions\./
       )
     ).toBeInTheDocument();
     expect(global.fetch).toHaveBeenCalledTimes(4);

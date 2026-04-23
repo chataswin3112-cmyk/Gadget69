@@ -33,6 +33,13 @@ public class SeedDataService implements ApplicationRunner {
   private static final Logger LOGGER = LoggerFactory.getLogger(SeedDataService.class);
   private static final long DEFAULT_OFFER_LOOKBACK_DAYS = 1;
   private static final long DEFAULT_OFFER_DURATION_DAYS = 30;
+  private static final String DEFAULT_INSTAGRAM_URL = "https://www.instagram.com/gadget69_tuty/";
+  private static final String DEFAULT_WHATSAPP_NUMBER = "919361586278";
+  private static final String DEFAULT_SHOP_PHONE = "9361586278";
+  private static final List<String> LEGACY_INSTAGRAM_URLS =
+      List.of("https://instagram.com", "https://instagram.com/");
+  private static final List<String> LEGACY_WHATSAPP_NUMBERS =
+      List.of("919876543210", "9876543210");
 
   private final AdminUserRepository adminUserRepository;
   private final SectionRepository sectionRepository;
@@ -100,7 +107,10 @@ public class SeedDataService implements ApplicationRunner {
   private void seedCatalog() {
     if (sectionRepository.count() == 0 && productRepository.count() == 0) {
       catalogSyncService.seedFreshCatalog();
+      return;
     }
+
+    catalogSyncService.seedMissingCommunityMedia();
   }
 
   private void seedSettings() {
@@ -116,9 +126,9 @@ public class SeedDataService implements ApplicationRunner {
         "Curated gadgets and accessories",
         "Support available on WhatsApp"
     ));
-    settings.setInstagramUrl("https://instagram.com");
-    settings.setWhatsappNumber("919361586278");
-    settings.setShopPhone("9361586278");
+    settings.setInstagramUrl(DEFAULT_INSTAGRAM_URL);
+    settings.setWhatsappNumber(DEFAULT_WHATSAPP_NUMBER);
+    settings.setShopPhone(DEFAULT_SHOP_PHONE);
     settings.setSupportEmail("natrajganesh2000@gmail.com");
     settings.setCatalogueUrl("#");
     settings.setContactUrl("/contact");
@@ -178,12 +188,20 @@ public class SeedDataService implements ApplicationRunner {
   private void backfillStoreSettingsContacts() {
     storeSettingsRepository.findTopByOrderByIdAsc().ifPresent(settings -> {
       boolean updated = false;
-      if (settings.getWhatsappNumber() == null || settings.getWhatsappNumber().isBlank()) {
-        settings.setWhatsappNumber("919361586278");
+      if (settings.getInstagramUrl() == null
+          || settings.getInstagramUrl().isBlank()
+          || LEGACY_INSTAGRAM_URLS.contains(settings.getInstagramUrl().trim().toLowerCase())) {
+        settings.setInstagramUrl(DEFAULT_INSTAGRAM_URL);
+        updated = true;
+      }
+      if (settings.getWhatsappNumber() == null
+          || settings.getWhatsappNumber().isBlank()
+          || LEGACY_WHATSAPP_NUMBERS.contains(settings.getWhatsappNumber().trim())) {
+        settings.setWhatsappNumber(DEFAULT_WHATSAPP_NUMBER);
         updated = true;
       }
       if (settings.getShopPhone() == null || settings.getShopPhone().isBlank()) {
-        settings.setShopPhone("9361586278");
+        settings.setShopPhone(DEFAULT_SHOP_PHONE);
         updated = true;
       }
       if (settings.getSupportEmail() == null || settings.getSupportEmail().isBlank()) {

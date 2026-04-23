@@ -146,6 +146,7 @@ const CommunitySection = () => {
                                 alt={item.title || item.caption || "Community video"}
                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 loading={index < 2 ? "eager" : "lazy"}
+                                optimizeWidth={360}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-foreground/38 via-foreground/6 to-transparent" />
                               <div className="absolute inset-0 flex items-center justify-center">
@@ -195,6 +196,7 @@ const CommunitySection = () => {
                           alt={item.title || item.caption || "Community media"}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading={index < 2 ? "eager" : "lazy"}
+                          optimizeWidth={260}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-foreground/18 via-transparent to-transparent" />
                       </div>
@@ -234,6 +236,7 @@ const CommunitySection = () => {
                     src={activeVideoPoster}
                     alt={activeVideo.title || activeVideo.caption || "Community video"}
                     className="h-auto max-h-[75vh] w-full object-cover"
+                    optimizeWidth={720}
                   />
                 )}
               </div>

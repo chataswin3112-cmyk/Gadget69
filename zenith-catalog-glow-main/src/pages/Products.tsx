@@ -1,13 +1,16 @@
-import { useDeferredValue, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
-import Footer from "@/components/storefront/Footer";
-import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import ProductCard from "@/components/storefront/ProductCard";
 import SectionHeader from "@/components/storefront/SectionHeader";
+import DeferredRender from "@/components/ui/deferred-render";
 import { useAdminData } from "@/contexts/AdminDataContext";
+import { scheduleAfterPaint, scheduleIdleTask } from "@/lib/idle";
+
+const Footer = lazy(() => import("@/components/storefront/Footer"));
+const FloatingContactActions = lazy(() => import("@/components/storefront/FloatingContactActions"));
 
 const filterTabs = [
   { key: "all", label: "All Products" },
@@ -45,7 +48,18 @@ const Products = () => {
   const deferredCategoryFilter = useDeferredValue(categoryFilter);
 
   useEffect(() => {
-    void Promise.all([ensureProductsLoaded(), ensureSectionsLoaded()]);
+    let cancelIdleSectionLoad = () => {};
+    const cancelProductLoad = scheduleAfterPaint(() => {
+      void ensureProductsLoaded();
+      cancelIdleSectionLoad = scheduleIdleTask(() => {
+        void ensureSectionsLoaded();
+      }, 1000);
+    }, 50);
+
+    return () => {
+      cancelProductLoad();
+      cancelIdleSectionLoad();
+    };
   }, [ensureProductsLoaded, ensureSectionsLoaded]);
 
   const filtered = useMemo(() => {
@@ -218,8 +232,22 @@ const Products = () => {
         )}
       </div>
 
-      <FloatingContactActions />
-      <Footer />
+      <DeferredRender
+        rootMargin="900px 0px"
+        placeholder={<div className="min-h-[1px]" aria-hidden="true" />}
+      >
+        <Suspense fallback={null}>
+          <FloatingContactActions />
+        </Suspense>
+      </DeferredRender>
+      <DeferredRender
+        rootMargin="900px 0px"
+        placeholder={<div className="min-h-[560px]" aria-hidden="true" />}
+      >
+        <Suspense fallback={<div className="min-h-[560px]" aria-hidden="true" />}>
+          <Footer />
+        </Suspense>
+      </DeferredRender>
     </div>
   );
 };

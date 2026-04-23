@@ -55,7 +55,10 @@ class CatalogSyncControllerTest {
 
     mockMvc.perform(get("/api/community-media"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(0)));
+        .andExpect(jsonPath("$", hasSize(3)))
+        .andExpect(jsonPath("$[0].title").value("Desk Setup Drop"))
+        .andExpect(jsonPath("$[1].title").value("Travel Tech Pick"))
+        .andExpect(jsonPath("$[2].title").value("Creator Essentials"));
   }
 
   private String loginAndExtractToken() throws Exception {

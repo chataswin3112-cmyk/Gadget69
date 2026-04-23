@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,9 +10,10 @@ import { AdminDataProvider, useAdminData } from "@/contexts/AdminDataContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminSessionGuard from "@/components/AdminSessionGuard";
 import ScrollToTop from "@/components/ScrollToTop";
+import Index from "./pages/Index";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 // Lazy-loaded components for better mobile performance
-const Index = lazy(() => import("./pages/Index"));
 const Products = lazy(() => import("./pages/Products"));
 const ProductDetails = lazy(() => import("./pages/ProductDetails"));
 const Categories = lazy(() => import("./pages/Categories"));
@@ -27,7 +28,6 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
@@ -82,6 +82,10 @@ const PublicSettingsBootstrap = () => {
 
 const AdminSettingsBootstrap = PublicSettingsBootstrap;
 
+const LazyPage = ({ children }: { children: ReactNode }) => (
+  <Suspense fallback={<PageLoader />}>{children}</Suspense>
+);
+
 const AdminRouteShell = () => (
   <ProtectedRoute>
     <AdminSessionGuard>
@@ -101,44 +105,42 @@ const App = () => (
         <Sonner />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <ScrollToTop />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route element={<PublicRouteShell />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:id" element={<ProductDetails />} />
-                <Route path="/categories" element={<Categories />} />
-                <Route path="/categories/:id" element={<CategoryDetails />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/checkout/failure" element={<CheckoutFailure />} />
-                <Route path="/track-order" element={<TrackOrder />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/refund-policy" element={<RefundPolicy />} />
-                <Route path="/shipping-policy" element={<ShippingPolicy />} />
-                <Route path="/terms-and-conditions" element={<TermsOfService />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
+          <Routes>
+            <Route element={<PublicRouteShell />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/products" element={<LazyPage><Products /></LazyPage>} />
+              <Route path="/products/:id" element={<LazyPage><ProductDetails /></LazyPage>} />
+              <Route path="/categories" element={<LazyPage><Categories /></LazyPage>} />
+              <Route path="/categories/:id" element={<LazyPage><CategoryDetails /></LazyPage>} />
+              <Route path="/cart" element={<LazyPage><Cart /></LazyPage>} />
+              <Route path="/checkout" element={<LazyPage><Checkout /></LazyPage>} />
+              <Route path="/checkout/success" element={<LazyPage><CheckoutSuccess /></LazyPage>} />
+              <Route path="/checkout/failure" element={<LazyPage><CheckoutFailure /></LazyPage>} />
+              <Route path="/track-order" element={<LazyPage><TrackOrder /></LazyPage>} />
+              <Route path="/contact" element={<LazyPage><Contact /></LazyPage>} />
+              <Route path="/privacy-policy" element={<LazyPage><PrivacyPolicy /></LazyPage>} />
+              <Route path="/refund-policy" element={<LazyPage><RefundPolicy /></LazyPage>} />
+              <Route path="/shipping-policy" element={<LazyPage><ShippingPolicy /></LazyPage>} />
+              <Route path="/terms-and-conditions" element={<LazyPage><TermsOfService /></LazyPage>} />
+              <Route path="*" element={<LazyPage><NotFound /></LazyPage>} />
+            </Route>
 
-              <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
-              <Route element={<AdminRouteShell />}>
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/categories" element={<AdminCategories />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
-                <Route path="/admin/offers" element={<AdminOffers />} />
-                <Route path="/admin/orders" element={<AdminOrders />} />
-                <Route path="/admin/banners" element={<AdminBanners />} />
-                <Route path="/admin/media" element={<AdminMedia />} />
-                <Route path="/admin/speed-test" element={<AdminSpeedTest />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-                <Route path="/admin/reviews" element={<AdminReviews />} />
-              </Route>
-            </Routes>
-          </Suspense>
+            <Route element={<AdminRouteShell />}>
+              <Route path="/admin/dashboard" element={<LazyPage><AdminDashboard /></LazyPage>} />
+              <Route path="/admin/categories" element={<LazyPage><AdminCategories /></LazyPage>} />
+              <Route path="/admin/products" element={<LazyPage><AdminProducts /></LazyPage>} />
+              <Route path="/admin/offers" element={<LazyPage><AdminOffers /></LazyPage>} />
+              <Route path="/admin/orders" element={<LazyPage><AdminOrders /></LazyPage>} />
+              <Route path="/admin/banners" element={<LazyPage><AdminBanners /></LazyPage>} />
+              <Route path="/admin/media" element={<LazyPage><AdminMedia /></LazyPage>} />
+              <Route path="/admin/speed-test" element={<LazyPage><AdminSpeedTest /></LazyPage>} />
+              <Route path="/admin/settings" element={<LazyPage><AdminSettings /></LazyPage>} />
+              <Route path="/admin/reviews" element={<LazyPage><AdminReviews /></LazyPage>} />
+            </Route>
+          </Routes>
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

@@ -1,21 +1,24 @@
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronRight, Minus, Play, Plus, ShoppingBag } from "lucide-react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
-import Footer from "@/components/storefront/Footer";
-import FloatingContactActions from "@/components/storefront/FloatingContactActions";
 import ProductCard from "@/components/storefront/ProductCard";
 import ColorSwatchSelector from "@/components/storefront/ColorSwatchSelector";
 import MediaFrame from "@/components/storefront/MediaFrame";
 import SectionHeader from "@/components/storefront/SectionHeader";
+import DeferredRender from "@/components/ui/deferred-render";
 import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useCart } from "@/contexts/CartContext";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { getProductById, getVariant } from "@/api/productApi";
-import { getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
+import { getProductMedia, getVariantMedia } from "@/lib/catalog-media";
 import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
 import { Product, ProductMedia, VariantMedia } from "@/types";
+import { scheduleIdleTask } from "@/lib/idle";
+
+const Footer = lazy(() => import("@/components/storefront/Footer"));
+const FloatingContactActions = lazy(() => import("@/components/storefront/FloatingContactActions"));
 
 type DisplayMedia = ProductMedia | VariantMedia;
 
@@ -80,7 +83,11 @@ const ProductDetails = () => {
   }, [cachedProduct, productId]);
 
   useEffect(() => {
-    void ensureProductsLoaded();
+    const cancelProductHydration = scheduleIdleTask(() => {
+      void ensureProductsLoaded();
+    }, 900);
+
+    return cancelProductHydration;
   }, [ensureProductsLoaded]);
 
   const variants = useMemo(() => product?.variants || [], [product?.variants]);
@@ -258,7 +265,7 @@ const ProductDetails = () => {
                           className="rounded-2xl bg-secondary/20"
                           loading={index === 0 ? "eager" : "lazy"}
                           sizes="(max-width: 1024px) 100vw, 50vw"
-                          optimizeWidth={1400}
+                          optimizeWidth={700}
                           fetchPriority={index === 0 ? "high" : "low"}
                         />
                       )}
@@ -293,14 +300,14 @@ const ProductDetails = () => {
                         <Play className="h-6 w-6 text-muted-foreground" />
                       </div>
                     ) : (
-                      <MediaFrame
-                        src={media.mediaUrl}
-                        alt=""
-                        padding="p-1"
-                        className="rounded-none"
-                        sizes="80px"
-                        optimizeWidth={240}
-                      />
+                        <MediaFrame
+                          src={media.mediaUrl}
+                          alt=""
+                          padding="p-1"
+                          className="rounded-none"
+                          sizes="80px"
+                          optimizeWidth={120}
+                        />
                     )}
                   </button>
                 ))}
@@ -442,18 +449,37 @@ const ProductDetails = () => {
       </div>
 
       {relatedProducts.length > 0 ? (
-        <div className="section-container section-padding">
-          <SectionHeader title="You May Also Like" viewAllLink={`/categories/${product.sectionId}`} />
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
-            {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct.id} product={relatedProduct} />
-            ))}
+        <DeferredRender
+          rootMargin="720px 0px"
+          placeholder={<div className="min-h-[440px]" aria-hidden="true" />}
+        >
+          <div className="section-container section-padding">
+            <SectionHeader title="You May Also Like" viewAllLink={`/categories/${product.sectionId}`} />
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
+              {relatedProducts.map((relatedProduct) => (
+                <ProductCard key={relatedProduct.id} product={relatedProduct} />
+              ))}
+            </div>
           </div>
-        </div>
+        </DeferredRender>
       ) : null}
 
-      <FloatingContactActions />
-      <Footer />
+      <DeferredRender
+        rootMargin="900px 0px"
+        placeholder={<div className="min-h-[1px]" aria-hidden="true" />}
+      >
+        <Suspense fallback={null}>
+          <FloatingContactActions />
+        </Suspense>
+      </DeferredRender>
+      <DeferredRender
+        rootMargin="900px 0px"
+        placeholder={<div className="min-h-[560px]" aria-hidden="true" />}
+      >
+        <Suspense fallback={<div className="min-h-[560px]" aria-hidden="true" />}>
+          <Footer />
+        </Suspense>
+      </DeferredRender>
     </div>
   );
 };

@@ -126,6 +126,7 @@ const ReviewAvatar = ({
         src={avatar}
         alt={name}
         className="h-10 w-10 flex-shrink-0 rounded-full border border-white/80 object-cover shadow-sm"
+        optimizeWidth={80}
       />
     );
   }

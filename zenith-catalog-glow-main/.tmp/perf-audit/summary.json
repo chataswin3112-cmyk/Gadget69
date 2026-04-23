@@ -1,42 +1,42 @@
 {
-  "generatedAt": "2026-04-21T19:08:46.389Z",
+  "generatedAt": "2026-04-23T03:15:02.434Z",
   "frontendUrl": "http://127.0.0.1:4173",
   "backendUrl": "http://127.0.0.1:8081",
   "results": [
     {
       "route": "/",
-      "performance": 40,
-      "accessibility": 89,
+      "performance": 76,
+      "accessibility": 90,
       "bestPractices": 100,
-      "seo": 92
+      "seo": 100
     },
     {
       "route": "/products",
-      "performance": 47,
+      "performance": 86,
       "accessibility": 90,
       "bestPractices": 100,
       "seo": 100
     },
     {
       "route": "/products/1",
-      "performance": 41,
+      "performance": 87,
       "accessibility": 89,
       "bestPractices": 100,
       "seo": 100
     },
     {
-      "route": "/admin",
-      "performance": 72,
+      "route": "/admin/dashboard",
+      "performance": 93,
       "accessibility": 88,
       "bestPractices": 100,
       "seo": 100
     },
     {
       "route": "/admin/orders",
-      "performance": 57,
-      "accessibility": 89,
+      "performance": 94,
+      "accessibility": 88,
       "bestPractices": 100,
-      "seo": 92
+      "seo": 100
     }
   ]
 }

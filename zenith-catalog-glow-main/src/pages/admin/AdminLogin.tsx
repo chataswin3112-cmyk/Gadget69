@@ -1,169 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
+import { adminLogin } from "@/api/adminApi";
 import { useAuth } from "@/contexts/AuthContext";
+import { getErrorMessage } from "@/lib/api-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
-import { adminLogin, resetPasswordWithSecretKey } from "@/api/adminApi";
-import { getErrorMessage } from "@/lib/api-error";
-import { CheckCircle2, Eye, EyeOff, KeyRound, Lock, ShieldCheck, X } from "lucide-react";
-import {
-  ADMIN_PASSWORD_HINT,
-  ADMIN_PASSWORD_PLACEHOLDER,
-  isStrongAdminPassword,
-} from "@/lib/admin-password";
 
-/* ─── Forgot Password Modal ──────────────────────────── */
-const ForgotPasswordModal = ({ onClose }: { onClose: () => void }) => {
-  const [secretKey, setSecretKey] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showKey, setShowKey] = useState(false);
-  const [showPwd, setShowPwd] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+const ForgotPasswordModal = lazy(() => import("@/components/admin/ForgotPasswordModal"));
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!secretKey.trim()) {
-      toast.error("Enter the secret key");
-      return;
-    }
-    if (!isStrongAdminPassword(newPassword)) {
-      toast.error(ADMIN_PASSWORD_HINT);
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    try {
-      setLoading(true);
-      await resetPasswordWithSecretKey({ secretKey: secretKey.trim(), newPassword });
-      setDone(true);
-      toast.success("Password reset successfully!");
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Invalid secret key"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    /* Backdrop */
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="w-full max-w-md rounded-2xl bg-card shadow-2xl border border-border overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <div className="flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-accent" />
-            <h2 className="font-heading text-lg font-bold">Forgot Password</h2>
-          </div>
-          <button onClick={onClose} className="rounded-full p-1.5 hover:bg-muted transition-colors">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="p-6">
-          {done ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
-                <CheckCircle2 className="h-6 w-6 shrink-0 text-green-600" />
-                <div>
-                  <p className="font-semibold text-green-700">Password Reset Successfully!</p>
-                  <p className="text-sm text-green-600/80 font-body">You can now log in with your new password.</p>
-                </div>
-              </div>
-              <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90" onClick={onClose}>
-                Back to Login
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="rounded-lg bg-muted/50 p-3 text-sm font-body text-muted-foreground">
-                Enter the <strong>Admin Secret Key</strong> configured in your backend
-                (<code className="text-xs bg-muted px-1 py-0.5 rounded">app.admin-secret</code>) to reset your password.
-              </div>
-
-              {/* Secret Key */}
-              <div className="space-y-2">
-                <Label className="font-body font-semibold">Secret Key</Label>
-                <div className="relative">
-                  <Input
-                    type={showKey ? "text" : "password"}
-                    value={secretKey}
-                    onChange={(e) => setSecretKey(e.target.value)}
-                    placeholder="Enter admin secret key"
-                    required
-                    className="pr-10 font-mono"
-                  />
-                  <button type="button" tabIndex={-1}
-                    onClick={() => setShowKey((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* New Password */}
-              <div className="space-y-2">
-                <Label className="font-body font-semibold">New Password</Label>
-                <div className="relative">
-                  <Input
-                    type={showPwd ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder={ADMIN_PASSWORD_PLACEHOLDER}
-                    required
-                    className="pr-10"
-                  />
-                  <button type="button" tabIndex={-1}
-                    onClick={() => setShowPwd((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                <p className="text-xs font-body text-muted-foreground">{ADMIN_PASSWORD_HINT}</p>
-              </div>
-
-              {/* Confirm Password */}
-              <div className="space-y-2">
-                <Label className="font-body font-semibold">Confirm New Password</Label>
-                <Input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter new password"
-                  required
-                />
-                {confirmPassword && newPassword !== confirmPassword && (
-                  <p className="text-xs text-destructive font-body">Passwords do not match</p>
-                )}
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  type="submit"
-                  disabled={loading || (!!confirmPassword && newPassword !== confirmPassword)}
-                  className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
-                >
-                  {loading ? "Resetting..." : "Reset Password"}
-                </Button>
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ─── Admin Login Page ───────────────────────────────── */
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
 
@@ -186,11 +34,14 @@ const AdminLogin = () => {
     if (lockoutTimer.current) {
       clearInterval(lockoutTimer.current);
     }
+
     let remaining = LOCKOUT_SECONDS;
     setLockoutRemaining(remaining);
+
     lockoutTimer.current = setInterval(() => {
       remaining -= 1;
       setLockoutRemaining(remaining);
+
       if (remaining <= 0) {
         clearInterval(lockoutTimer.current!);
         setAttemptCount(0);
@@ -206,21 +57,24 @@ const AdminLogin = () => {
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isLockedOut) return;
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    if (isLockedOut) {
+      return;
+    }
+
     setErrorMsg("");
     setLoading(true);
+
     try {
       const response = await adminLogin({ email: email.trim(), password });
       login(response.token);
       toast.success("Welcome back, Admin!");
       navigate("/admin/dashboard");
     } catch (error: unknown) {
-      // Always reset loading first
       setLoading(false);
 
-      // Detect network / proxy errors (backend offline)
       const isNetworkError =
         !((error as { response?: unknown }).response) &&
         ((error as { code?: string }).code === "ERR_NETWORK" ||
@@ -229,25 +83,27 @@ const AdminLogin = () => {
           (error as { message?: string }).message?.includes("ENOBUFS"));
 
       if (isNetworkError) {
-        const msg = "Cannot connect to server. Please make sure the backend is running.";
-        setErrorMsg(msg);
-        toast.error(msg);
+        const message = "Cannot connect to server. Please make sure the backend is running.";
+        setErrorMsg(message);
+        toast.error(message);
         return;
       }
 
-      const newCount = attemptCount + 1;
-      setAttemptCount(newCount);
-      if (newCount >= MAX_LOGIN_ATTEMPTS) {
-        const msg = `Too many failed attempts. Locked out for ${LOCKOUT_SECONDS} seconds.`;
-        setErrorMsg(msg);
-        toast.error(msg);
+      const nextCount = attemptCount + 1;
+      setAttemptCount(nextCount);
+
+      if (nextCount >= MAX_LOGIN_ATTEMPTS) {
+        const message = `Too many failed attempts. Locked out for ${LOCKOUT_SECONDS} seconds.`;
+        setErrorMsg(message);
+        toast.error(message);
         startLockout();
       } else {
-        const msg = getErrorMessage(error, "Invalid credentials");
-        setErrorMsg(msg);
-        toast.error(msg);
-        if (newCount >= 3) {
-          toast.warning(`${MAX_LOGIN_ATTEMPTS - newCount} attempt(s) remaining before lockout.`);
+        const message = getErrorMessage(error, "Invalid credentials");
+        setErrorMsg(message);
+        toast.error(message);
+
+        if (nextCount >= 3) {
+          toast.warning(`${MAX_LOGIN_ATTEMPTS - nextCount} attempt(s) remaining before lockout.`);
         }
       }
     }
@@ -255,56 +111,61 @@ const AdminLogin = () => {
 
   return (
     <>
-      {forgotOpen && <ForgotPasswordModal onClose={() => setForgotOpen(false)} />}
+      {forgotOpen ? (
+        <Suspense fallback={null}>
+          <ForgotPasswordModal onClose={() => setForgotOpen(false)} />
+        </Suspense>
+      ) : null}
 
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
+          <div className="mb-8 text-center">
             <div className="mb-4 flex items-center justify-center">
               <img
                 src={gadget69Wordmark}
                 alt="Gadget69"
-                className="h-32 w-auto max-w-full"
+                className="h-32 w-32 max-w-full object-contain"
+                width={1024}
+                height={1024}
                 decoding="async"
                 {...{ fetchpriority: "high" }}
               />
             </div>
-            <p className="text-muted-foreground font-body text-sm">Admin Panel</p>
+            <p className="text-sm text-muted-foreground font-body">Admin Panel</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-card rounded-xl shadow-premium p-8 space-y-5">
-            {/* Security badge */}
+          <form onSubmit={handleSubmit} className="space-y-5 rounded-xl bg-card p-8 shadow-premium">
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-green-500" />
               <span className="font-body">Secured connection</span>
             </div>
 
-            <h2 className="font-heading text-xl font-bold text-center">Sign In</h2>
+            <h2 className="text-center font-heading text-xl font-bold">Sign In</h2>
 
-            {/* Lockout warning */}
-            {isLockedOut && (
+            {isLockedOut ? (
               <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
-                <Lock className="h-5 w-5 text-destructive shrink-0" />
+                <Lock className="h-5 w-5 shrink-0 text-destructive" />
                 <p className="text-sm text-destructive font-body">
                   Account locked. Try again in <strong>{lockoutRemaining}s</strong>.
                 </p>
               </div>
-            )}
+            ) : null}
 
-            {/* Error Message */}
-            {!isLockedOut && errorMsg && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm font-body text-destructive text-center">
+            {!isLockedOut && errorMsg ? (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-sm text-destructive font-body">
                 {errorMsg}
               </div>
-            )}
+            ) : null}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-body">Email</Label>
+              <Label htmlFor="email" className="font-body">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="admin@gadget69.com"
                 required
                 disabled={isLockedOut}
@@ -313,11 +174,13 @@ const AdminLogin = () => {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="font-body">Password</Label>
+                <Label htmlFor="password" className="font-body">
+                  Password
+                </Label>
                 <button
                   type="button"
                   onClick={() => setForgotOpen(true)}
-                  className="text-xs text-accent hover:underline font-body"
+                  className="text-xs text-accent font-body hover:underline"
                 >
                   Forgot Password?
                 </button>
@@ -327,7 +190,7 @@ const AdminLogin = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder="********"
                   required
                   className="pr-10"
@@ -336,7 +199,7 @@ const AdminLogin = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  onClick={() => setShowPassword((v) => !v)}
+                  onClick={() => setShowPassword((current) => !current)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -346,13 +209,13 @@ const AdminLogin = () => {
 
             <Button
               type="submit"
-              className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-heading font-semibold"
+              className="w-full bg-accent font-heading font-semibold text-accent-foreground hover:bg-accent/90"
               disabled={loading || isLockedOut}
             >
               {loading ? "Signing in..." : isLockedOut ? `Locked (${lockoutRemaining}s)` : "Sign In"}
             </Button>
 
-            <p className="text-center text-xs font-body text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground font-body">
               Seeded default credentials apply only on the first backend start. If the password
               changed later, use the latest one or reset it with the admin secret key.
             </p>

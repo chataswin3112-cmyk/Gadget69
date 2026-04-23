@@ -89,7 +89,7 @@ const HeroSlider = () => {
                 decoding="async"
                 fetchPriority={index === current ? "high" : undefined}
                 sizes="100vw"
-                optimizeWidth={isMobile ? 900 : 1600}
+                optimizeWidth={isMobile ? 400 : 720}
               />
             </picture>
             <div className="home-hero-overlay absolute inset-0" />

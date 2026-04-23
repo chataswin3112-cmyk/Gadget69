@@ -2,6 +2,7 @@ const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
 const DEFAULT_API_BASE_URL = "/api";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 const CLOUDINARY_HOST = "res.cloudinary.com";
+const UNSPLASH_HOSTS = new Set(["images.unsplash.com", "plus.unsplash.com"]);
 
 export const FALLBACK_IMAGE_SRC = "/placeholder.svg";
 
@@ -144,6 +145,52 @@ const optimizeCloudinaryUrl = (
   }
 };
 
+const optimizeUnsplashUrl = (
+  candidateUrl: string,
+  options?: {
+    width?: number;
+    height?: number;
+  }
+) => {
+  try {
+    const parsed = new URL(candidateUrl);
+    if (!UNSPLASH_HOSTS.has(parsed.hostname)) {
+      return candidateUrl;
+    }
+
+    const devicePixelRatio =
+      typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+    const targetWidth =
+      typeof options?.width === "number" && options.width > 0
+        ? Math.max(1, Math.round(options.width * devicePixelRatio))
+        : null;
+    const targetHeight =
+      typeof options?.height === "number" && options.height > 0
+        ? Math.max(1, Math.round(options.height * devicePixelRatio))
+        : null;
+
+    if (targetWidth) {
+      parsed.searchParams.set("w", String(targetWidth));
+    }
+
+    if (targetHeight) {
+      parsed.searchParams.set("h", String(targetHeight));
+    }
+
+    if (!parsed.searchParams.has("auto")) {
+      parsed.searchParams.set("auto", "format");
+    }
+
+    if (!parsed.searchParams.has("q")) {
+      parsed.searchParams.set("q", "80");
+    }
+
+    return parsed.toString();
+  } catch {
+    return candidateUrl;
+  }
+};
+
 const resolveNormalizedMediaUrl = (
   url?: string | null,
   currentOrigin = resolveCurrentOrigin(),
@@ -161,7 +208,7 @@ const resolveNormalizedMediaUrl = (
     if (isUnsafeAbsoluteMediaUrl(normalized, currentOrigin)) {
       return "";
     }
-    return optimizeCloudinaryUrl(normalized, options);
+    return optimizeUnsplashUrl(optimizeCloudinaryUrl(normalized, options), options);
   }
 
   if (normalized.startsWith("/uploads/")) {

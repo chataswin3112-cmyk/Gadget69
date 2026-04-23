@@ -402,5 +402,34 @@
       ],
       "displayOrder": 19
     }
+  ],
+  "communityMedia": [
+    {
+      "title": "Desk Setup Drop",
+      "caption": "Fresh picks from the Gadget69 desk with creator-ready accessories and clean everyday carry gear.",
+      "mediaType": "IMAGE",
+      "imageUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&h=1600&fit=crop",
+      "actionLink": "https://www.instagram.com/gadget69_tuty/",
+      "displayOrder": 0,
+      "isActive": true
+    },
+    {
+      "title": "Travel Tech Pick",
+      "caption": "Wireless audio, charging essentials, and premium add-ons picked for daily movement and quick setups.",
+      "mediaType": "IMAGE",
+      "imageUrl": "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=1200&h=1600&fit=crop",
+      "actionLink": "https://www.instagram.com/gadget69_tuty/",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "title": "Creator Essentials",
+      "caption": "Portable creator gear and standout gadgets curated for reels, desks, and product shots.",
+      "mediaType": "IMAGE",
+      "imageUrl": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&h=1600&fit=crop",
+      "actionLink": "https://www.instagram.com/gadget69_tuty/",
+      "displayOrder": 2,
+      "isActive": true
+    }
   ]
 }

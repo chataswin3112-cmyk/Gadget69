@@ -49,6 +49,7 @@ const CategoryRail = ({ sections }: CategoryRailProps) => {
                     aspectRatio="aspect-square"
                     className="rounded-[22px] bg-white/60"
                     padding="p-4"
+                    optimizeWidth={170}
                   />
                   <div className="px-1 pb-1 pt-4 flex items-end justify-between">
                     <div>

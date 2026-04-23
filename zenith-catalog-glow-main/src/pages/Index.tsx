@@ -1,21 +1,53 @@
-import { useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import HeroSlider from "@/components/storefront/HeroSlider";
-import CategoryRail from "@/components/storefront/CategoryRail";
-import TopCategoryGrid from "@/components/storefront/TopCategoryGrid";
 import ProductSectionRow from "@/components/storefront/ProductSectionRow";
-import ProductMarqueeSection from "@/components/storefront/ProductMarqueeSection";
-import FloatingContactActions from "@/components/storefront/FloatingContactActions";
-import CommunitySection from "@/components/storefront/CommunitySection";
-import ReviewSection from "@/components/storefront/ReviewSection";
-import Footer from "@/components/storefront/Footer";
 import DeferredRender from "@/components/ui/deferred-render";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { useScrollAnimations } from "@/hooks/useScrollAnimations";
 import { useScrollBgColor, SECTION_BG_COLORS } from "@/hooks/useScrollBgColor";
+import { scheduleAfterPaint, scheduleIdleTask } from "@/lib/idle";
+
+const CategoryRail = lazy(() => import("@/components/storefront/CategoryRail"));
+const TopCategoryGrid = lazy(() => import("@/components/storefront/TopCategoryGrid"));
+const ProductMarqueeSection = lazy(() => import("@/components/storefront/ProductMarqueeSection"));
+const FloatingContactActions = lazy(() => import("@/components/storefront/FloatingContactActions"));
+const CommunitySection = lazy(() => import("@/components/storefront/CommunitySection"));
+const ReviewSection = lazy(() => import("@/components/storefront/ReviewSection"));
+const Footer = lazy(() => import("@/components/storefront/Footer"));
 
 const rowSurfaceTones = ["mist", "ivory", "paper"] as const;
+
+const DeferredSection = ({
+  children,
+  minHeight,
+  rootMargin = "420px 0px",
+  bgColor,
+  onVisible,
+}: {
+  children: ReactNode;
+  minHeight: string;
+  rootMargin?: string;
+  bgColor?: string;
+  onVisible?: () => void;
+}) => {
+  const placeholder = (
+    <div className={minHeight} data-bg-color={bgColor} aria-hidden="true" />
+  );
+
+  return (
+    <DeferredRender rootMargin={rootMargin} placeholder={placeholder} onVisible={onVisible}>
+      <Suspense fallback={placeholder}>{children}</Suspense>
+    </DeferredRender>
+  );
+};
+
+const HomepageEnhancements = ({ deps }: { deps: ReadonlyArray<number> }) => {
+  useScrollAnimations(deps);
+  useScrollBgColor(deps);
+  return null;
+};
 
 const Index = () => {
   const {
@@ -30,18 +62,26 @@ const Index = () => {
     ensureReviewsLoaded,
     ensureSectionsLoaded,
   } = useAdminData();
+  const [enhancementsReady, setEnhancementsReady] = useState(false);
 
   useEffect(() => {
-    void Promise.all([
-      ensureBannersLoaded(),
-      ensureSectionsLoaded(),
-      ensureProductsLoaded(),
-    ]);
+    void ensureBannersLoaded();
+
+    const cancelCatalogLoad = scheduleAfterPaint(() => {
+      void Promise.all([ensureSectionsLoaded(), ensureProductsLoaded()]);
+    }, 80);
+
+    const cancelEnhancementLoad = scheduleIdleTask(() => {
+      setEnhancementsReady(true);
+    }, 1000);
+
+    return () => {
+      cancelCatalogLoad();
+      cancelEnhancementLoad();
+    };
   }, [ensureBannersLoaded, ensureProductsLoaded, ensureSectionsLoaded]);
 
   const deps = [sections.length, products.length, banners.length, communityMedia.length, reviews.length];
-  useScrollAnimations(deps);
-  useScrollBgColor(deps);
 
   const newLaunches = useMemo(
     () => products.filter((product) => product.is_new_launch),
@@ -65,40 +105,59 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      {enhancementsReady ? <HomepageEnhancements deps={deps} /> : null}
       <AnnouncementBar />
       <Navbar />
 
       <div data-bg-color="#fefce8">
-        <HeroSlider />
+        {banners.length ? <HeroSlider /> : <div className="home-hero" aria-hidden="true" />}
       </div>
 
-      <div data-bg-color="#dbeafe">
-        <CategoryRail sections={sections} />
-      </div>
+      <DeferredSection
+        minHeight="min-h-[360px]"
+        rootMargin="480px 0px"
+        bgColor="#dbeafe"
+      >
+        <div data-bg-color="#dbeafe">
+          <CategoryRail sections={sections} />
+        </div>
+      </DeferredSection>
 
-      <DeferredRender
+      <DeferredSection
+        minHeight="min-h-[420px]"
         rootMargin="520px 0px"
-        placeholder={<div className="min-h-[420px]" data-bg-color="#fff7ed" aria-hidden="true" />}
       >
         <div data-bg-color="#fff7ed">
           <ProductMarqueeSection />
         </div>
-      </DeferredRender>
+      </DeferredSection>
 
-      <div data-bg-color="#e0f2fe">
-        <ProductSectionRow
-          label="Just Arrived"
-          title="New Launches"
-          products={newLaunches}
-          viewAllLink="/products?filter=new"
-          animateDir="up"
-          surfaceTone="paper"
-        />
-      </div>
+      <DeferredSection
+        minHeight="min-h-[520px]"
+        rootMargin="420px 0px"
+        bgColor="#e0f2fe"
+      >
+        <div data-bg-color="#e0f2fe">
+          <ProductSectionRow
+            label="Just Arrived"
+            title="New Launches"
+            products={newLaunches}
+            viewAllLink="/products?filter=new"
+            animateDir="up"
+            surfaceTone="paper"
+          />
+        </div>
+      </DeferredSection>
 
-      <div data-bg-color="#f3e8ff">
-        <TopCategoryGrid sections={sections} />
-      </div>
+      <DeferredSection
+        minHeight="min-h-[460px]"
+        rootMargin="460px 0px"
+        bgColor="#f3e8ff"
+      >
+        <div data-bg-color="#f3e8ff">
+          <TopCategoryGrid sections={sections} />
+        </div>
+      </DeferredSection>
 
       {featuredCategoryRows.map(({ section, products: rowProducts, surfaceTone, bgColor }, index) => (
         <div key={section.id} data-bg-color={bgColor}>
@@ -114,50 +173,51 @@ const Index = () => {
       ))}
 
       {deferredCategoryRows.map(({ section, products: rowProducts, surfaceTone, bgColor }, index) => (
-        <DeferredRender
-          key={section.id}
-          rootMargin="420px 0px"
-          placeholder={<div className="min-h-[540px]" data-bg-color={bgColor} aria-hidden="true" />}
-        >
-          <div data-bg-color={bgColor}>
-            <ProductSectionRow
-              label={section.name}
-              title={section.name}
-              products={rowProducts}
-              viewAllLink={`/categories/${section.id}`}
-              animateDir={index % 2 === 0 ? "left" : "right"}
-              surfaceTone={surfaceTone}
-            />
-          </div>
-        </DeferredRender>
+        <div key={section.id} data-bg-color={bgColor}>
+          <ProductSectionRow
+            label={section.name}
+            title={section.name}
+            products={rowProducts}
+            viewAllLink={`/categories/${section.id}`}
+            animateDir={index % 2 === 0 ? "left" : "right"}
+            surfaceTone={surfaceTone}
+          />
+        </div>
       ))}
 
-      <DeferredRender
+      <DeferredSection
+        minHeight="min-h-[700px]"
         rootMargin="680px 0px"
+        bgColor="#fef9c3"
         onVisible={() => {
           void ensureCommunityMediaLoaded();
         }}
-        placeholder={<div className="min-h-[700px]" data-bg-color="#fef9c3" aria-hidden="true" />}
       >
         <div data-bg-color="#fef9c3">
           <CommunitySection />
         </div>
-      </DeferredRender>
+      </DeferredSection>
 
-      <DeferredRender
+      <DeferredSection
+        minHeight="min-h-[540px]"
         rootMargin="720px 0px"
+        bgColor="#fce7f3"
         onVisible={() => {
           void ensureReviewsLoaded();
         }}
-        placeholder={<div className="min-h-[540px]" data-bg-color="#fce7f3" aria-hidden="true" />}
       >
         <div data-bg-color="#fce7f3">
           <ReviewSection />
         </div>
-      </DeferredRender>
+      </DeferredSection>
 
-      <FloatingContactActions />
-      <Footer />
+      <DeferredSection minHeight="min-h-[1px]" rootMargin="960px 0px">
+        <FloatingContactActions />
+      </DeferredSection>
+
+      <DeferredSection minHeight="min-h-[560px]" rootMargin="960px 0px">
+        <Footer />
+      </DeferredSection>
     </div>
   );
 };

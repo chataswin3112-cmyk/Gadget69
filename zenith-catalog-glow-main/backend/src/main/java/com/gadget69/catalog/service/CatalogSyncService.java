@@ -2,6 +2,7 @@ package com.gadget69.catalog.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gadget69.catalog.entity.Banner;
+import com.gadget69.catalog.entity.CommunityMedia;
 import com.gadget69.catalog.entity.Product;
 import com.gadget69.catalog.entity.Section;
 import com.gadget69.catalog.repository.BannerRepository;
@@ -53,6 +54,16 @@ public class CatalogSyncService {
   public CatalogSyncResult seedFreshCatalog() {
     CatalogDefinition catalog = loadCatalog();
     return syncCatalog(catalog, false);
+  }
+
+  @Transactional
+  public int seedMissingCommunityMedia() {
+    if (communityMediaRepository.count() > 0) {
+      return (int) communityMediaRepository.count();
+    }
+
+    CatalogDefinition catalog = loadCatalog();
+    return syncCommunityMedia(catalog.communityMedia(), false);
   }
 
   private CatalogSyncResult syncCatalog(CatalogDefinition catalog, boolean removeNonCatalogContent) {
@@ -156,12 +167,12 @@ public class CatalogSyncService {
       deletedBanners = (int) bannerRepository.count();
       bannerRepository.deleteAll();
       deletedCommunityMedia = (int) communityMediaRepository.count();
-      communityMediaRepository.deleteAll();
     } else if (bannerRepository.count() == 0) {
       deletedBanners = 0;
     }
 
     int bannerCount = resetHeroBanners();
+    int communityMediaCount = syncCommunityMedia(catalog.communityMedia(), removeNonCatalogContent);
 
     return new CatalogSyncResult(
         createdSections,
@@ -173,6 +184,7 @@ public class CatalogSyncService {
         deletedBanners,
         deletedCommunityMedia,
         bannerCount,
+        communityMediaCount,
         sectionRepository.count(),
         productRepository.count()
     );
@@ -211,6 +223,49 @@ public class CatalogSyncService {
     }
     bannerRepository.saveAll(banners);
     return banners.size();
+  }
+
+  private int syncCommunityMedia(List<CatalogCommunityMedia> definitions, boolean replaceExisting) {
+    List<CatalogCommunityMedia> communityDefinitions = definitions == null ? List.of() : definitions;
+
+    if (!replaceExisting && communityMediaRepository.count() > 0) {
+      return (int) communityMediaRepository.count();
+    }
+
+    if (replaceExisting) {
+      communityMediaRepository.deleteAll();
+    }
+
+    if (communityDefinitions.isEmpty()) {
+      return 0;
+    }
+
+    List<CommunityMedia> mediaItems = communityDefinitions.stream()
+        .map(this::toCommunityMedia)
+        .toList();
+    communityMediaRepository.saveAll(mediaItems);
+    return mediaItems.size();
+  }
+
+  private CommunityMedia toCommunityMedia(CatalogCommunityMedia definition) {
+    CommunityMedia media = new CommunityMedia();
+    media.setTitle(definition.title());
+    media.setCaption(definition.caption());
+    media.setMediaType(
+        definition.mediaType() == null || definition.mediaType().isBlank()
+            ? "IMAGE"
+            : definition.mediaType().trim().toUpperCase(Locale.ROOT));
+    media.setImageUrl(definition.imageUrl());
+    media.setVideoUrl(definition.videoUrl());
+    media.setThumbnailUrl(definition.thumbnailUrl());
+    media.setVideoPublicId(definition.videoPublicId());
+    media.setVideoWidth(definition.videoWidth());
+    media.setVideoHeight(definition.videoHeight());
+    media.setVideoDuration(definition.videoDuration());
+    media.setActionLink(definition.actionLink());
+    media.setDisplayOrder(definition.displayOrder());
+    media.setIsActive(definition.isActive() == null ? true : definition.isActive());
+    return media;
   }
 
   private void applySection(Section section, CatalogSection sectionDefinition) {
@@ -266,11 +321,16 @@ public class CatalogSyncService {
       int deletedBanners,
       int deletedCommunityMedia,
       int heroBanners,
+      int communityMediaItems,
       long totalSections,
       long totalProducts
   ) {}
 
-  public record CatalogDefinition(List<CatalogSection> sections, List<CatalogProduct> products) {}
+  public record CatalogDefinition(
+      List<CatalogSection> sections,
+      List<CatalogProduct> products,
+      List<CatalogCommunityMedia> communityMedia
+  ) {}
 
   public record CatalogSection(
       String name,
@@ -292,5 +352,21 @@ public class CatalogSyncService {
       String imageUrl,
       List<String> galleryImages,
       int displayOrder
+  ) {}
+
+  public record CatalogCommunityMedia(
+      String title,
+      String caption,
+      String mediaType,
+      String imageUrl,
+      String videoUrl,
+      String thumbnailUrl,
+      String videoPublicId,
+      Integer videoWidth,
+      Integer videoHeight,
+      Double videoDuration,
+      String actionLink,
+      int displayOrder,
+      Boolean isActive
   ) {}
 }

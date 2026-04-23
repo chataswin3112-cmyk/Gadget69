@@ -104,9 +104,11 @@ const defaultSettings: StoreSettings = {
   id: 1,
   siteTitle: "Gadget69",
   announcementItems: [],
+  instagramUrl: "https://www.instagram.com/gadget69_tuty/",
   whatsappNumber: "919361586278",
   shopPhone: "9361586278",
   supportEmail: "natrajganesh2000@gmail.com",
+  contactUrl: "/contact",
 };
 
 const AdminDataContext = createContext<AdminDataContextType | undefined>(undefined);

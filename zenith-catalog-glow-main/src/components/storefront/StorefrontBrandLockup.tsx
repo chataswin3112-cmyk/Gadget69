@@ -10,6 +10,8 @@ interface StorefrontBrandLockupProps {
   labelClassName?: string;
   loading?: "eager" | "lazy";
   fetchPriority?: "auto" | "high" | "low";
+  intrinsicWidth?: number;
+  intrinsicHeight?: number;
 }
 
 const toneClasses: Record<BrandTone, string> = {
@@ -25,16 +27,20 @@ const StorefrontBrandLockup = ({
   labelClassName,
   loading = "lazy",
   fetchPriority = "auto",
+  intrinsicWidth = 448,
+  intrinsicHeight = 448,
 }: StorefrontBrandLockupProps) => (
   <div className={cn("flex min-w-0 items-center", className)}>
     <img
       src={imageSrc}
       alt="Gadget 69"
       className={cn(
-        "h-8 w-auto flex-shrink-0 object-contain",
+        "flex-shrink-0 object-contain",
         toneClasses[tone] === "text-white" ? "brightness-0 invert mix-blend-screen" : "mix-blend-multiply",
         imageClassName
       )}
+      width={intrinsicWidth}
+      height={intrinsicHeight}
       loading={loading}
       decoding="async"
       {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
