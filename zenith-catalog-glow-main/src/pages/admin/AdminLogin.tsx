@@ -13,7 +13,54 @@ import { Label } from "@/components/ui/label";
 const ForgotPasswordModal = lazy(() => import("@/components/admin/ForgotPasswordModal"));
 
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_SECONDS = 30;
+const RATE_LIMIT_LOCKOUT_SECONDS = 15 * 60;
+
+const formatLockoutTime = (seconds: number) => {
+  const safeSeconds = Math.max(0, seconds);
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainingSeconds = safeSeconds % 60;
+  return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+};
+
+const getHeaderValue = (headers: unknown, name: string) => {
+  if (!headers || typeof headers !== "object") {
+    return null;
+  }
+
+  const getter = (headers as { get?: (headerName: string) => unknown }).get;
+  if (typeof getter === "function") {
+    const value = getter.call(headers, name);
+    if (typeof value === "string" || typeof value === "number") {
+      return String(value);
+    }
+  }
+
+  const record = headers as Record<string, unknown>;
+  const value = record[name] ?? record[name.toLowerCase()] ?? record[name.toUpperCase()];
+  return typeof value === "string" || typeof value === "number" ? String(value) : null;
+};
+
+const getRetryAfterSeconds = (error: unknown) => {
+  const retryAfter = getHeaderValue(
+    (error as { response?: { headers?: unknown } }).response?.headers,
+    "Retry-After"
+  );
+  if (!retryAfter) {
+    return null;
+  }
+
+  const numericSeconds = Number.parseInt(retryAfter, 10);
+  if (Number.isFinite(numericSeconds) && numericSeconds > 0) {
+    return numericSeconds;
+  }
+
+  const retryAfterDate = Date.parse(retryAfter);
+  if (Number.isFinite(retryAfterDate)) {
+    return Math.max(1, Math.ceil((retryAfterDate - Date.now()) / 1000));
+  }
+
+  return null;
+};
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -30,12 +77,12 @@ const AdminLogin = () => {
 
   const isLockedOut = lockoutRemaining > 0;
 
-  const startLockout = () => {
+  const startLockout = (seconds = RATE_LIMIT_LOCKOUT_SECONDS) => {
     if (lockoutTimer.current) {
       clearInterval(lockoutTimer.current);
     }
 
-    let remaining = LOCKOUT_SECONDS;
+    let remaining = Math.max(1, seconds);
     setLockoutRemaining(remaining);
 
     lockoutTimer.current = setInterval(() => {
@@ -44,7 +91,9 @@ const AdminLogin = () => {
 
       if (remaining <= 0) {
         clearInterval(lockoutTimer.current!);
+        lockoutTimer.current = null;
         setAttemptCount(0);
+        setErrorMsg("");
       }
     }, 1000);
   };
@@ -69,9 +118,11 @@ const AdminLogin = () => {
 
     try {
       const response = await adminLogin({ email: email.trim(), password });
+      setErrorMsg("");
+      setAttemptCount(0);
       login(response.token);
       toast.success("Welcome back, Admin!");
-      navigate("/admin/dashboard");
+      navigate("/admin/dashboard", { replace: true });
     } catch (error: unknown) {
       setLoading(false);
 
@@ -89,11 +140,22 @@ const AdminLogin = () => {
         return;
       }
 
+      const responseStatus = (error as { response?: { status?: number } }).response?.status;
+      if (responseStatus === 429) {
+        const retryAfterSeconds = getRetryAfterSeconds(error) ?? RATE_LIMIT_LOCKOUT_SECONDS;
+        const message = `Too many login attempts. Try again in ${formatLockoutTime(retryAfterSeconds)}.`;
+        setAttemptCount(MAX_LOGIN_ATTEMPTS);
+        setErrorMsg(message);
+        toast.error(message);
+        startLockout(retryAfterSeconds);
+        return;
+      }
+
       const nextCount = attemptCount + 1;
       setAttemptCount(nextCount);
 
       if (nextCount >= MAX_LOGIN_ATTEMPTS) {
-        const message = `Too many failed attempts. Locked out for ${LOCKOUT_SECONDS} seconds.`;
+        const message = `Too many failed attempts. Try again in ${formatLockoutTime(RATE_LIMIT_LOCKOUT_SECONDS)}.`;
         setErrorMsg(message);
         toast.error(message);
         startLockout();
@@ -146,7 +208,7 @@ const AdminLogin = () => {
               <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
                 <Lock className="h-5 w-5 shrink-0 text-destructive" />
                 <p className="text-sm text-destructive font-body">
-                  Account locked. Try again in <strong>{lockoutRemaining}s</strong>.
+                  Account locked. Try again in <strong>{formatLockoutTime(lockoutRemaining)}</strong>.
                 </p>
               </div>
             ) : null}
@@ -212,7 +274,7 @@ const AdminLogin = () => {
               className="w-full bg-accent font-heading font-semibold text-accent-foreground hover:bg-accent/90"
               disabled={loading || isLockedOut}
             >
-              {loading ? "Signing in..." : isLockedOut ? `Locked (${lockoutRemaining}s)` : "Sign In"}
+              {loading ? "Signing in..." : isLockedOut ? `Locked (${formatLockoutTime(lockoutRemaining)})` : "Sign In"}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground font-body">

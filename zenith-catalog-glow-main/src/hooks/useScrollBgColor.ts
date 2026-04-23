@@ -2,15 +2,15 @@ import { useEffect } from "react";
 
 /**
  * Scroll-triggered page background color transitions.
- * Each section with [data-bg-color] attribute gets a unique pastel bg
- * that smoothly fades in as the section scrolls into mid-viewport.
+ * Sections marked with [data-bg-color] take over the page background as they
+ * cross the upper-middle viewport line.
  */
 
-// Smooth CSS transition is handled via a <style> tag injected once
 const BG_TRANSITION_ID = "scroll-bg-transition-style";
 
 const injectTransitionStyle = () => {
   if (document.getElementById(BG_TRANSITION_ID)) return;
+
   const style = document.createElement("style");
   style.id = BG_TRANSITION_ID;
   style.textContent = `
@@ -23,24 +23,23 @@ const injectTransitionStyle = () => {
   document.head.appendChild(style);
 };
 
-// Pastel / light colour palette — user-requested: yellow, blue, orange, sky blue, lavender
+// Light pastel palette only: yellow, blue, orange, sky, lavender, mint, blush, peach.
 export const SECTION_BG_COLORS = [
-  "#fefce8", // 🟡 Soft Yellow
-  "#dbeafe", // 🔵 Light Blue
-  "#ffedd5", // 🟠 Warm Orange
-  "#e0f2fe", // 🩵 Sky Blue
-  "#f3e8ff", // 💜 Lavender
-  "#fef9c3", // 🌼 Buttercup Yellow
-  "#bfdbfe", // 💙 Cornflower Blue
-  "#fed7aa", // 🍑 Peach Orange
+  "#fefce8",
+  "#dbeafe",
+  "#ffedd5",
+  "#e0f2fe",
+  "#f3e8ff",
+  "#dcfce7",
+  "#fce7f3",
+  "#fed7aa",
 ] as const;
 
 export function useScrollBgColor(dependencies: unknown[] = []) {
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isDesktop = window.innerWidth >= 768;
 
-    if (!isDesktop || prefersReducedMotion) {
+    if (prefersReducedMotion) {
       document.body.style.backgroundColor = "";
       document.documentElement.style.backgroundColor = "";
       return;
@@ -48,53 +47,61 @@ export function useScrollBgColor(dependencies: unknown[] = []) {
 
     injectTransitionStyle();
 
-    const defaultBg = "#faf9f7"; // site's base paper background
+    const defaultBg = "#faf9f7";
     let rafId = 0;
+    let observedDocumentHeight = 0;
+    let sections: HTMLElement[] = [];
 
-    const getSections = () =>
-      Array.from(
-        document.querySelectorAll<HTMLElement>("[data-bg-color]")
-      );
+    const refreshSections = () => {
+      sections = Array.from(document.querySelectorAll<HTMLElement>("[data-bg-color]"));
+      observedDocumentHeight = document.documentElement.scrollHeight;
+    };
 
     const updateBg = () => {
-      const sections = getSections();
-      const viewportMid = window.innerHeight * 0.45; // 45% from top
-
+      const viewportMid = window.innerHeight * 0.45;
       let activeBg = defaultBg;
 
       for (const section of sections) {
         const rect = section.getBoundingClientRect();
-        // Activate when section covers the mid-viewport line
         if (rect.top <= viewportMid && rect.bottom >= viewportMid) {
           activeBg = section.dataset.bgColor ?? defaultBg;
           break;
         }
       }
 
-      // Apply to both html and body for full-bleed effect
       document.body.style.backgroundColor = activeBg;
       document.documentElement.style.backgroundColor = activeBg;
     };
 
     const onScroll = () => {
       if (rafId) return;
+
       rafId = window.requestAnimationFrame(() => {
         rafId = 0;
+
+        if (document.documentElement.scrollHeight !== observedDocumentHeight) {
+          refreshSections();
+        }
+
         updateBg();
       });
     };
 
-    // Run once on mount
+    const onResize = () => {
+      refreshSections();
+      onScroll();
+    };
+
+    refreshSections();
     updateBg();
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       window.cancelAnimationFrame(rafId);
-      // Reset on unmount
       document.body.style.backgroundColor = "";
       document.documentElement.style.backgroundColor = "";
     };

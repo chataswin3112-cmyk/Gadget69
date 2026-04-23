@@ -36,22 +36,24 @@ class CatalogSyncControllerTest {
             .header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalSections").value(10))
-        .andExpect(jsonPath("$.totalProducts").value(20))
+        .andExpect(jsonPath("$.totalProducts").value(21))
         .andExpect(jsonPath("$.heroBanners").value(3));
 
     mockMvc.perform(post("/api/admin/catalog/replace-demo-data")
             .header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalSections").value(10))
-        .andExpect(jsonPath("$.totalProducts").value(20))
+        .andExpect(jsonPath("$.totalProducts").value(21))
         .andExpect(jsonPath("$.heroBanners").value(3));
 
     mockMvc.perform(get("/api/products"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(20)))
+        .andExpect(jsonPath("$", hasSize(21)))
         .andExpect(jsonPath("$[0].name").value("Ultra Series 9 Smartwatch (AMOLED Display)"))
         .andExpect(jsonPath("$[0].price").value(2499.00))
-        .andExpect(jsonPath("$[0].sectionName").value("Wearables"));
+        .andExpect(jsonPath("$[0].sectionName").value("Wearables"))
+        .andExpect(jsonPath("$[20].name").value("2TB Metal USB-C Flash Drive"))
+        .andExpect(jsonPath("$[20].sectionName").value("Storage"));
 
     mockMvc.perform(get("/api/community-media"))
         .andExpect(status().isOk())

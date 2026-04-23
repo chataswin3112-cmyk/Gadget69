@@ -401,6 +401,23 @@
         "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=1200&fit=crop"
       ],
       "displayOrder": 19
+    },
+    {
+      "name": "2TB Metal USB-C Flash Drive",
+      "category": "Storage",
+      "price": "1299",
+      "mrp": "1999",
+      "stockQuantity": 70,
+      "slug": "2tb-metal-usb-c-flash-drive",
+      "modelNumber": "G69-ST-021",
+      "shortDescription": "Compact 2TB metal USB-C flash drive for quick everyday transfers.",
+      "description": "A compact metal USB-C flash drive with 2TB storage for phones, tablets, laptops, documents, media backups, and fast everyday file sharing.",
+      "imageUrl": "/uploads/images/11d5b8de-a46c-4fe1-a6a1-99d43d4085ae.jpg",
+      "galleryImages": [
+        "/uploads/images/11d5b8de-a46c-4fe1-a6a1-99d43d4085ae.jpg",
+        "/uploads/images/4b5bec6a-1dbd-4a97-bcbb-5d006f7d2f2d.jpg"
+      ],
+      "displayOrder": 20
     }
   ],
   "communityMedia": [

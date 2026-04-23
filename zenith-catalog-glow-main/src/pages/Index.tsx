@@ -126,8 +126,9 @@ const Index = () => {
       <DeferredSection
         minHeight="min-h-[420px]"
         rootMargin="520px 0px"
+        bgColor="#ffedd5"
       >
-        <div data-bg-color="#fff7ed">
+        <div data-bg-color="#ffedd5">
           <ProductMarqueeSection />
         </div>
       </DeferredSection>
@@ -188,12 +189,12 @@ const Index = () => {
       <DeferredSection
         minHeight="min-h-[700px]"
         rootMargin="680px 0px"
-        bgColor="#fef9c3"
+        bgColor="#dcfce7"
         onVisible={() => {
           void ensureCommunityMediaLoaded();
         }}
       >
-        <div data-bg-color="#fef9c3">
+        <div data-bg-color="#dcfce7">
           <CommunitySection />
         </div>
       </DeferredSection>
@@ -211,12 +212,16 @@ const Index = () => {
         </div>
       </DeferredSection>
 
-      <DeferredSection minHeight="min-h-[1px]" rootMargin="960px 0px">
-        <FloatingContactActions />
+      <DeferredSection minHeight="min-h-[1px]" rootMargin="960px 0px" bgColor="#fed7aa">
+        <div data-bg-color="#fed7aa">
+          <FloatingContactActions />
+        </div>
       </DeferredSection>
 
-      <DeferredSection minHeight="min-h-[560px]" rootMargin="960px 0px">
-        <Footer />
+      <DeferredSection minHeight="min-h-[560px]" rootMargin="960px 0px" bgColor="#dbeafe">
+        <div data-bg-color="#dbeafe">
+          <Footer />
+        </div>
       </DeferredSection>
     </div>
   );
