@@ -1,5 +1,6 @@
 import axios from "axios";
 import apiClient from "./client";
+import { uploadAdminFile } from "./productApi";
 import { CommunityMedia } from "@/types";
 import { buildCloudinaryPosterUrl } from "@/lib/cloudinary";
 
@@ -14,8 +15,8 @@ export interface CommunityVideoUploadSignature {
 
 export interface UploadedCommunityVideo {
   videoUrl: string;
-  thumbnailUrl: string;
-  videoPublicId: string;
+  thumbnailUrl?: string;
+  videoPublicId?: string;
   videoWidth?: number;
   videoHeight?: number;
   videoDuration?: number;
@@ -60,34 +61,41 @@ export const uploadCommunityVideo = async (
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<UploadedCommunityVideo> => {
-  const signature = await getCommunityVideoUploadSignature(file);
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("api_key", signature.apiKey);
-  formData.append("timestamp", String(signature.timestamp));
-  formData.append("signature", signature.signature);
-  formData.append("folder", signature.folder);
+  try {
+    const signature = await getCommunityVideoUploadSignature(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", signature.apiKey);
+    formData.append("timestamp", String(signature.timestamp));
+    formData.append("signature", signature.signature);
+    formData.append("folder", signature.folder);
 
-  const uploadUrl = `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`;
-  const res = await axios.post(uploadUrl, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-    onUploadProgress: (event) => {
-      if (!onProgress || !event.total) {
-        return;
-      }
-      onProgress((event.loaded / event.total) * 100);
-    },
-  });
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`;
+    const res = await axios.post(uploadUrl, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress: (event) => {
+        if (!onProgress || !event.total) {
+          return;
+        }
+        onProgress((event.loaded / event.total) * 100);
+      },
+    });
 
-  return {
-    videoUrl: res.data.secure_url,
-    thumbnailUrl: buildCloudinaryPosterUrl({
-      publicId: res.data.public_id,
-      cloudName: signature.cloudName,
-    }),
-    videoPublicId: res.data.public_id,
-    videoWidth: res.data.width,
-    videoHeight: res.data.height,
-    videoDuration: res.data.duration,
-  };
+    return {
+      videoUrl: res.data.secure_url,
+      thumbnailUrl: buildCloudinaryPosterUrl({
+        publicId: res.data.public_id,
+        cloudName: signature.cloudName,
+      }),
+      videoPublicId: res.data.public_id,
+      videoWidth: res.data.width,
+      videoHeight: res.data.height,
+      videoDuration: res.data.duration,
+    };
+  } catch {
+    const storedFile = await uploadAdminFile(file, onProgress);
+    return {
+      videoUrl: storedFile.url,
+    };
+  }
 };

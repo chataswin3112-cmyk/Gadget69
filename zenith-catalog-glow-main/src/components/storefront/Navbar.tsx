@@ -2,10 +2,9 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { useAdminData } from "@/contexts/AdminDataContext";
 import { cn } from "@/lib/utils";
 
-import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.webp";
 import StorefrontBrandLockup from "./StorefrontBrandLockup";
 
 const CategoryMegaMenu = lazy(() => import("./CategoryMegaMenu"));
@@ -22,15 +21,12 @@ const navLinks = [
 
 const Navbar = () => {
   const { totalItems } = useCart();
-  const { settings } = useAdminData();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [shouldRenderCart, setShouldRenderCart] = useState(false);
   const [shouldRenderMegaMenu, setShouldRenderMegaMenu] = useState(false);
-
 
   const openCart = () => {
     setShouldRenderCart(true);
@@ -67,17 +63,6 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    const onScroll = () => {
-      const nextScrolled = window.scrollY > 20;
-      setScrolled((current) => (current === nextScrolled ? current : nextScrolled));
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
     const handler = () => openCart();
     window.addEventListener("open-cart-drawer", handler);
     return () => window.removeEventListener("open-cart-drawer", handler);
@@ -85,12 +70,11 @@ const Navbar = () => {
 
   return (
     <>
-      <nav
-        className={cn(
-          "sticky left-0 right-0 top-0 z-50 transition-all duration-300",
-          scrolled ? "glass-solid" : "glass"
-        )}
-      >
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+
+      <nav aria-label="Primary" className="sticky left-0 right-0 top-0 z-50 glass-solid">
         <div className="section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24">
           <div className="flex flex-shrink-0 items-center">
             <Link to="/" aria-label="Gadget 69 home" className="flex min-w-0 flex-shrink-0 items-center overflow-visible">
@@ -138,30 +122,30 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              aria-label="Search"
-              className="hidden h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition-all duration-200 hover:bg-black/[0.06] hover:text-foreground lg:flex"
+            <Link
+              to="/products"
+              aria-label="Search products"
+              className="hidden h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition-colors hover:bg-black/[0.06] hover:text-foreground lg:flex"
             >
               <Search className="h-4 w-4" />
-            </button>
+            </Link>
 
             <button
+              type="button"
               onClick={openCart}
-              aria-label="Open cart"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 hover:bg-black/[0.06]"
+              aria-label={totalItems > 0 ? `Open cart (${totalItems} items)` : "Open cart"}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
             >
               <ShoppingBag className="h-5 w-5 text-foreground" />
               {totalItems > 0 && (
-                <>
-                  <span className="absolute -right-1 -top-1 z-10 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
-                    {totalItems}
-                  </span>
-                  <span className="absolute -right-1 -top-1 h-[18px] w-[18px] rounded-full bg-accent opacity-60 animate-ping" />
-                </>
+                <span className="absolute -right-1 -top-1 z-10 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
+                  {totalItems}
+                </span>
               )}
             </button>
 
             <button
+              type="button"
               className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/[0.06] lg:hidden"
               onClick={() => setMobileOpen((current) => !current)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -184,7 +168,7 @@ const Navbar = () => {
         ) : null}
 
         {mobileOpen ? (
-          <div className="glass border-t border-border lg:hidden">
+          <div className="border-t border-border bg-card lg:hidden">
             <div className="flex max-h-[calc(100svh-4.25rem)] flex-col gap-3 overflow-y-auto p-4">
               {navLinks.map((link) => (
                 <Link

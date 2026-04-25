@@ -1,0 +1,72 @@
+[
+  {
+    "label": "home",
+    "route": "/",
+    "status": "ok",
+    "error": null,
+    "title": "Gadget69 - Premium Electronics",
+    "url": "http://127.0.0.1:8080/",
+    "consoleErrors": [],
+    "requestFailures": []
+  },
+  {
+    "label": "products",
+    "route": "/products",
+    "status": "ok",
+    "error": null,
+    "title": "Gadget69 - Premium Electronics",
+    "url": "http://127.0.0.1:8080/products",
+    "consoleErrors": [],
+    "requestFailures": []
+  },
+  {
+    "label": "product-details",
+    "route": "/products/1",
+    "status": "ok",
+    "error": null,
+    "title": "Gadget69 - Premium Electronics",
+    "url": "http://127.0.0.1:8080/products/1",
+    "consoleErrors": [],
+    "requestFailures": []
+  },
+  {
+    "label": "home-mobile",
+    "route": "/",
+    "status": "ok",
+    "error": null,
+    "title": "Gadget69 - Premium Electronics",
+    "url": "http://127.0.0.1:8080/",
+    "consoleErrors": [],
+    "requestFailures": []
+  },
+  {
+    "label": "admin-login",
+    "route": "/admin",
+    "status": "ok",
+    "error": null,
+    "title": "Gadget69 - Premium Electronics",
+    "url": "http://127.0.0.1:8080/admin/login",
+    "consoleErrors": [],
+    "requestFailures": []
+  },
+  {
+    "label": "admin-dashboard",
+    "route": "/admin",
+    "status": "ok",
+    "error": null,
+    "title": "Gadget69 - Premium Electronics",
+    "url": "http://127.0.0.1:8080/admin/dashboard",
+    "consoleErrors": [],
+    "requestFailures": []
+  },
+  {
+    "label": "admin-orders",
+    "route": "/admin",
+    "status": "ok",
+    "error": null,
+    "title": "Gadget69 - Premium Electronics",
+    "url": "http://127.0.0.1:8080/admin/orders",
+    "consoleErrors": [],
+    "requestFailures": []
+  }
+]

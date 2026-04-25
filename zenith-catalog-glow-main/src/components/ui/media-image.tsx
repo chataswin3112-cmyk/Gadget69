@@ -10,6 +10,45 @@ interface MediaImageProps extends Omit<ComponentPropsWithoutRef<"img">, "src"> {
   optimizeHeight?: number;
 }
 
+const buildResponsiveSrcSet = (
+  src: string | null | undefined,
+  options: {
+    width?: number;
+    height?: number;
+  }
+) => {
+  if (typeof options.width !== "number" || options.width <= 0) {
+    return undefined;
+  }
+
+  const baseWidth = Math.round(options.width);
+  const candidateWidths = Array.from(
+    new Set([baseWidth, Math.min(baseWidth * 2, 1920)].filter((width) => width > 0))
+  );
+
+  const entries = candidateWidths
+    .map((width) => {
+      const ratio = width / baseWidth;
+      const height =
+        typeof options.height === "number" && options.height > 0
+          ? Math.round(options.height * ratio)
+          : undefined;
+      const url = resolveResponsiveMediaUrl(src, {
+        width,
+        height,
+        applyDevicePixelRatio: false,
+      });
+      return url ? { url, width } : null;
+    })
+    .filter((entry): entry is { url: string; width: number } => Boolean(entry));
+
+  if (new Set(entries.map((entry) => entry.url)).size < 2) {
+    return undefined;
+  }
+
+  return entries.map((entry) => `${entry.url} ${entry.width}w`).join(", ");
+};
+
 const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
   (
     {
@@ -20,8 +59,11 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
       loading,
       decoding,
       fetchPriority,
+      referrerPolicy,
       optimizeWidth,
       optimizeHeight,
+      sizes,
+      srcSet,
       ...props
     },
     ref
@@ -46,6 +88,26 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
       [optimizeHeight, optimizeWidth, resolvedFallbackSrc, src]
     );
     const [currentSrc, setCurrentSrc] = useState(resolvedSrc);
+    const resolvedSrcSet = useMemo(
+      () =>
+        sizes
+          ? buildResponsiveSrcSet(src, {
+              width: optimizeWidth,
+              height: optimizeHeight,
+            })
+          : undefined,
+      [optimizeHeight, optimizeWidth, sizes, src]
+    );
+    const resolvedFallbackSrcSet = useMemo(
+      () =>
+        sizes
+          ? buildResponsiveSrcSet(fallbackSrc, {
+              width: optimizeWidth,
+              height: optimizeHeight,
+            })
+          : undefined,
+      [fallbackSrc, optimizeHeight, optimizeWidth, sizes]
+    );
 
     useEffect(() => {
       setCurrentSrc(resolvedSrc);
@@ -56,8 +118,11 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
         {...props}
         ref={ref}
         src={currentSrc}
+        srcSet={srcSet ?? (currentSrc === resolvedSrc ? resolvedSrcSet : resolvedFallbackSrcSet)}
+        sizes={sizes}
         loading={loading ?? (eager ? "eager" : "lazy")}
         decoding={decoding ?? (eager ? "sync" : "async")}
+        referrerPolicy={referrerPolicy ?? (/^https?:/i.test(currentSrc) ? "no-referrer" : undefined)}
         {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
         onError={(event) => {
           onError?.(event);

@@ -38,8 +38,9 @@ export const SECTION_BG_COLORS = [
 export function useScrollBgColor(dependencies: unknown[] = []) {
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
 
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || isMobileViewport) {
       document.body.style.backgroundColor = "";
       document.documentElement.style.backgroundColor = "";
       return;

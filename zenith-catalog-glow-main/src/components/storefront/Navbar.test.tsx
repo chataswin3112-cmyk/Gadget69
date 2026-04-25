@@ -31,6 +31,7 @@ describe("Navbar", () => {
     expect(homeLink).toHaveAttribute("href", "/");
     expect(screen.getByRole("img", { name: /gadget 69/i })).toBeInTheDocument();
 
+    expect(screen.getByRole("link", { name: /search products/i })).toHaveAttribute("href", "/products");
     expect(screen.getByLabelText(/open cart/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/open menu/i)).toBeInTheDocument();
   });

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Star, Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminData } from "@/contexts/AdminDataContext";
@@ -31,69 +32,79 @@ const StarRow = ({ rating }: { rating: number }) => (
 const ReviewSection = () => {
   const { reviews } = useAdminData();
 
+  const displayReviews = useMemo(
+    () => reviews.slice(0, Math.min(reviews.length, 6)),
+    [reviews]
+  );
+  const marqueeReviews = useMemo(() => {
+    if (displayReviews.length <= 1) {
+      return displayReviews;
+    }
+
+    return [...displayReviews, ...displayReviews];
+  }, [displayReviews]);
+  const avgRating = useMemo(() => {
+    if (!reviews.length) {
+      return "0.0";
+    }
+
+    return (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1);
+  }, [reviews]);
+
   if (!reviews.length) return null;
-
-  // Repeat to fill the marquee (need at least ~8 cards)
-  const filled = reviews.length < 4
-    ? [...reviews, ...reviews, ...reviews]
-    : [...reviews, ...reviews];
-
-  const avgRating = (
-    reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-  ).toFixed(1);
 
   return (
     <section
       data-testid="review-section"
-      className="section-padding overflow-hidden [content-visibility:auto] [contain-intrinsic-size:760px]"
+      className="group section-padding [content-visibility:auto] [contain-intrinsic-size:760px]"
     >
       <div className="section-container">
-        {/* Header */}
-        <div className="mb-8 sm:mb-10 flex flex-col items-center text-center px-2">
+        <div className="mb-8 flex flex-col items-center px-2 text-center sm:mb-10">
           <p className="mb-2 font-body text-xs font-medium uppercase tracking-[0.22em] text-accent">
             What People Say
           </p>
-          <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
+          <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl md:text-4xl lg:text-5xl">
             Customer Feedback
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
             Real customers. Genuine stories. No fakes.
           </p>
-          {/* Aggregate badge */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3 rounded-full border border-[hsl(var(--surface-line))] bg-white/80 px-4 sm:px-5 py-2.5 shadow-sm backdrop-blur">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 rounded-full border border-[hsl(var(--surface-line))] bg-white/80 px-4 py-2.5 shadow-sm backdrop-blur sm:gap-3 sm:px-5">
             <StarRow rating={5} />
             <span className="font-heading text-lg font-bold text-foreground">{avgRating}</span>
-            <span className="text-sm text-muted-foreground font-body">
+            <span className="font-body text-sm text-muted-foreground">
               from {reviews.length.toLocaleString()} reviews
             </span>
           </div>
         </div>
 
-        <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 md:hidden">
-          {reviews.map((review, i) => (
-            <ReviewCard
-              key={`${review.id}-mobile-${i}`}
-              review={review}
-              index={i}
-            />
-          ))}
-        </div>
-
-        {/* Single infinite marquee row — pauses on hover */}
-        <div className="group relative hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] md:flex">
-          <div
-            data-testid="review-marquee-track"
-            className="review-marquee-track flex flex-nowrap animate-marquee-left gap-4 will-change-transform group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]"
-          >
-            {[...filled, ...filled].map((review, i) => (
-              <ReviewCard
-                key={`${review.id}-${i}`}
-                review={review}
-                index={i}
-              />
-            ))}
+        {displayReviews.length === 1 ? (
+          <div className="mx-auto max-w-[360px]">
+            <ReviewCard review={displayReviews[0]} index={0} />
           </div>
-        </div>
+        ) : (
+          <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+            <div
+              data-testid="review-marquee-track"
+              className="review-marquee-track flex w-max gap-4 will-change-transform animate-marquee-left group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]"
+            >
+              {marqueeReviews.map((review, index) => {
+                const originalIndex = index % displayReviews.length;
+                const isDuplicate = index >= displayReviews.length;
+
+                return (
+                  <div
+                    key={`${review.id}-${index}`}
+                    className="w-[84vw] max-w-[340px] flex-shrink-0 sm:w-[320px] lg:w-[360px]"
+                    aria-hidden={isDuplicate}
+                  >
+                    <ReviewCard review={review} index={originalIndex} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -147,7 +158,7 @@ const ReviewCard = ({ review, index }: ReviewCardProps) => {
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
 
   return (
-    <div className="relative w-[220px] sm:w-[260px] flex-shrink-0 overflow-hidden rounded-[20px] border border-white/78 bg-white/90 p-4 sm:p-5 shadow-[0_14px_36px_-22px_hsl(var(--surface-shadow)/0.26)] backdrop-blur-sm md:w-[320px]">
+    <div className="relative overflow-hidden rounded-[20px] border border-white/78 bg-white/90 p-4 shadow-[0_14px_36px_-22px_hsl(var(--surface-shadow)/0.26)] backdrop-blur-sm sm:p-5">
       <Quote className="absolute right-4 top-4 h-7 w-7 fill-[hsl(38_55%_88%)] text-[hsl(38_55%_88%)]" />
 
       <StarRow rating={review.rating} />

@@ -218,6 +218,13 @@ export interface StoreSettings {
   contactUrl?: string;
 }
 
+export interface StorefrontBootstrap {
+  sections: Section[];
+  products: Product[];
+  banners: Banner[];
+  settings: StoreSettings;
+}
+
 export interface CatalogMediaUploadSignature {
   cloudName: string;
   apiKey: string;

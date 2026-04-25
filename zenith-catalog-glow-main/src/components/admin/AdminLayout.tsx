@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-import gadget69Logo from "@/assets/gadget69-logo.png";
+import gadget69Logo from "@/assets/gadget69-logo.webp";
 import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
 

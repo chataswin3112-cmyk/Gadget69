@@ -46,6 +46,8 @@ import {
   updateReview as updateReviewApi,
   deleteReview as deleteReviewApi,
 } from "@/api/reviewApi";
+import { getStorefrontBootstrap } from "@/api/storefrontApi";
+import { scheduleIdleTask } from "@/lib/idle";
 import { resolveMediaUrl } from "@/lib/media";
 
 type AdminDataResourceKey =
@@ -73,6 +75,7 @@ interface AdminDataContextType {
   ensureSettingsLoaded: () => Promise<void>;
   ensureCommunityMediaLoaded: () => Promise<void>;
   ensureReviewsLoaded: () => Promise<void>;
+  ensureStorefrontBootstrapLoaded: () => Promise<void>;
   addSection: (section: Partial<Section>) => Promise<Section>;
   updateSection: (id: number, data: Partial<Section>) => Promise<Section>;
   deleteSection: (id: number) => Promise<void>;
@@ -100,10 +103,21 @@ const ADMIN_DATA_RESOURCES: AdminDataResourceKey[] = [
   "reviews",
 ];
 
+const STOREFRONT_BOOTSTRAP_RESOURCES: AdminDataResourceKey[] = [
+  "sections",
+  "products",
+  "banners",
+  "settings",
+];
+
 const defaultSettings: StoreSettings = {
   id: 1,
   siteTitle: "Gadget69",
-  announcementItems: [],
+  announcementItems: [
+    "FREE SHIPPING ON ORDERS OVER RS. 999",
+    "NEW ARRIVALS EVERY WEEK",
+    "EASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA",
+  ],
   instagramUrl: "https://www.instagram.com/gadget69_tuty/",
   whatsappNumber: "919361586278",
   shopPhone: "9361586278",
@@ -258,6 +272,7 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
   const [loadedResources, setLoadedResources] = useState<ResourceLoadMap>(initialLoadedResources);
   const [activeLoads, setActiveLoads] = useState(0);
   const inFlightLoadsRef = useRef<Partial<Record<AdminDataResourceKey, Promise<void>>>>({});
+  const storefrontBootstrapRef = useRef<Promise<void> | null>(null);
   const loadedResourcesRef = useRef<ResourceLoadMap>(initialLoadedResources);
 
   useEffect(() => {
@@ -290,6 +305,28 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
     );
   }, []);
 
+  const updateLoadedStates = useCallback((resources: AdminDataResourceKey[]) => {
+    loadedResourcesRef.current = resources.reduce<ResourceLoadMap>(
+      (current, resource) => ({
+        ...current,
+        [resource]: true,
+      }),
+      loadedResourcesRef.current
+    );
+
+    setLoadedResources((current) => {
+      let changed = false;
+      const next = { ...current };
+      resources.forEach((resource) => {
+        if (!next[resource]) {
+          next[resource] = true;
+          changed = true;
+        }
+      });
+      return changed ? next : current;
+    });
+  }, []);
+
   const runWithLoader = useCallback(async <T,>(showLoader: boolean, task: () => Promise<T>) => {
     if (showLoader) {
       setActiveLoads((current) => current + 1);
@@ -316,6 +353,15 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
 
       if (!force && loadedResourcesRef.current[resource]) {
         return;
+      }
+
+      if (
+        !force &&
+        !isAuthenticated &&
+        STOREFRONT_BOOTSTRAP_RESOURCES.includes(resource) &&
+        storefrontBootstrapRef.current
+      ) {
+        return storefrontBootstrapRef.current;
       }
 
       const existingRequest = inFlightLoadsRef.current[resource];
@@ -374,6 +420,57 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
     },
     [isAuthenticated, runWithLoader, updateLoadedState]
   );
+
+  const ensureStorefrontBootstrapLoaded = useCallback(async () => {
+    if (isAuthenticated) {
+      await Promise.all(
+        STOREFRONT_BOOTSTRAP_RESOURCES.map((resource) =>
+          loadResource(resource, {
+            showLoader: false,
+          })
+        )
+      );
+      return;
+    }
+
+    if (
+      STOREFRONT_BOOTSTRAP_RESOURCES.every((resource) => loadedResourcesRef.current[resource])
+    ) {
+      return;
+    }
+
+    if (storefrontBootstrapRef.current) {
+      return storefrontBootstrapRef.current;
+    }
+
+    const request = runWithLoader(false, async () => {
+      try {
+        const data = await getStorefrontBootstrap();
+        startTransition(() => {
+          setSections(sortSections(data.sections));
+          setProducts(sortProducts(data.products));
+          setBanners(sortBanners(data.banners));
+          setSettings({ ...defaultSettings, ...data.settings });
+        });
+        updateLoadedStates(STOREFRONT_BOOTSTRAP_RESOURCES);
+      } catch (error) {
+        console.warn("Failed to load storefront bootstrap", error);
+        storefrontBootstrapRef.current = null;
+        await Promise.all(
+          STOREFRONT_BOOTSTRAP_RESOURCES.map((resource) =>
+            loadResource(resource, {
+              showLoader: false,
+            })
+          )
+        );
+      } finally {
+        storefrontBootstrapRef.current = null;
+      }
+    });
+
+    storefrontBootstrapRef.current = request;
+    return request;
+  }, [isAuthenticated, loadResource, runWithLoader, updateLoadedStates]);
 
   const ensureSectionsLoaded = useCallback(
     () => loadResource("sections"),
@@ -463,15 +560,19 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
       return;
     }
 
-    persistCatalogCache(isAuthenticated, {
-      banners,
-      communityMedia,
-      loadedResources: loadedResourceList,
-      products,
-      reviews,
-      sections,
-      settings,
-    });
+    const cancelPersist = scheduleIdleTask(() => {
+      persistCatalogCache(isAuthenticated, {
+        banners,
+        communityMedia,
+        loadedResources: loadedResourceList,
+        products,
+        reviews,
+        sections,
+        settings,
+      });
+    }, 1200);
+
+    return cancelPersist;
   }, [
     banners,
     communityMedia,
@@ -606,6 +707,7 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
       ensureSettingsLoaded,
       ensureCommunityMediaLoaded,
       ensureReviewsLoaded,
+      ensureStorefrontBootstrapLoaded,
       addSection,
       updateSection,
       deleteSection,
@@ -638,6 +740,7 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
       ensureSettingsLoaded,
       ensureCommunityMediaLoaded,
       ensureReviewsLoaded,
+      ensureStorefrontBootstrapLoaded,
       addSection,
       updateSection,
       deleteSection,

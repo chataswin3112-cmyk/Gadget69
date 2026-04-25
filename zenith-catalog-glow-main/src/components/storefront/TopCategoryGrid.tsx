@@ -29,7 +29,7 @@ const TopCategoryGrid = ({ sections }: TopCategoryGridProps) => {
                 data-drift-y="-0.38"
                 data-drift-strength="0.6"
               >
-                <div className="overflow-hidden rounded-[28px] border border-white/80 bg-white/88 shadow-[0_20px_44px_-34px_hsl(var(--surface-shadow)/0.42)] transition-[box-shadow,border-color] duration-300 group-hover:border-[hsl(var(--surface-soft-gold))]/55 group-hover:shadow-[0_28px_62px_-32px_hsl(var(--surface-shadow)/0.38)]">
+                <div className="overflow-hidden rounded-[28px] border border-white/80 bg-white/88 shadow-[0_20px_44px_-34px_hsl(var(--surface-shadow)/0.42)] transition-[box-shadow,border-color] duration-200 group-hover:border-[hsl(var(--surface-soft-gold))]/55 group-hover:shadow-[0_28px_62px_-32px_hsl(var(--surface-shadow)/0.38)]">
                   <MediaFrame
                     src={section.imageUrl || "/placeholder.svg"}
                     alt={section.name}

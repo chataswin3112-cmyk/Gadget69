@@ -29,4 +29,10 @@ describe("resolveMediaUrl", () => {
     expect(resolveMediaUrl("https://www.gadget69.in", "https://www.gadget69.in")).toBe("");
     expect(resolveMediaUrl("https://www.gadget69.in/", "https://www.gadget69.in")).toBe("");
   });
+
+  it("rewrites known broken Unsplash media URLs to a working alias", () => {
+    expect(
+      resolveMediaUrl("https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=1200&h=1200&fit=crop")
+    ).toContain("photo-1606220588913-b3aacb4d2f46");
+  });
 });

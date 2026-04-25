@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, Eye } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { Product } from "@/types";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ interface ProductCardProps {
   product: Product;
   animationPreset?: "product-card-rise" | "product-card-flip";
   className?: string;
+  priority?: boolean;
   drift?: {
     x: number;
     y: number;
@@ -21,7 +22,7 @@ interface ProductCardProps {
   };
 }
 
-const ProductCard = ({ product, animationPreset, className, drift }: ProductCardProps) => {
+const ProductCard = ({ product, animationPreset, className, priority = false, drift }: ProductCardProps) => {
   const { addToCart } = useCart();
   const variants = useMemo(() => product.variants || [], [product.variants]);
   const defaultVariant = variants.find((v) => v.isDefault) || variants[0];
@@ -54,7 +55,7 @@ const ProductCard = ({ product, animationPreset, className, drift }: ProductCard
   return (
     <div
       className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-premium transition-[box-shadow,border-color,background-color] duration-300 hover:shadow-premium-hover border border-transparent hover:border-[hsl(var(--surface-soft-gold))]/30",
+        "group flex h-full flex-col overflow-hidden rounded-xl border border-transparent bg-card shadow-premium transition-[box-shadow,border-color,background-color] duration-200 hover:border-[hsl(var(--surface-soft-gold))]/30 hover:shadow-premium-hover",
         className
       )}
       data-animate-card={animationPreset}
@@ -71,16 +72,10 @@ const ProductCard = ({ product, animationPreset, className, drift }: ProductCard
           className="bg-secondary/30"
           padding="p-6"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 25vw, 20vw"
-          optimizeWidth={320}
+          optimizeWidth={priority ? 260 : 320}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "low"}
         />
-
-        {/* Quick View overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/18 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-4 py-2 text-xs font-semibold text-foreground shadow-lg translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-            <Eye className="h-3.5 w-3.5" />
-            Quick View
-          </span>
-        </div>
 
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-10">
@@ -147,8 +142,8 @@ const ProductCard = ({ product, animationPreset, className, drift }: ProductCard
           <button
             onClick={handleAddToCart}
             className={cn(
-              "p-2 rounded-full bg-accent text-accent-foreground transition-all duration-200 hover:bg-accent/80 hover:scale-110 active:scale-95",
-              addedFlash && "scale-110 bg-green-500 text-white"
+              "rounded-full bg-accent p-2 text-accent-foreground transition-colors duration-200 hover:bg-accent/80",
+              addedFlash && "bg-green-500 text-white"
             )}
             aria-label="Add to cart"
           >

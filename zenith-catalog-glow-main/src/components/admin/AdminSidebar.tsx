@@ -14,7 +14,7 @@ import {
   Tag,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import gadget69Logo from "@/assets/gadget69-logo.png";
+import gadget69Logo from "@/assets/gadget69-logo.webp";
 import {
   Sidebar,
   SidebarContent,

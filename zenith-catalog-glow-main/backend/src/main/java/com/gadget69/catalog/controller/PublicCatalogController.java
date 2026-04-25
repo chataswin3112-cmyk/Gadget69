@@ -24,6 +24,7 @@ import com.gadget69.catalog.service.RazorpayPaymentService.RazorpayOrder;
 import com.gadget69.catalog.service.EmailNotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,6 +108,35 @@ public class PublicCatalogController {
     return bannerRepository.findAllByIsActiveTrueOrderByDisplayOrderAscIdAsc().stream()
         .map(catalogMapper::toBannerResponse)
         .toList();
+  }
+
+  @GetMapping("/storefront/bootstrap")
+  @Transactional(readOnly = true)
+  public ResponseEntity<ApiDtos.StorefrontBootstrapResponse> storefrontBootstrap() {
+    List<ApiDtos.SectionResponse> sectionResponses =
+        sectionRepository.findAllByOrderBySortOrderAscNameAsc().stream()
+            .map(catalogMapper::toSectionResponse)
+            .toList();
+    List<ApiDtos.ProductResponse> productResponses =
+        productRepository.findAllByOrderByDisplayOrderAscCreatedAtDesc().stream()
+            .map(catalogMapper::toProductResponse)
+            .toList();
+    List<ApiDtos.BannerResponse> bannerResponses =
+        bannerRepository.findAllByIsActiveTrueOrderByDisplayOrderAscIdAsc().stream()
+            .map(catalogMapper::toBannerResponse)
+            .toList();
+    ApiDtos.SettingsResponse settingsResponse =
+        catalogMapper.toSettingsResponse(storeSettingsRepository.findTopByOrderByIdAsc()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Settings not found")));
+
+    return ResponseEntity.ok()
+        .cacheControl(CacheControl.maxAge(Duration.ofSeconds(60)).cachePublic())
+        .body(new ApiDtos.StorefrontBootstrapResponse(
+            sectionResponses,
+            productResponses,
+            bannerResponses,
+            settingsResponse
+        ));
   }
 
   @GetMapping("/settings")

@@ -9,7 +9,7 @@ import {
   toPhoneHref,
   toWhatsAppUrl,
 } from "@/lib/social-links";
-import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.webp";
 import StorefrontBrandLockup from "./StorefrontBrandLockup";
 
 const WhatsAppIcon = () => (
@@ -74,7 +74,7 @@ const Footer = () => {
         <div className="grid grid-cols-2 gap-x-8 gap-y-7 border-b border-white/10 pb-7 sm:hidden">
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Shop</p>
-            <nav className="flex flex-col items-start gap-2">
+            <nav aria-label="Shop footer" className="flex flex-col items-start gap-2">
               <Link to="/products" className={footerLinkClass}>All Products</Link>
               <Link to="/categories" className={footerLinkClass}>Categories</Link>
               <Link to="/products?filter=new" className={footerLinkClass}>New Launches</Link>
@@ -83,7 +83,7 @@ const Footer = () => {
           </div>
           <div className="space-y-3 text-left">
             <p className={footerHeadingClass}>Company</p>
-            <nav className="flex flex-col items-start gap-2">
+            <nav aria-label="Company footer" className="flex flex-col items-start gap-2">
               <Link to="/contact" className={footerLinkClass}>Contact Us</Link>
               <Link to="/track-order" className={footerLinkClass}>Track Order</Link>
               {catalogueUrl ? (
@@ -96,7 +96,7 @@ const Footer = () => {
           </div>
           <div className="col-span-2 space-y-3 text-left">
             <p className={footerHeadingClass}>Legal</p>
-            <nav className="flex flex-col items-start gap-2">
+            <nav aria-label="Legal footer" className="flex flex-col items-start gap-2">
               <Link to="/privacy-policy" className={footerLinkClass}>Privacy Policy</Link>
               <Link to="/terms-and-conditions" className={footerLinkClass}>Terms & Conditions</Link>
               <Link to="/shipping-policy" className={footerLinkClass}>Shipping Policy</Link>
@@ -145,7 +145,7 @@ const Footer = () => {
           <div className="grid content-start items-start gap-x-8 gap-y-8 pt-2 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-4 text-left">
               <p className={footerHeadingClass}>Shop</p>
-              <nav className="flex flex-col items-start gap-2.5">
+              <nav aria-label="Shop footer" className="flex flex-col items-start gap-2.5">
                 <Link to="/products" className={footerLinkClass}>All Products</Link>
                 <Link to="/categories" className={footerLinkClass}>Categories</Link>
                 <Link to="/products?filter=new" className={footerLinkClass}>New Launches</Link>
@@ -154,7 +154,7 @@ const Footer = () => {
             </div>
             <div className="space-y-4 text-left">
               <p className={footerHeadingClass}>Company</p>
-              <nav className="flex flex-col items-start gap-2.5">
+              <nav aria-label="Company footer" className="flex flex-col items-start gap-2.5">
                 <Link to="/contact" className={footerLinkClass}>Contact Us</Link>
                 <Link to="/track-order" className={footerLinkClass}>Track Order</Link>
                 {catalogueUrl ? <a href={catalogueUrl} className={footerLinkClass}>Catalogue</a> : null}
@@ -163,7 +163,7 @@ const Footer = () => {
             </div>
             <div className="space-y-4 text-left">
               <p className={footerHeadingClass}>Legal</p>
-              <nav className="flex flex-col items-start gap-2.5">
+              <nav aria-label="Legal footer" className="flex flex-col items-start gap-2.5">
                 <Link to="/privacy-policy" className={footerLinkClass}>Privacy Policy</Link>
                 <Link to="/terms-and-conditions" className={footerLinkClass}>Terms & Conditions</Link>
                 <Link to="/shipping-policy" className={footerLinkClass}>Shipping Policy</Link>

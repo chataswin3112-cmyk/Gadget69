@@ -40,7 +40,7 @@ const CategoryRail = ({ sections }: CategoryRailProps) => {
                 data-drift-strength="0.72"
               >
                 <div
-                  className="rounded-[28px] border border-white/80 p-3 shadow-[0_20px_44px_-32px_hsl(var(--surface-shadow)/0.45)] transition-all duration-300 group-hover:border-[hsl(var(--surface-soft-gold))]/60 group-hover:shadow-[0_28px_60px_-34px_hsl(var(--surface-shadow)/0.4)] group-hover:-translate-y-1"
+                  className="rounded-[28px] border border-white/80 p-3 shadow-[0_20px_44px_-32px_hsl(var(--surface-shadow)/0.45)] transition-[border-color,box-shadow] duration-200 group-hover:border-[hsl(var(--surface-soft-gold))]/60 group-hover:shadow-[0_28px_60px_-34px_hsl(var(--surface-shadow)/0.4)]"
                   style={{ background: CARD_GRADIENTS[index % CARD_GRADIENTS.length] }}
                 >
                   <MediaFrame
@@ -60,7 +60,7 @@ const CategoryRail = ({ sections }: CategoryRailProps) => {
                         Explore
                       </p>
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-accent opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-200 flex-shrink-0 mb-0.5" />
+                    <ArrowRight className="mb-0.5 h-3.5 w-3.5 flex-shrink-0 text-accent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                   </div>
                 </div>
               </Link>

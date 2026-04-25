@@ -22,6 +22,36 @@ const FloatingContactActions = lazy(() => import("@/components/storefront/Floati
 
 type DisplayMedia = ProductMedia | VariantMedia;
 
+const ProductDetailsSkeleton = () => (
+  <div className="min-h-screen bg-background">
+    <AnnouncementBar />
+    <Navbar />
+    <div className="section-container pb-2 pt-6">
+      <div className="h-5 w-48 animate-pulse rounded-full bg-secondary/60" />
+    </div>
+    <div className="section-container py-8">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="rounded-3xl border border-border bg-card p-4 shadow-premium">
+          <div className="aspect-square animate-pulse rounded-2xl bg-secondary/50" />
+        </div>
+        <div className="space-y-5">
+          <div className="h-4 w-28 animate-pulse rounded-full bg-secondary/60" />
+          <div className="h-9 w-4/5 animate-pulse rounded-full bg-secondary/60" />
+          <div className="h-5 w-32 animate-pulse rounded-full bg-secondary/50" />
+          <div className="h-9 w-48 animate-pulse rounded-full bg-secondary/60" />
+          <div className="h-5 w-36 animate-pulse rounded-full bg-secondary/50" />
+          <div className="space-y-3">
+            <div className="h-4 w-full animate-pulse rounded-full bg-secondary/50" />
+            <div className="h-4 w-11/12 animate-pulse rounded-full bg-secondary/50" />
+            <div className="h-4 w-2/3 animate-pulse rounded-full bg-secondary/50" />
+          </div>
+          <div className="h-12 w-full animate-pulse rounded-lg bg-secondary/60 sm:w-72" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const ProductDetails = () => {
   const { id } = useParams();
   const productId = Number(id);
@@ -192,11 +222,7 @@ const ProductDetails = () => {
   };
 
   if (productLoading && !product) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-      </div>
-    );
+    return <ProductDetailsSkeleton />;
   }
 
   if (!product || productError) {
@@ -264,8 +290,8 @@ const ProductDetails = () => {
                           padding="p-8"
                           className="rounded-2xl bg-secondary/20"
                           loading={index === 0 ? "eager" : "lazy"}
-                          sizes="(max-width: 1024px) 100vw, 50vw"
-                          optimizeWidth={700}
+                          sizes="(max-width: 640px) 82vw, (max-width: 1024px) 70vw, 50vw"
+                          optimizeWidth={520}
                           fetchPriority={index === 0 ? "high" : "low"}
                         />
                       )}
@@ -438,6 +464,7 @@ const ProductDetails = () => {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={stock <= 0}
+                data-testid="product-details-add-to-cart"
                 className="flex min-w-[160px] w-full flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 <ShoppingBag className="h-5 w-5" />

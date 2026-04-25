@@ -55,7 +55,7 @@ describe("AdminLogin", () => {
     const logo = screen.getByAltText("Gadget69") as HTMLImageElement;
 
     expect(logo).toBeInTheDocument();
-    expect(logo.src).toContain("gadget69-navbar-wordmark.png");
+    expect(logo.src).toContain("gadget69-navbar-wordmark.webp");
     expect(logo).toHaveClass("h-32");
     expect(screen.queryByRole("heading", { name: /gadget69/i })).not.toBeInTheDocument();
     expect(screen.getByText("Admin Panel")).toBeInTheDocument();

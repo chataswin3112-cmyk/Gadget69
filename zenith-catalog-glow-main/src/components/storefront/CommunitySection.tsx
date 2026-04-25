@@ -129,7 +129,7 @@ const CommunitySection = () => {
                                 videoPublicId={item.videoPublicId}
                                 poster={videoPoster}
                                 className="h-full rounded-none border-0 bg-black"
-                                mediaClassName="transition-transform duration-500 group-hover:scale-105"
+                                mediaClassName=""
                                 objectFit="cover"
                                 controls={false}
                                 autoPlay
@@ -144,7 +144,7 @@ const CommunitySection = () => {
                               <MediaImage
                                 src={videoPoster}
                                 alt={item.title || item.caption || "Community video"}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                className="h-full w-full object-cover"
                                 loading={index < 2 ? "eager" : "lazy"}
                                 optimizeWidth={360}
                               />
@@ -194,7 +194,7 @@ const CommunitySection = () => {
                         <MediaImage
                           src={poster}
                           alt={item.title || item.caption || "Community media"}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="h-full w-full object-cover"
                           loading={index < 2 ? "eager" : "lazy"}
                           optimizeWidth={260}
                         />

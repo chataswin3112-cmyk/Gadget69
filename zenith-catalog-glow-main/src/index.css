@@ -168,6 +168,26 @@
     @apply bg-card backdrop-blur-xl border-b border-border/50 shadow-sm;
   }
 
+  .skip-link {
+    position: fixed;
+    left: 1rem;
+    top: 0.75rem;
+    z-index: 110;
+    border-radius: 9999px;
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transform: translateY(-180%);
+    transition: transform 180ms ease;
+    box-shadow: 0 10px 30px -18px hsl(var(--foreground) / 0.45);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
   .shadow-premium {
     box-shadow:
       0 1px 3px 0 hsl(var(--foreground) / 0.04),
@@ -185,11 +205,7 @@
   }
 
   .media-frame img {
-    @apply w-full h-full object-contain transition-transform duration-500;
-  }
-
-  .media-frame:hover img {
-    transform: scale(1.05);
+    @apply w-full h-full object-contain;
   }
 
   .text-gradient-gold {
@@ -210,15 +226,8 @@
   }
 
   .section-header-line {
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
-  }
-
-  [data-animate="curtain-header"].is-visible .section-header-line,
-  [data-animate].is-visible .section-header-line,
-  .home-section-panel .section-header-line {
     transform: scaleX(1);
+    transform-origin: left;
   }
 
   .home-section-panel > * {
@@ -396,33 +405,6 @@
   }
 }
 
-@keyframes announcement-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.announcement-scroll {
-  animation: announcement-scroll 25s linear infinite;
-  will-change: transform;
-}
-
-@keyframes hero-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-}
-
-.animate-hero-float {
-  animation: hero-float 3.2s ease-in-out infinite;
-  will-change: transform;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .announcement-scroll,
-  .animate-hero-float {
-    animation: none;
-  }
-}
-
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -464,8 +446,8 @@
   0% { transform: translateX(-50%); }
   100% { transform: translateX(0); }
 }
-.animate-product-left  { animation: product-left  50s linear infinite; }
-.animate-product-right { animation: product-right 58s linear infinite; }
+.animate-product-left  { animation: product-left  36s linear infinite; }
+.animate-product-right { animation: product-right 42s linear infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee-left,
@@ -488,10 +470,6 @@
 button:not([disabled]),
 [role="button"]:not([disabled]) {
   -webkit-tap-highlight-color: transparent;
-}
-
-button:active:not([disabled]) {
-  transform: scale(0.97);
 }
 
 /* Smooth focus ring */
@@ -520,12 +498,6 @@ button:active:not([disabled]) {
 /* ─── Ultra Mobile Performance Layer ──────────────────────────── */
 
 /* GPU-accelerated rendering for critical UI elements */
-nav,
-.sticky {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
 /* Generic content-visibility created large layout shifts on audited routes.
    Keep deferred rendering scoped to explicit placeholders in the route code. */
 
@@ -570,18 +542,10 @@ textarea {
     transition-duration: 200ms !important;
   }
 
-  /* Prevent marquee animation jank on mobile */
-  .announcement-scroll {
-    animation-duration: 28s;
-  }
-
-  .announcement-shimmer-overlay,
-  .animate-marquee-left,
-  .animate-marquee-right,
+  /* Keep only the product marquee moving on mobile-sized surfaces. */
   .animate-product-left,
-  .animate-product-right,
-  .animate-hero-float {
-    animation: none !important;
+  .animate-product-right {
+    animation-duration: 32s;
   }
 
   .home-hero-content {

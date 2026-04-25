@@ -77,7 +77,7 @@ const CloudinaryVideoUploadField = ({ value, onChange }: CloudinaryVideoUploadFi
       };
 
       onChange(nextValue);
-      toast.success(`${file.name} uploaded to Cloudinary`);
+      toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
       toast.error(getErrorMessage(error, "Cloudinary video upload failed"));
     } finally {
@@ -106,7 +106,7 @@ const CloudinaryVideoUploadField = ({ value, onChange }: CloudinaryVideoUploadFi
       <div className="space-y-1">
         <Label className="font-body">Community Video</Label>
         <p className="text-sm text-muted-foreground">
-          Paste a Cloudinary, YouTube, or Instagram link, or upload any MP4, MOV, or WebM file. Every source is shown inside a landscape frame on the storefront.
+          Paste a Cloudinary, YouTube, or Instagram link, or upload any MP4, MOV, or WebM file. When Cloudinary is unavailable, uploads fall back to local storage automatically.
         </p>
       </div>
 
@@ -193,7 +193,7 @@ const CloudinaryVideoUploadField = ({ value, onChange }: CloudinaryVideoUploadFi
       {uploading ? (
         <div className="space-y-2">
           <Progress value={progress} />
-          <p className="text-xs text-muted-foreground">{Math.round(progress)}% uploaded to Cloudinary</p>
+          <p className="text-xs text-muted-foreground">{Math.round(progress)}% uploaded</p>
         </div>
       ) : null}
     </div>

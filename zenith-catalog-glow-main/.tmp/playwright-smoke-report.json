@@ -1,0 +1,18 @@
+{
+  "targetUrl": "http://127.0.0.1:4173",
+  "startedAt": "2026-04-25T05:46:51.481Z",
+  "home": {
+    "title": "Gadget69 - Premium Electronics",
+    "heroLoaded": true,
+    "productsRouteReached": true,
+    "reviewSectionVisible": true,
+    "communitySectionVisible": true
+  },
+  "admin": {
+    "loginWorked": true
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failed": "locator.waitFor: Error: strict mode violation: getByText('Codex Smoke Image') resolved to 2 elements:\n    1) <p class=\"font-body font-medium\">Codex Smoke Image</p> aka getByText('Codex Smoke Image').first()\n    2) <p class=\"font-body font-medium\">Codex Smoke Image</p> aka getByText('Codex Smoke Image').nth(1)\n\nCall log:\n\u001b[2m  - waiting for getByText('Codex Smoke Image') to be visible\u001b[22m\n",
+  "finishedAt": "2026-04-25T05:47:02.126Z"
+}

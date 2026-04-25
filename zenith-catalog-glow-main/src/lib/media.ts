@@ -3,6 +3,9 @@ const DEFAULT_API_BASE_URL = "/api";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 const CLOUDINARY_HOST = "res.cloudinary.com";
 const UNSPLASH_HOSTS = new Set(["images.unsplash.com", "plus.unsplash.com"]);
+const UNSPLASH_PATH_ALIASES = new Map([
+  ["/photo-1590658268037-6bf12f032f55", "/photo-1606220588913-b3aacb4d2f46"],
+]);
 
 export const FALLBACK_IMAGE_SRC = "/placeholder.svg";
 
@@ -103,6 +106,7 @@ const optimizeCloudinaryUrl = (
   options?: {
     width?: number;
     height?: number;
+    applyDevicePixelRatio?: boolean;
   }
 ) => {
   try {
@@ -150,6 +154,7 @@ const optimizeUnsplashUrl = (
   options?: {
     width?: number;
     height?: number;
+    applyDevicePixelRatio?: boolean;
   }
 ) => {
   try {
@@ -158,8 +163,16 @@ const optimizeUnsplashUrl = (
       return candidateUrl;
     }
 
+    const aliasedPath = UNSPLASH_PATH_ALIASES.get(parsed.pathname);
+    if (aliasedPath) {
+      parsed.pathname = aliasedPath;
+    }
+
+    const shouldApplyDevicePixelRatio = options?.applyDevicePixelRatio !== false;
     const devicePixelRatio =
-      typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+      shouldApplyDevicePixelRatio && typeof window !== "undefined"
+        ? Math.min(window.devicePixelRatio || 1, 2)
+        : 1;
     const targetWidth =
       typeof options?.width === "number" && options.width > 0
         ? Math.max(1, Math.round(options.width * devicePixelRatio))
@@ -182,7 +195,7 @@ const optimizeUnsplashUrl = (
     }
 
     if (!parsed.searchParams.has("q")) {
-      parsed.searchParams.set("q", "80");
+      parsed.searchParams.set("q", "62");
     }
 
     return parsed.toString();
@@ -197,6 +210,7 @@ const resolveNormalizedMediaUrl = (
   options?: {
     width?: number;
     height?: number;
+    applyDevicePixelRatio?: boolean;
   }
 ) => {
   if (!url) return "";
@@ -234,6 +248,7 @@ export const resolveResponsiveMediaUrl = (
   options?: {
     width?: number;
     height?: number;
+    applyDevicePixelRatio?: boolean;
   },
   currentOrigin = resolveCurrentOrigin()
 ) => resolveNormalizedMediaUrl(url, currentOrigin, options);

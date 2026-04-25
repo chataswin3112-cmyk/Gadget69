@@ -259,6 +259,13 @@ public final class ApiDtos {
       LocalDate date
   ) {}
 
+  public record StorefrontBootstrapResponse(
+      List<SectionResponse> sections,
+      List<ProductResponse> products,
+      List<BannerResponse> banners,
+      SettingsResponse settings
+  ) {}
+
   public record OrderItemPayload(
       Long productId,
       String productName,

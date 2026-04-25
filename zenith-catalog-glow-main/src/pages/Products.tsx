@@ -42,25 +42,38 @@ const Products = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_PRODUCTS);
+  const [initialProductsLoaded, setInitialProductsLoaded] = useState(allProducts.length > 0);
 
   const deferredSearch = useDeferredValue(search);
   const deferredSortBy = useDeferredValue(sortBy);
   const deferredCategoryFilter = useDeferredValue(categoryFilter);
 
   useEffect(() => {
+    let cancelled = false;
     let cancelIdleSectionLoad = () => {};
     const cancelProductLoad = scheduleAfterPaint(() => {
-      void ensureProductsLoaded();
+      void Promise.resolve(ensureProductsLoaded()).finally(() => {
+        if (!cancelled) {
+          setInitialProductsLoaded(true);
+        }
+      });
       cancelIdleSectionLoad = scheduleIdleTask(() => {
         void ensureSectionsLoaded();
       }, 1000);
     }, 50);
 
     return () => {
+      cancelled = true;
       cancelProductLoad();
       cancelIdleSectionLoad();
     };
   }, [ensureProductsLoaded, ensureSectionsLoaded]);
+
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      setInitialProductsLoaded(true);
+    }
+  }, [allProducts.length]);
 
   const filtered = useMemo(() => {
     let products = [...allProducts];
@@ -114,6 +127,7 @@ const Products = () => {
     [filtered, visibleCount]
   );
   const hasMoreProducts = visibleCount < filtered.length;
+  const showInitialSkeleton = !initialProductsLoaded && allProducts.length === 0;
 
   const handleFilterChange = (key: string) => {
     const nextSearchParams = new URLSearchParams(searchParams);
@@ -133,7 +147,10 @@ const Products = () => {
       <Navbar />
 
       <div className="section-container pt-8 pb-4">
-        <SectionHeader title="Products" subtitle={`${filtered.length} products`} />
+        <SectionHeader
+          title="Products"
+          subtitle={showInitialSkeleton ? "Loading products" : `${filtered.length} products`}
+        />
 
         <div className="mb-6 flex flex-wrap gap-2">
           {filterTabs.map((tab) => (
@@ -189,7 +206,7 @@ const Products = () => {
       </div>
 
       <div className="section-container pb-16">
-        {isLoading && allProducts.length === 0 ? (
+        {showInitialSkeleton || (isLoading && allProducts.length === 0) ? (
           <div className="grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="aspect-[0.78] animate-pulse rounded-2xl bg-secondary/40" />
@@ -212,7 +229,7 @@ const Products = () => {
                     } as CSSProperties
                   }
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} priority={index < 2} />
                 </div>
               ))}
             </div>
@@ -242,9 +259,9 @@ const Products = () => {
       </DeferredRender>
       <DeferredRender
         rootMargin="900px 0px"
-        placeholder={<div className="min-h-[560px]" aria-hidden="true" />}
+        placeholder={<div className="min-h-[960px]" aria-hidden="true" />}
       >
-        <Suspense fallback={<div className="min-h-[560px]" aria-hidden="true" />}>
+        <Suspense fallback={<div className="min-h-[960px]" aria-hidden="true" />}>
           <Footer />
         </Suspense>
       </DeferredRender>

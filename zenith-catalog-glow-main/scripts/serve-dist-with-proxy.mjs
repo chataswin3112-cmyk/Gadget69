@@ -1,4 +1,5 @@
-import { createServer } from "node:http";
+import { createServer, request as httpRequest } from "node:http";
+import { request as httpsRequest } from "node:https";
 import { existsSync, createReadStream } from "node:fs";
 import { mkdir, stat } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
@@ -35,61 +36,64 @@ const contentTypes = {
 const immutableAssetPattern = /[.-][A-Za-z0-9_-]{6,}\.(css|gif|ico|jpe?g|js|json|png|svg|webp)$/i;
 const compressibleExtensions = new Set([".css", ".html", ".js", ".json", ".svg"]);
 
-const readRequestBody = async (request) => {
-  const chunks = [];
-  for await (const chunk of request) {
-    chunks.push(chunk);
-  }
-  return chunks.length ? Buffer.concat(chunks) : undefined;
+const isClientAbortError = (error) => {
+  const code = error?.code;
+  return (
+    code === "ECONNRESET" ||
+    code === "ERR_STREAM_PREMATURE_CLOSE" ||
+    error?.message === "aborted"
+  );
 };
 
-const writeFetchResponse = async (response, nodeResponse) => {
-  const headers = Object.fromEntries(response.headers.entries());
-  delete headers["content-encoding"];
-  delete headers["transfer-encoding"];
-  delete headers.connection;
-
-  nodeResponse.writeHead(response.status, headers);
-
-  if (!response.body) {
-    nodeResponse.end();
-    return;
+const pipeIgnoringClientAbort = async (...streams) => {
+  try {
+    await pipeline(...streams);
+  } catch (error) {
+    if (!isClientAbortError(error)) {
+      throw error;
+    }
   }
-
-  for await (const chunk of response.body) {
-    nodeResponse.write(chunk);
-  }
-  nodeResponse.end();
 };
 
 const proxyRequest = async (request, response) => {
   const requestUrl = new URL(request.url || "/", `http://${request.headers.host || "127.0.0.1"}`);
   const targetUrl = new URL(`${requestUrl.pathname}${requestUrl.search}`, backendOrigin);
-  const headers = new Headers();
+  const upstreamRequest = (targetUrl.protocol === "https:" ? httpsRequest : httpRequest)(
+    targetUrl,
+    {
+      method: request.method,
+      headers: {
+        ...request.headers,
+        host: targetUrl.host,
+        connection: "close",
+      },
+    },
+    async (upstreamResponse) => {
+      const headers = { ...upstreamResponse.headers };
+      delete headers["transfer-encoding"];
+      delete headers.connection;
 
-  Object.entries(request.headers).forEach(([key, value]) => {
-    if (!value || ["host", "connection", "content-length"].includes(key.toLowerCase())) {
+      response.writeHead(upstreamResponse.statusCode || 502, headers);
+      await pipeIgnoringClientAbort(upstreamResponse, response);
+    }
+  );
+
+  upstreamRequest.on("error", (error) => {
+    if (response.headersSent) {
+      response.end();
       return;
     }
-    if (Array.isArray(value)) {
-      headers.set(key, value.join(","));
-      return;
-    }
-    headers.set(key, value);
+
+    response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end(error instanceof Error ? error.message : "Proxy error");
   });
 
-  const body =
-    request.method && ["GET", "HEAD"].includes(request.method.toUpperCase())
-      ? undefined
-      : await readRequestBody(request);
+  if (request.method && ["GET", "HEAD"].includes(request.method.toUpperCase())) {
+    upstreamRequest.end();
+    return;
+  }
 
-  const proxied = await fetch(targetUrl, {
-    method: request.method,
-    headers,
-    body,
-  });
-
-  await writeFetchResponse(proxied, response);
+  await pipeIgnoringClientAbort(request, upstreamRequest);
 };
 
 const resolveCacheControl = (targetPath) => {
@@ -144,7 +148,7 @@ const serveFile = async (request, targetPath, response) => {
 
   const source = createReadStream(targetPath);
   if (encoding === "br") {
-    await pipeline(
+    await pipeIgnoringClientAbort(
       source,
       createBrotliCompress({
         params: {
@@ -157,11 +161,11 @@ const serveFile = async (request, targetPath, response) => {
   }
 
   if (encoding === "gzip") {
-    await pipeline(source, createGzip({ level: 6 }), response);
+    await pipeIgnoringClientAbort(source, createGzip({ level: 6 }), response);
     return;
   }
 
-  await pipeline(source, response);
+  await pipeIgnoringClientAbort(source, response);
 };
 
 const resolveStaticPath = async (requestPath) => {
@@ -190,6 +194,15 @@ const server = createServer(async (request, response) => {
     const filePath = await resolveStaticPath(url);
     await serveFile(request, filePath, response);
   } catch (error) {
+    if (response.writableEnded) {
+      return;
+    }
+
+    if (response.headersSent) {
+      response.end();
+      return;
+    }
+
     response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
     response.end(error instanceof Error ? error.message : "Server error");
   }

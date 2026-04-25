@@ -412,22 +412,24 @@ public class AdminCatalogController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file provided");
     }
 
-    // Enforce maximum file size: 10 MB
-    long maxFileSizeBytes = 10L * 1024 * 1024;
+    // Enforce maximum file size: 50 MB
+    long maxFileSizeBytes = 50L * 1024 * 1024;
     if (file.getSize() > maxFileSizeBytes) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "File too large. Maximum allowed size is 10 MB.");
+          "File too large. Maximum allowed size is 50 MB.");
     }
 
-    // Whitelist allowed file types (images only for product/banner uploads)
+    // Whitelist allowed file types for local admin uploads
     String contentType = file.getContentType();
     java.util.Set<String> allowedTypes = java.util.Set.of(
         "image/jpeg", "image/jpg", "image/png", "image/webp",
-        "image/gif", "image/svg+xml"
+        "image/gif", "image/svg+xml",
+        "video/mp4", "video/quicktime", "video/webm",
+        "application/pdf"
     );
     if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Invalid file type. Only JPEG, PNG, WebP, GIF, or SVG images are allowed.");
+          "Invalid file type. Only JPEG, PNG, WebP, GIF, SVG images, MP4/MOV/WebM videos, or PDF files are allowed.");
     }
 
     // Validate filename extension as a secondary check
@@ -436,10 +438,12 @@ public class AdminCatalogController {
       String lower = originalFilename.toLowerCase();
       boolean validExtension = lower.endsWith(".jpg") || lower.endsWith(".jpeg")
           || lower.endsWith(".png") || lower.endsWith(".webp")
-          || lower.endsWith(".gif") || lower.endsWith(".svg");
+          || lower.endsWith(".gif") || lower.endsWith(".svg")
+          || lower.endsWith(".mp4") || lower.endsWith(".mov")
+          || lower.endsWith(".webm") || lower.endsWith(".pdf");
       if (!validExtension) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            "Invalid file extension. Allowed: jpg, jpeg, png, webp, gif, svg");
+            "Invalid file extension. Allowed: jpg, jpeg, png, webp, gif, svg, mp4, mov, webm, pdf");
       }
     }
 
@@ -862,6 +866,7 @@ public class AdminCatalogController {
   }
 
   @PostMapping("/variants/{id}/media")
+  @Transactional
   public ApiDtos.VariantMediaResponse addVariantMedia(HttpServletRequest httpRequest,
       @PathVariable Long id,
       @RequestBody ApiDtos.VariantMediaPayload payload) {
@@ -897,6 +902,7 @@ public class AdminCatalogController {
   }
 
   @PutMapping("/variant-media/{id}/primary")
+  @Transactional
   public ApiDtos.VariantMediaResponse setVariantMediaPrimary(HttpServletRequest httpRequest,
       @PathVariable Long id) {
     authTokenService.requireAdmin(httpRequest);
@@ -916,6 +922,7 @@ public class AdminCatalogController {
   }
 
   @DeleteMapping("/variant-media/{id}")
+  @Transactional
   public ResponseEntity<Void> deleteVariantMedia(HttpServletRequest httpRequest,
       @PathVariable Long id) {
     authTokenService.requireAdmin(httpRequest);

@@ -1,0 +1,1976 @@
+[
+  {
+    "label": "desktop",
+    "viewport": {
+      "width": 1440,
+      "height": 960
+    },
+    "consoleErrors": [],
+    "requestFailures": [],
+    "states": [
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-0-0.png",
+        "scrollY": 0,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 2465,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "border-b border-black/10"
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "section-container"
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "flex min-h-9 flex-wrap items-center justify-center gap-x-5 gap-y-1 py-2"
+          },
+          {
+            "tag": "span",
+            "text": "Free shipping on orders over Rs. 999*",
+            "className": "inline-flex items-center gap-4 whitespace-nowrap"
+          },
+          {
+            "tag": "span",
+            "text": "Free shipping on orders over Rs. 999",
+            "className": "text-[11px] font-medium tracking-[0.18em] text-white/85 uppercase"
+          },
+          {
+            "tag": "span",
+            "text": "New arrivals every week*",
+            "className": "inline-flex items-center gap-4 whitespace-nowrap"
+          },
+          {
+            "tag": "span",
+            "text": "New arrivals every week",
+            "className": "text-[11px] font-medium tracking-[0.18em] text-white/85 uppercase"
+          },
+          {
+            "tag": "span",
+            "text": "Easy admin updates for products, banners, and media",
+            "className": "inline-flex items-center gap-4 whitespace-nowrap"
+          },
+          {
+            "tag": "span",
+            "text": "Easy admin updates for products, banners, and media",
+            "className": "text-[11px] font-medium tracking-[0.18em] text-white/85 uppercase"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "New Gadget Pro MaxShop Now",
+          "className": "space-y-3 sm:space-y-4"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-1-691.png",
+        "scrollY": 691,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 2465,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "SmartphonesExploreLaptopsExploreAudioExploreStorageExplore",
+          "className": "scrollbar-hide -mx-4 flex gap-5 overflow-x-auto px-4 pb-4"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-2-1382.png",
+        "scrollY": 1382,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 2465,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "section",
+          "text": "Our CatalogueBrowse All ProductsPremium electronics crafted for everyone.SaleSmartphonesGadget Pro M",
+          "className": "section-padding overflow-hidden group"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-3-2073.png",
+        "scrollY": 2073,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 2465,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "Just ArrivedNew LaunchesView AllNew-18%SmartphonesGadget Pro MaxG69-PM-001₹114,999₹139,999NewBestsel",
+          "className": "home-section-panel home-section-panel--elevated"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-4-2764.png",
+        "scrollY": 2764,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 2465,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "PopularTop CategoriesView AllSmartphonesPremium flagship smartphonesLaptopsUltra-thin powerhouse lap",
+          "className": "home-section-panel"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-5-3455.png",
+        "scrollY": 3455,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 2465,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "New-18%SmartphonesGadget Pro MaxG69-PM-001₹114,999₹139,999New-1%Smartphoneshead56₹99₹100",
+          "className": "grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-6-4146.png",
+        "scrollY": 4146,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 2604,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "Bestseller-16%LaptopsGadget Book AirG69-BA-001₹134,999₹159,999",
+          "className": "grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-7-4837.png",
+        "scrollY": 4837,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 3086,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "NewBestseller-20%AudioGadget Pods EliteG69-PE-001₹19,999₹24,999",
+          "className": "grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-8-5528.png",
+        "scrollY": 5528,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 3422,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "-35%Storage2TB Metal USB-C Flash DriveG69-ST-021₹1,299₹1,999",
+          "className": "grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-9-6219.png",
+        "scrollY": 6219,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 3422,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "",
+          "className": "absolute inset-0 bg-gradient-to-t from-foreground/18 via-transparent to-transparent"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-10-6910.png",
+        "scrollY": 6910,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 3422,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "What People SayCustomer FeedbackReal customers. Genuine stories. No fakes.4.7from 3 reviews",
+          "className": "mb-8 flex flex-col items-center px-2 text-center sm:mb-10"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-11-7279.png",
+        "scrollY": 7279,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 3422,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "Premium electronics crafted for those who demand excellence. Experience luxury technology.ShopAll Pr",
+          "className": "section-container px-5 py-8 sm:px-8 sm:py-11"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\desktop-12-7279.png",
+        "scrollY": 7279,
+        "viewportHeight": 960,
+        "documentHeight": 8239,
+        "bodyTextLength": 3422,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "hidden items-center gap-2 lg:flex"
+          },
+          {
+            "tag": "div",
+            "text": "Home",
+            "className": "relative"
+          },
+          {
+            "tag": "a",
+            "text": "Home",
+            "className": "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black t"
+          },
+          {
+            "tag": "div",
+            "text": "Categories",
+            "className": "relative"
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "Premium electronics crafted for those who demand excellence. Experience luxury technology.ShopAll Pr",
+          "className": "section-container px-5 py-8 sm:px-8 sm:py-11"
+        }
+      }
+    ]
+  },
+  {
+    "label": "mobile",
+    "viewport": {
+      "width": 412,
+      "height": 915
+    },
+    "consoleErrors": [],
+    "requestFailures": [
+      "GET https://images.unsplash.com/photo-1556656793-08538906a9f8?w=720&h=700&fit=crop&auto=format&q=80 net::ERR_ABORTED"
+    ],
+    "states": [
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-0-0.png",
+        "scrollY": 0,
+        "viewportHeight": 915,
+        "documentHeight": 7552,
+        "bodyTextLength": 1552,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "border-b border-black/10"
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "section-container"
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "flex min-h-9 items-center overflow-x-auto py-2 scrollbar-hide"
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "flex min-w-full items-center justify-center gap-4"
+          },
+          {
+            "tag": "span",
+            "text": "Free shipping on orders over Rs. 999*",
+            "className": "inline-flex items-center gap-4 whitespace-nowrap"
+          },
+          {
+            "tag": "span",
+            "text": "Free shipping on orders over Rs. 999",
+            "className": "text-[10px] font-medium tracking-[0.16em] text-white/85 uppercase"
+          },
+          {
+            "tag": "span",
+            "text": "New arrivals every week*",
+            "className": "inline-flex items-center gap-4 whitespace-nowrap"
+          },
+          {
+            "tag": "span",
+            "text": "New arrivals every week",
+            "className": "text-[10px] font-medium tracking-[0.16em] text-white/85 uppercase"
+          },
+          {
+            "tag": "span",
+            "text": "Easy admin updates for products, banners, and media",
+            "className": "inline-flex items-center gap-4 whitespace-nowrap"
+          },
+          {
+            "tag": "span",
+            "text": "Easy admin updates for products, banners, and media",
+            "className": "text-[10px] font-medium tracking-[0.16em] text-white/85 uppercase"
+          }
+        ],
+        "centerElement": {
+          "tag": "section",
+          "text": "BrowseExplore CategoriesView AllSmartphonesExploreLaptopsExploreAudioExploreStorageExplore",
+          "className": "section-padding"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-1-659.png",
+        "scrollY": 659,
+        "viewportHeight": 915,
+        "documentHeight": 7552,
+        "bodyTextLength": 1552,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "SaleSmartphonesGadget Pro MaxRs. 114,999Rs. 139,999SaleLaptopsGadget Book AirRs. 134,999Rs. 159,999S",
+          "className": "grid grid-cols-2 gap-4 px-4 sm:hidden"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-2-1318.png",
+        "scrollY": 1318,
+        "viewportHeight": 915,
+        "documentHeight": 7552,
+        "bodyTextLength": 1552,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "Just ArrivedNew LaunchesView AllNew-18%SmartphonesGadget Pro MaxG69-PM-001₹114,999₹139,999NewBestsel",
+          "className": "home-section-panel home-section-panel--elevated"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-3-1977.png",
+        "scrollY": 1977,
+        "viewportHeight": 915,
+        "documentHeight": 7552,
+        "bodyTextLength": 1552,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "New-18%SmartphonesGadget Pro MaxG69-PM-001₹114,999₹139,999NewBestseller-20%AudioGadget Pods EliteG69",
+          "className": "grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-4-2636.png",
+        "scrollY": 2636,
+        "viewportHeight": 915,
+        "documentHeight": 7552,
+        "bodyTextLength": 1552,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "SmartphonesPremium flagship smartphonesLaptopsUltra-thin powerhouse laptopsAudioHi-fi headphones and",
+          "className": "grid grid-cols-2 gap-5 md:grid-cols-4"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-5-3295.png",
+        "scrollY": 3295,
+        "viewportHeight": 915,
+        "documentHeight": 7552,
+        "bodyTextLength": 1691,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "section",
+          "text": "SmartphonesSmartphonesView AllNew-18%SmartphonesGadget Pro MaxG69-PM-001₹114,999₹139,999New-1%Smartp",
+          "className": "section-padding"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-6-3954.png",
+        "scrollY": 3954,
+        "viewportHeight": 915,
+        "documentHeight": 7548,
+        "bodyTextLength": 2173,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "AudioAudioView All",
+          "className": "flex items-end justify-between mb-5 sm:mb-7 lg:mb-8"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-7-4613.png",
+        "scrollY": 4613,
+        "viewportHeight": 915,
+        "documentHeight": 7548,
+        "bodyTextLength": 2509,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "-35%Storage2TB Metal USB-C Flash DriveG69-ST-021₹1,299₹1,999",
+          "className": "grid grid-cols-2 gap-4 md:gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-8-5272.png",
+        "scrollY": 5272,
+        "viewportHeight": 915,
+        "documentHeight": 7548,
+        "bodyTextLength": 2509,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "",
+          "className": "absolute inset-0 bg-gradient-to-t from-foreground/18 via-transparent to-transparent"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-9-5931.png",
+        "scrollY": 5931,
+        "viewportHeight": 915,
+        "documentHeight": 7548,
+        "bodyTextLength": 2509,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "\"Quick delivery, clean packaging, and the product quality felt premium right away.\"ANAarav Nair2026-",
+          "className": "grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-10-6590.png",
+        "scrollY": 6590,
+        "viewportHeight": 915,
+        "documentHeight": 7548,
+        "bodyTextLength": 2509,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "p",
+          "text": "Premium electronics crafted for those who demand excellence. Experience luxury technology.",
+          "className": "max-w-sm text-xs leading-6 text-white/55 font-body"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-11-6633.png",
+        "scrollY": 6633,
+        "viewportHeight": 915,
+        "documentHeight": 7548,
+        "bodyTextLength": 2509,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "Premium electronics crafted for those who demand excellence. Experience luxury technology.",
+          "className": "mb-7 flex flex-col items-start text-left sm:hidden"
+        }
+      },
+      {
+        "screenshot": "C:\\Users\\Admin\\Downloads\\zenith-catalog-glow-main (1)\\zenith-catalog-glow-main\\.tmp\\scroll-check\\mobile-12-6633.png",
+        "scrollY": 6633,
+        "viewportHeight": 915,
+        "documentHeight": 7548,
+        "bodyTextLength": 2509,
+        "visibleCount": 12,
+        "visibleNodes": [
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": ""
+          },
+          {
+            "tag": "div",
+            "text": "Free shipping on orders over Rs. 999*New arrivals every week*Easy admin updates ",
+            "className": "min-h-screen"
+          },
+          {
+            "tag": "nav",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "sticky left-0 right-0 top-0 z-50 glass-solid"
+          },
+          {
+            "tag": "div",
+            "text": "HomeCategoriesNew LaunchesBest SellersTrack OrderContact Us",
+            "className": "section-container flex h-[4.25rem] items-center justify-between gap-3 md:h-24"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex flex-shrink-0 items-center"
+          },
+          {
+            "tag": "a",
+            "text": "",
+            "className": "flex min-w-0 flex-shrink-0 items-center overflow-visible"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex min-w-0 items-center"
+          },
+          {
+            "tag": "img",
+            "text": "",
+            "className": "flex-shrink-0 mix-blend-multiply h-[6.75rem] w-[6.75rem] sm:h-[9rem] sm:w-[9rem]"
+          },
+          {
+            "tag": "div",
+            "text": "",
+            "className": "flex items-center gap-3"
+          },
+          {
+            "tag": "button",
+            "text": "",
+            "className": "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          },
+          {
+            "tag": "svg",
+            "text": "",
+            "className": ""
+          },
+          {
+            "tag": "path",
+            "text": "",
+            "className": ""
+          }
+        ],
+        "centerElement": {
+          "tag": "div",
+          "text": "Premium electronics crafted for those who demand excellence. Experience luxury technology.",
+          "className": "mb-7 flex flex-col items-start text-left sm:hidden"
+        }
+      }
+    ]
+  }
+]

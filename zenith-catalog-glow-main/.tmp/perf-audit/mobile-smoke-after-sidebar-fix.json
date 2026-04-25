@@ -1,0 +1,68 @@
+{
+  "frontendUrl": "http://127.0.0.1:8080",
+  "backendUrl": "http://127.0.0.1:8081",
+  "productId": 1,
+  "generatedAt": "2026-04-25T10:44:19.852Z",
+  "results": [
+    {
+      "path": "/",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "FREE SHIPPING ON ORDERS OVER RS. 999\n*\nNEW ARRIVALS EVERY WEEK\n*\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\nSkip to content\nGadget69 premium electronics catalog\n\nPREMIUM ELECTRONICS\n\nNew Gadget Pro Max\nShop Now\n\nPREMIUM ELECTRONICS\n\nPure Sound, All Day\nExplore Audio\n\nBROWSE\n\nExplore Categories\nView All\n\nSmartphones\n\nEXPLORE\n\nLaptops\n\nEXPLORE\n\nAudio\n\nEXPLORE\n\nStorage\n\nEXPLORE\n\nOUR CATALOGUE\n\nBrowse All Products\n\nPremium electronics crafted for everyone.\n\nSALE\n\nSMARTPHONES\n\nGadget Pro Max\n\nRs. 114,999\nRs. 139,999\nSALE\n\nLAPTOPS\n\nGadget Book Air\n\nRs. 134,999\nRs. 159,999\nSALE\n\nAUDIO\n\nGadget Pods Elite\n\nRs. 19,999\nRs. 24,999\n\nSMARTPHONES\n\nhead\n\nRs. 99\nRs. 100\nView All Products\n\nJUST ARRIVED\n\nNew Launches\nView All\nNEW\n-18%\n\nSMARTPHONES\n\nGadget Pro Max\n\nG69-PM-001\n\n₹114,999\n₹139,999\nNEW\nB",
+      "consoleErrors": [],
+      "requestFailures": []
+    },
+    {
+      "path": "/products",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "FREE SHIPPING ON ORDERS OVER RS. 999\n*\nNEW ARRIVALS EVERY WEEK\n*\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\nSkip to content\nProducts\n\n5 products\n\nAll Products\nNew Launches\nBest Sellers\nAll Categories\nSmartphones\nLaptops\nAudio\nStorage\nNewest\nPrice: Low to High\nPrice: High to Low\nName A-Z\n-35%\n\nSTORAGE\n\n2TB Metal USB-C Flash Drive\n\nG69-ST-021\n\n₹1,299\n₹1,999\nNEW\n-1%\n\nSMARTPHONES\n\nhead\n\n56\n\n₹99\n₹100\nNEW\nBESTSELLER\n-20%\n\nAUDIO\n\nGadget Pods Elite\n\nG69-PE-001\n\n₹19,999\n₹24,999\nBESTSELLER\n-16%\n\nLAPTOPS\n\nGadget Book Air\n\nG69-BA-001\n\n₹134,999\n₹159,999\nNEW\n-18%\n\nSMARTPHONES\n\nGadget Pro Max\n\nG69-PM-001\n\n₹114,999\n₹139,999\n\nPremium electronics crafted for those who demand excellence. Experience luxury technology.\n\nSHOP\n\nAll Products\nCategories\nNew Launches\nBest Sellers\n\nCOMPANY\n\nContact Us\nTrack",
+      "consoleErrors": [],
+      "requestFailures": []
+    },
+    {
+      "path": "/products/1",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "FREE SHIPPING ON ORDERS OVER RS. 999\n*\nNEW ARRIVALS EVERY WEEK\n*\nEASY ADMIN UPDATES FOR PRODUCTS, BANNERS, AND MEDIA\nSkip to content\nHome\nProducts\nGadget Pro Max\nPrevious slide\nNext slide\nSMARTPHONES\nGadget Pro Max\n\nG69-PM-001\n\nRs. 114,999\nRs. 139,999\n18% OFF\nIn Stock (25)\n\nTitanium flagship phone with pro-grade camera system.\n\n1\nAdd to Cart\nYou May Also Like\nView All\nNEW\n-1%\n\nSMARTPHONES\n\nhead\n\n56\n\n₹99\n₹100\n\nPremium electronics crafted for those who demand excellence. Experience luxury technology.\n\nSHOP\n\nAll Products\nCategories\nNew Launches\nBest Sellers\n\nCOMPANY\n\nContact Us\nTrack Order\nCatalogue\nCall +91 93615 86278\n\nLEGAL\n\nPrivacy Policy\nTerms & Conditions\nShipping Policy\nRefund Policy\nCopyright 2026 Gadget 69. All rights reserved.\nTOP",
+      "consoleErrors": [],
+      "requestFailures": []
+    },
+    {
+      "path": "/admin",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "Welcome back, Admin!\nToggle Sidebar\n\nAdmin Workspace\n\nCATALOG CONTROL CENTER\n\nDashboard\n\nRevenue, order conversion, and top-selling products in one place.\n\nManage Products\nManage Offers\nView Orders\nTotal Revenue\n\nRs. 0\n\nPaid Orders\n\n0\n\nConversion Rate\n\n0.00%\n\nTotal Orders\n\n6\n\nTotal Products\n\n5\n\nCategories\n\n4\n\nTop Selling Products\n\nRanked by paid-order units sold.\n\nNo paid orders yet, so top-selling products will appear here once sales start coming in.",
+      "consoleErrors": [],
+      "requestFailures": []
+    },
+    {
+      "path": "/admin/orders",
+      "status": "ok",
+      "error": null,
+      "title": "Gadget69 - Premium Electronics",
+      "viewportWidth": 412,
+      "scrollWidth": 412,
+      "hasHorizontalOverflow": false,
+      "snippet": "Toggle Sidebar\n\nAdmin Workspace\n\nCATALOG CONTROL CENTER\n\nOrder Management\n\nTrack payments, manage fulfilment, and handle customer orders from one place.\n\nLast updated: 16:14:17\nRefresh\n\nALL ORDERS\n\n6\n\nComplete admin queue\n\nACTIVE ORDERS\n\n0\n\nConfirmed and processing\n\nDELIVERY ORDERS\n\n1\n\nShipped to delivered\n\nFAILED ORDERS\n\n1\n\nPayment issues\n\nPENDING ORDERS\n\n5\n\nAwaiting payment\n\nAll Orders\nActive Orders\nDelivery Orders\nFailed Orders\nPending Orders\nAll Payments\nPending\nSuccess\nFailed\nRefunded\nAll Statuses\nPENDING\nCONFIRMED\nPROCESSING\nSHIPPED\nOUT_FOR_DELIVERY\nDELIVERED\nCANCELLED\n\n6 order(s) match the current queue view.\n\nOrder #261\n\n25/04/2026, 16:04:28\n\nRs. 19,999\n\n1 item(s)\n\nAswin Aswin\n\n8825602356\n\naswin3112san@gmail.com\n\nGadget Pods Elite\n\nAudio - G69-PE-001\n\nx 1\nPENDING\nPENDING\nPENDING\nCO",
+      "consoleErrors": [],
+      "requestFailures": []
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "rea
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
-import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.png";
+import gadget69Wordmark from "@/assets/gadget69-navbar-wordmark.webp";
 import { adminLogin } from "@/api/adminApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { getErrorMessage } from "@/lib/api-error";

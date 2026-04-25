@@ -63,7 +63,7 @@ describe("Admin sidebar branding", () => {
     const ordersLink = screen.getByRole("link", { name: /orders/i });
 
     expect(logo).toBeInTheDocument();
-    expect(logo.src).toContain("gadget69-logo.png");
+    expect(logo.src).toContain("gadget69-logo.webp");
     expect(logo).toHaveClass("h-32");
     expect(screen.queryByText(/^Gadget69$/)).not.toBeInTheDocument();
     expect(screen.getByText("Admin Panel")).toHaveClass("text-sidebar-foreground");

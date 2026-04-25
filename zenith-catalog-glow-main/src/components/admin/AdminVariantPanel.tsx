@@ -494,10 +494,10 @@ const AdminVariantPanel = ({ productId }: AdminVariantPanelProps) => {
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm font-body hover:bg-secondary/40">
                         {uploadingToId === variant.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                        Upload images or MP4
+                        Upload images or videos
                         <input
                           type="file"
-                          accept=".jpg,.jpeg,.png,.webp,.mp4"
+                          accept=".jpg,.jpeg,.png,.webp,.gif,.svg,.mp4,.mov,.webm"
                           multiple
                           className="hidden"
                           onChange={(event) => {
@@ -507,7 +507,7 @@ const AdminVariantPanel = ({ productId }: AdminVariantPanelProps) => {
                         />
                       </label>
                       <p className="text-xs text-muted-foreground">
-                        Images and videos upload directly to Cloudinary.
+                        Images and videos upload to Cloudinary when configured, otherwise secure local storage.
                       </p>
                     </div>
                   </div>

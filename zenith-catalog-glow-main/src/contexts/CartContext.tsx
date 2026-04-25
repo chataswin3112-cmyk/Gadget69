@@ -1,7 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { CartItem, Product, ProductVariant } from "@/types";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { getCartLineId, getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
+import { scheduleIdleTask } from "@/lib/idle";
 import { getVariantPrice } from "@/lib/pricing";
 
 interface CartContextType {
@@ -19,6 +21,21 @@ const STORAGE_KEY = "mzflow_cart";
 
 const clampQuantity = (qty: number, maxStock?: number | null) =>
   typeof maxStock === "number" && maxStock > 0 ? Math.min(qty, maxStock) : qty;
+
+const areCartItemsEqual = (current: CartItem[], next: CartItem[]) =>
+  current.length === next.length &&
+  current.every((item, index) => {
+    const candidate = next[index];
+    return (
+      candidate != null &&
+      item.lineId === candidate.lineId &&
+      item.quantity === candidate.quantity &&
+      item.unitPrice === candidate.unitPrice &&
+      item.mediaUrl === candidate.mediaUrl &&
+      item.variantId === candidate.variantId &&
+      item.product.id === candidate.product.id
+    );
+  });
 
 const hydrateCartItem = (product: Product, variantId?: number): CartItem => {
   const selectedVariant = product.variants?.find((variant) => variant.id === variantId);
@@ -39,6 +56,7 @@ const hydrateCartItem = (product: Product, variantId?: number): CartItem => {
 };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -51,7 +69,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { products, isLoading, ensureProductsLoaded } = useAdminData();
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const cancelPersist = scheduleIdleTask(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }, 500);
+
+    return cancelPersist;
   }, [items]);
 
   const addToCart = useCallback((product: Product, qty = 1, variant?: ProductVariant | null) => {
@@ -120,17 +142,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ];
       });
 
-      return JSON.stringify(current) === JSON.stringify(nextItems) ? current : nextItems;
+      return areCartItemsEqual(current, nextItems) ? current : nextItems;
     });
   }, [isLoading, items.length, products]);
 
   useEffect(() => {
-    if (items.length === 0 || products.length > 0) {
+    const needsCatalogHydration =
+      location.pathname === "/cart" || location.pathname === "/checkout";
+
+    if (!needsCatalogHydration || items.length === 0 || products.length > 0) {
       return;
     }
 
     void ensureProductsLoaded();
-  }, [ensureProductsLoaded, items.length, products.length]);
+  }, [ensureProductsLoaded, items.length, location.pathname, products.length]);
 
   const clearCart = useCallback(() => setItems([]), []);
 

@@ -1,0 +1,374 @@
+﻿{
+    "sections":  [
+                     {
+                         "id":  1,
+                         "name":  "Smartphones",
+                         "description":  "Premium flagship smartphones",
+                         "imageUrl":  "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900",
+                         "is_active":  true,
+                         "show_in_explore":  true,
+                         "show_in_top_category":  true,
+                         "accent_tone":  null,
+                         "sort_order":  0
+                     },
+                     {
+                         "id":  2,
+                         "name":  "Laptops",
+                         "description":  "Ultra-thin powerhouse laptops",
+                         "imageUrl":  "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900",
+                         "is_active":  true,
+                         "show_in_explore":  true,
+                         "show_in_top_category":  true,
+                         "accent_tone":  null,
+                         "sort_order":  1
+                     },
+                     {
+                         "id":  3,
+                         "name":  "Audio",
+                         "description":  "Hi-fi headphones and speakers",
+                         "imageUrl":  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900",
+                         "is_active":  true,
+                         "show_in_explore":  true,
+                         "show_in_top_category":  true,
+                         "accent_tone":  null,
+                         "sort_order":  2
+                     },
+                     {
+                         "id":  33,
+                         "name":  "Storage",
+                         "description":  "Storage drives and memory accessories",
+                         "imageUrl":  "/uploads/images/11d5b8de-a46c-4fe1-a6a1-99d43d4085ae.jpg",
+                         "is_active":  true,
+                         "show_in_explore":  true,
+                         "show_in_top_category":  true,
+                         "accent_tone":  "blue",
+                         "sort_order":  20
+                     }
+                 ],
+    "products":  [
+                     {
+                         "id":  1,
+                         "name":  "Gadget Pro Max",
+                         "description":  "Titanium flagship phone with pro-grade camera system.",
+                         "price":  129999.00,
+                         "stockQuantity":  25,
+                         "sectionId":  1,
+                         "sectionName":  "Smartphones",
+                         "imageUrl":  "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=900",
+                         "videoUrl":  null,
+                         "createdAt":  "2026-04-15T11:38:14.153021",
+                         "offer":  true,
+                         "offerPrice":  114999.00,
+                         "offerStartDate":  "2026-04-14",
+                         "offerEndDate":  "2026-05-15",
+                         "slug":  null,
+                         "model_number":  "G69-PM-001",
+                         "short_description":  null,
+                         "mrp":  139999.00,
+                         "display_order":  0,
+                         "is_new_launch":  true,
+                         "is_best_seller":  false,
+                         "is_featured":  true,
+                         "is_hero_featured":  false,
+                         "status":  "ACTIVE",
+                         "default_thumbnail_url":  "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=900",
+                         "galleryImages":  [
+                                               "https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=900"
+                                           ],
+                         "specifications":  {
+
+                                            },
+                         "variants":  [
+
+                                      ],
+                         "media":  [
+                                       {
+                                           "id":  1,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "MAIN",
+                                           "displayOrder":  0,
+                                           "isPrimary":  true
+                                       },
+                                       {
+                                           "id":  2,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "ADDITIONAL",
+                                           "displayOrder":  1,
+                                           "isPrimary":  false
+                                       },
+                                       {
+                                           "id":  3,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "ADDITIONAL",
+                                           "displayOrder":  2,
+                                           "isPrimary":  false
+                                       }
+                                   ]
+                     },
+                     {
+                         "id":  2,
+                         "name":  "Gadget Book Air",
+                         "description":  "Slim performance laptop built for creators and teams.",
+                         "price":  149999.00,
+                         "stockQuantity":  15,
+                         "sectionId":  2,
+                         "sectionName":  "Laptops",
+                         "imageUrl":  "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900",
+                         "videoUrl":  null,
+                         "createdAt":  "2026-04-15T11:38:14.246824",
+                         "offer":  true,
+                         "offerPrice":  134999.00,
+                         "offerStartDate":  "2026-04-14",
+                         "offerEndDate":  "2026-05-15",
+                         "slug":  null,
+                         "model_number":  "G69-BA-001",
+                         "short_description":  null,
+                         "mrp":  159999.00,
+                         "display_order":  1,
+                         "is_new_launch":  false,
+                         "is_best_seller":  true,
+                         "is_featured":  true,
+                         "is_hero_featured":  false,
+                         "status":  "ACTIVE",
+                         "default_thumbnail_url":  "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900",
+                         "galleryImages":  [
+                                               "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=900"
+                                           ],
+                         "specifications":  {
+
+                                            },
+                         "variants":  [
+
+                                      ],
+                         "media":  [
+                                       {
+                                           "id":  4,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "MAIN",
+                                           "displayOrder":  0,
+                                           "isPrimary":  true
+                                       },
+                                       {
+                                           "id":  5,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "ADDITIONAL",
+                                           "displayOrder":  1,
+                                           "isPrimary":  false
+                                       },
+                                       {
+                                           "id":  6,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "ADDITIONAL",
+                                           "displayOrder":  2,
+                                           "isPrimary":  false
+                                       }
+                                   ]
+                     },
+                     {
+                         "id":  3,
+                         "name":  "Gadget Pods Elite",
+                         "description":  "Immersive earbuds with spatial audio and adaptive noise canceling.",
+                         "price":  24999.00,
+                         "stockQuantity":  100,
+                         "sectionId":  3,
+                         "sectionName":  "Audio",
+                         "imageUrl":  "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900",
+                         "videoUrl":  null,
+                         "createdAt":  "2026-04-15T11:38:14.251340",
+                         "offer":  true,
+                         "offerPrice":  19999.00,
+                         "offerStartDate":  "2026-04-14",
+                         "offerEndDate":  "2026-05-15",
+                         "slug":  null,
+                         "model_number":  "G69-PE-001",
+                         "short_description":  null,
+                         "mrp":  24999.00,
+                         "display_order":  2,
+                         "is_new_launch":  true,
+                         "is_best_seller":  true,
+                         "is_featured":  false,
+                         "is_hero_featured":  false,
+                         "status":  "ACTIVE",
+                         "default_thumbnail_url":  "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900",
+                         "galleryImages":  [
+                                               "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=900"
+                                           ],
+                         "specifications":  {
+
+                                            },
+                         "variants":  [
+
+                                      ],
+                         "media":  [
+                                       {
+                                           "id":  7,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "MAIN",
+                                           "displayOrder":  0,
+                                           "isPrimary":  true
+                                       },
+                                       {
+                                           "id":  8,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "ADDITIONAL",
+                                           "displayOrder":  1,
+                                           "isPrimary":  false
+                                       },
+                                       {
+                                           "id":  9,
+                                           "mediaUrl":  "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=900",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "ADDITIONAL",
+                                           "displayOrder":  2,
+                                           "isPrimary":  false
+                                       }
+                                   ]
+                     },
+                     {
+                         "id":  33,
+                         "name":  "head",
+                         "description":  "jmvjhbj",
+                         "price":  99.00,
+                         "stockQuantity":  7,
+                         "sectionId":  1,
+                         "sectionName":  "Smartphones",
+                         "imageUrl":  null,
+                         "videoUrl":  null,
+                         "createdAt":  "2026-04-20T10:58:44.443024",
+                         "offer":  false,
+                         "offerPrice":  null,
+                         "offerStartDate":  null,
+                         "offerEndDate":  null,
+                         "slug":  null,
+                         "model_number":  "56",
+                         "short_description":  null,
+                         "mrp":  100.00,
+                         "display_order":  5,
+                         "is_new_launch":  true,
+                         "is_best_seller":  false,
+                         "is_featured":  false,
+                         "is_hero_featured":  false,
+                         "status":  "ACTIVE",
+                         "default_thumbnail_url":  null,
+                         "galleryImages":  [
+
+                                           ],
+                         "specifications":  {
+
+                                            },
+                         "variants":  [
+
+                                      ],
+                         "media":  [
+
+                                   ]
+                     },
+                     {
+                         "id":  65,
+                         "name":  "2TB Metal USB-C Flash Drive",
+                         "description":  "A compact metal USB-C flash drive with 2TB storage for phones, tablets, laptops, documents, media backups, and fast everyday file sharing.",
+                         "price":  1299.00,
+                         "stockQuantity":  70,
+                         "sectionId":  33,
+                         "sectionName":  "Storage",
+                         "imageUrl":  "/uploads/images/11d5b8de-a46c-4fe1-a6a1-99d43d4085ae.jpg",
+                         "videoUrl":  null,
+                         "createdAt":  "2026-04-23T19:47:35.429640",
+                         "offer":  false,
+                         "offerPrice":  null,
+                         "offerStartDate":  null,
+                         "offerEndDate":  null,
+                         "slug":  "2tb-metal-usb-c-flash-drive",
+                         "model_number":  "G69-ST-021",
+                         "short_description":  "Compact 2TB metal USB-C flash drive for quick everyday transfers.",
+                         "mrp":  1999.00,
+                         "display_order":  20,
+                         "is_new_launch":  false,
+                         "is_best_seller":  false,
+                         "is_featured":  false,
+                         "is_hero_featured":  false,
+                         "status":  "ACTIVE",
+                         "default_thumbnail_url":  "/uploads/images/11d5b8de-a46c-4fe1-a6a1-99d43d4085ae.jpg",
+                         "galleryImages":  [
+                                               "/uploads/images/4b5bec6a-1dbd-4a97-bcbb-5d006f7d2f2d.jpg"
+                                           ],
+                         "specifications":  {
+                                                "Capacity":  "2TB",
+                                                "Connector":  "USB-C",
+                                                "Body":  "Metal"
+                                            },
+                         "variants":  [
+
+                                      ],
+                         "media":  [
+                                       {
+                                           "id":  33,
+                                           "mediaUrl":  "/uploads/images/11d5b8de-a46c-4fe1-a6a1-99d43d4085ae.jpg",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "MAIN",
+                                           "displayOrder":  0,
+                                           "isPrimary":  true
+                                       },
+                                       {
+                                           "id":  34,
+                                           "mediaUrl":  "/uploads/images/4b5bec6a-1dbd-4a97-bcbb-5d006f7d2f2d.jpg",
+                                           "mediaType":  "IMAGE",
+                                           "mediaRole":  "ADDITIONAL",
+                                           "displayOrder":  1,
+                                           "isPrimary":  false
+                                       }
+                                   ]
+                     }
+                 ],
+    "banners":  [
+                    {
+                        "id":  1,
+                        "title":  "New Gadget Pro Max",
+                        "desktopImageUrl":  "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=1600\u0026h=700\u0026fit=crop",
+                        "mobileImageUrl":  null,
+                        "ctaText":  "Shop Now",
+                        "ctaLink":  "/products/1",
+                        "linkedProductId":  null,
+                        "displayOrder":  0,
+                        "isActive":  true
+                    },
+                    {
+                        "id":  2,
+                        "title":  "Pure Sound, All Day",
+                        "desktopImageUrl":  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1600\u0026h=700\u0026fit=crop",
+                        "mobileImageUrl":  null,
+                        "ctaText":  "Explore Audio",
+                        "ctaLink":  "/categories/3",
+                        "linkedProductId":  null,
+                        "displayOrder":  1,
+                        "isActive":  true
+                    }
+                ],
+    "settings":  {
+                     "id":  1,
+                     "siteTitle":  "Gadget69",
+                     "metaDescription":  "Premium electronics crafted for those who demand excellence.",
+                     "logoUrl":  null,
+                     "faviconUrl":  null,
+                     "footerText":  "Premium electronics crafted for those who demand excellence. Experience luxury technology.",
+                     "announcementItems":  [
+                                               "Free shipping on orders over Rs. 999",
+                                               "New arrivals every week",
+                                               "Easy admin updates for products, banners, and media"
+                                           ],
+                     "instagramUrl":  "https://www.instagram.com/gadget69_tuty/",
+                     "whatsappNumber":  "919361586278",
+                     "shopPhone":  "9361586278",
+                     "supportEmail":  "natrajganesh2000@gmail.com",
+                     "catalogueUrl":  "#",
+                     "contactUrl":  "/contact"
+                 }
+}

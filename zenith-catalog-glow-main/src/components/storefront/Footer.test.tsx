@@ -38,6 +38,9 @@ describe("Footer", () => {
     expect(screen.getAllByText("All Products").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/instagram/i).length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/whatsapp/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText(/shop footer/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText(/company footer/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText(/legal footer/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/93615 86278/).length).toBeGreaterThan(0);
 
     const customLogos = container.querySelectorAll('img[src="https://cdn.example.com/custom-logo.png"]');

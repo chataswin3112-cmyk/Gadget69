@@ -42,13 +42,37 @@ export const deleteProduct = async (id: number): Promise<void> => {
   await apiClient.delete(`/admin/products/${id}`);
 };
 
-export const uploadFile = async (file: File): Promise<string> => {
+interface AdminStoredFileResponse {
+  url: string;
+  fileName: string;
+  mediaType: string;
+}
+
+const inferLocalMediaType = (file: File): "IMAGE" | "VIDEO" =>
+  file.type.toLowerCase().startsWith("video/") ? "VIDEO" : "IMAGE";
+
+export const uploadAdminFile = async (
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<AdminStoredFileResponse> => {
   const formData = new FormData();
   formData.append("file", file);
   const res = await apiClient.post("/admin/upload", formData, {
     headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (event) => {
+      if (!onProgress || !event.total) {
+        return;
+      }
+      onProgress((event.loaded / event.total) * 100);
+    },
   });
-  return res.data.url;
+  onProgress?.(100);
+  return res.data;
+};
+
+export const uploadFile = async (file: File): Promise<string> => {
+  const storedFile = await uploadAdminFile(file);
+  return storedFile.url;
 };
 
 export const getCatalogMediaUploadSignature = async (data: {
@@ -72,41 +96,49 @@ export const uploadCatalogMediaFile = async (
   height?: number;
   duration?: number;
 }> => {
-  const signature = await getCatalogMediaUploadSignature({
-    fileName: file.name,
-    contentType: file.type,
-    fileSize: file.size,
-    target,
-  });
+  try {
+    const signature = await getCatalogMediaUploadSignature({
+      fileName: file.name,
+      contentType: file.type,
+      fileSize: file.size,
+      target,
+    });
 
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("api_key", signature.apiKey);
-  formData.append("timestamp", String(signature.timestamp));
-  formData.append("signature", signature.signature);
-  formData.append("folder", signature.folder);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", signature.apiKey);
+    formData.append("timestamp", String(signature.timestamp));
+    formData.append("signature", signature.signature);
+    formData.append("folder", signature.folder);
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`,
-    {
-      method: "POST",
-      body: formData,
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const payload = await response.json();
+
+    if (!response.ok || !payload.secure_url) {
+      throw new Error(payload?.error?.message || "Upload failed");
     }
-  );
-  const payload = await response.json();
 
-  if (!response.ok || !payload.secure_url) {
-    throw new Error(payload?.error?.message || "Upload failed");
+    return {
+      secureUrl: payload.secure_url as string,
+      mediaType: signature.resourceType === "video" ? "VIDEO" : "IMAGE",
+      publicId: payload.public_id as string | undefined,
+      width: payload.width as number | undefined,
+      height: payload.height as number | undefined,
+      duration: payload.duration as number | undefined,
+    };
+  } catch {
+    const storedFile = await uploadAdminFile(file);
+    return {
+      secureUrl: storedFile.url,
+      mediaType: inferLocalMediaType(file),
+    };
   }
-
-  return {
-    secureUrl: payload.secure_url as string,
-    mediaType: signature.resourceType === "video" ? "VIDEO" : "IMAGE",
-    publicId: payload.public_id as string | undefined,
-    width: payload.width as number | undefined,
-    height: payload.height as number | undefined,
-    duration: payload.duration as number | undefined,
-  };
 };
 
 export const getProductMedia = async (productId: number): Promise<ProductMedia[]> => {

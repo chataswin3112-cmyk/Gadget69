@@ -65,9 +65,9 @@ const ProductMarqueeSection = () => {
       <div className="mt-10 flex justify-center">
         <Link
           to="/products"
-          className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background transition-all duration-300 hover:scale-[1.03] hover:bg-foreground/85 hover:shadow-lg font-heading"
+          className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/85 font-heading"
         >
-          View All Products →
+          View All Products
         </Link>
       </div>
     </section>
@@ -84,14 +84,14 @@ const CompactProductCard = ({ product }: { product: Product }) => {
       className={cn(
         "group w-full flex-shrink-0 overflow-hidden rounded-[20px]",
         "border border-white/70 bg-white/90 shadow-[0_12px_32px_-18px_hsl(var(--surface-shadow)/0.22)]",
-        "transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_20px_44px_-20px_hsl(var(--surface-shadow)/0.30)] sm:w-[200px] md:w-[220px]"
+        "transition-shadow duration-200 hover:shadow-[0_20px_44px_-20px_hsl(var(--surface-shadow)/0.30)] sm:w-[200px] md:w-[220px]"
       )}
     >
       <div className="relative aspect-square overflow-hidden bg-secondary/10">
         <MediaImage
           src={product.imageUrl}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover"
           loading="lazy"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 220px, 240px"
           optimizeWidth={160}
@@ -111,11 +111,11 @@ const CompactProductCard = ({ product }: { product: Product }) => {
         </p>
         <div className="mt-1.5 flex items-baseline gap-1.5">
           <span className="text-sm font-bold text-foreground font-body">
-            ₹{price.toLocaleString()}
+            Rs. {price.toLocaleString()}
           </span>
           {product.mrp && product.mrp > price && (
             <span className="text-xs line-through text-muted-foreground font-body">
-              ₹{product.mrp.toLocaleString()}
+              Rs. {product.mrp.toLocaleString()}
             </span>
           )}
         </div>

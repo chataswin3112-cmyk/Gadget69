@@ -34,18 +34,15 @@ describe("ReviewSection", () => {
     mockUseAdminData.mockReturnValue({ reviews });
   });
 
-  it("renders review content, avatar images, and a hover-pausing marquee track", () => {
+  it("renders review content, avatar images, and an auto-scrolling review rail", () => {
     render(<ReviewSection />);
 
     expect(screen.getByText("Customer Feedback")).toBeInTheDocument();
+    expect(screen.getByTestId("review-marquee-track")).toHaveClass("animate-marquee-left");
     expect(screen.getAllByText("Nila Rajan").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/great after-sales support/i).length).toBeGreaterThan(0);
     expect(screen.getAllByAltText("Nila Rajan")[0]).toHaveAttribute("src", "https://cdn.example.com/nila.jpg");
-
-    const marqueeTrack = screen.getByTestId("review-marquee-track");
-    expect(marqueeTrack.className).toContain("animate-marquee-left");
-    expect(marqueeTrack.className).toContain("group-hover:[animation-play-state:paused]");
-    expect(marqueeTrack.className).toContain("group-focus-within:[animation-play-state:paused]");
+    expect(screen.getAllByText("Customer").length).toBeGreaterThan(0);
   });
 
   it("renders nothing when no reviews are available", () => {
