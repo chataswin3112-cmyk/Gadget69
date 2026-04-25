@@ -179,6 +179,79 @@ class AdminOfferUpdateTest {
         .andExpect(jsonPath("$.offerEndDate").value(tomorrow));
   }
 
+  @Test
+  void updatingProductAcceptsMixedSpecificationValueTypes() throws Exception {
+    String token = loginAndExtractToken();
+
+    MvcResult productsResult = mockMvc.perform(get("/api/admin/products")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    JsonNode products = objectMapper.readTree(productsResult.getResponse().getContentAsString());
+    JsonNode product = products.get(0);
+    long productId = product.get("id").asLong();
+
+    mockMvc.perform(put("/api/admin/products/{id}", productId)
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "name": %s,
+                  "description": %s,
+                  "price": %s,
+                  "stockQuantity": %s,
+                  "sectionId": %s,
+                  "imageUrl": %s,
+                  "videoUrl": %s,
+                  "offer": false,
+                  "slug": %s,
+                  "model_number": %s,
+                  "short_description": %s,
+                  "mrp": %s,
+                  "display_order": %s,
+                  "is_new_launch": %s,
+                  "is_best_seller": %s,
+                  "is_featured": %s,
+                  "is_hero_featured": %s,
+                  "status": %s,
+                  "default_thumbnail_url": %s,
+                  "galleryImages": %s,
+                  "specifications": {
+                    "Display": 6.7,
+                    "Wireless Charging": true,
+                    "Battery": {"value": 5000, "unit": "mAh"},
+                    " ": "ignored"
+                  }
+                }
+                """.formatted(
+                quote(product.get("name")),
+                quote(product.get("description")),
+                product.get("price"),
+                product.get("stockQuantity"),
+                product.get("sectionId"),
+                quote(product.get("imageUrl")),
+                nullableJson(product.get("videoUrl")),
+                nullableJson(product.get("slug")),
+                nullableJson(product.get("model_number")),
+                nullableJson(product.get("short_description")),
+                nullableJson(product.get("mrp")),
+                nullableJson(product.get("display_order")),
+                nullableJson(product.get("is_new_launch")),
+                nullableJson(product.get("is_best_seller")),
+                nullableJson(product.get("is_featured")),
+                nullableJson(product.get("is_hero_featured")),
+                quote(product.get("status")),
+                nullableJson(product.get("default_thumbnail_url")),
+                product.get("galleryImages").toString()
+            )))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.specifications.Display").value("6.7"))
+        .andExpect(jsonPath("$.specifications['Wireless Charging']").value("true"))
+        .andExpect(jsonPath("$.specifications.Battery").value("{\"value\":5000,\"unit\":\"mAh\"}"))
+        .andExpect(jsonPath("$.specifications[' ']").doesNotExist());
+  }
+
   private String loginAndExtractToken() throws Exception {
     MvcResult result = mockMvc.perform(post("/api/admin/login")
             .contentType(MediaType.APPLICATION_JSON)

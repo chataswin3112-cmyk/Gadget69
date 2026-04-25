@@ -130,7 +130,6 @@ public class SeedDataService implements ApplicationRunner {
     settings.setWhatsappNumber(DEFAULT_WHATSAPP_NUMBER);
     settings.setShopPhone(DEFAULT_SHOP_PHONE);
     settings.setSupportEmail("natrajganesh2000@gmail.com");
-    settings.setCatalogueUrl("#");
     settings.setContactUrl("/contact");
     storeSettingsRepository.save(settings);
   }
@@ -206,6 +205,10 @@ public class SeedDataService implements ApplicationRunner {
       }
       if (settings.getSupportEmail() == null || settings.getSupportEmail().isBlank()) {
         settings.setSupportEmail("natrajganesh2000@gmail.com");
+        updated = true;
+      }
+      if (settings.getCatalogueUrl() != null && settings.getCatalogueUrl().trim().startsWith("#")) {
+        settings.setCatalogueUrl(null);
         updated = true;
       }
       if (updated) {

@@ -21,6 +21,11 @@ const STRENGTH_LABELS = ["", "Very Weak", "Weak", "Fair", "Good", "Strong"];
 const STRENGTH_COLORS = ["", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
 const STRENGTH_TEXT = ["", "text-red-500", "text-orange-500", "text-yellow-500", "text-blue-500", "text-green-500"];
 
+const normalizeOptionalAssetUrl = (value?: string) => {
+  const trimmed = value?.trim();
+  return trimmed && !trimmed.startsWith("#") ? trimmed : undefined;
+};
+
 const PasswordStrengthMeter = ({ password }: { password: string }) => {
   if (!password) return null;
   const { checks, score } = checkAdminPasswordStrength(password);
@@ -150,6 +155,7 @@ const ChangePasswordForm = () => {
               className="pr-10"
             />
             <button type="button" tabIndex={-1}
+              aria-label={showOld ? "Hide current password" : "Show current password"}
               onClick={() => setShowOld((v) => !v)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               {showOld ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -170,6 +176,7 @@ const ChangePasswordForm = () => {
               className="pr-10"
             />
             <button type="button" tabIndex={-1}
+              aria-label={showNew ? "Hide new password" : "Show new password"}
               onClick={() => setShowNew((v) => !v)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -218,20 +225,28 @@ const AdminSettings = () => {
   const [form, setForm] = useState({ ...settings });
   const [newAnnouncement, setNewAnnouncement] = useState("");
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     void ensureSettingsLoaded();
   }, [ensureSettingsLoaded]);
 
   useEffect(() => {
-    setForm({ ...settings });
-  }, [settings]);
+    if (!isDirty) {
+      setForm({ ...settings });
+    }
+  }, [isDirty, settings]);
+
+  const updateForm = (updater: (current: typeof form) => typeof form) => {
+    setIsDirty(true);
+    setForm(updater);
+  };
 
   const addAnnouncement = () => {
     if (!newAnnouncement.trim()) {
       return;
     }
-    setForm((current) => ({
+    updateForm((current) => ({
       ...current,
       announcementItems: [...current.announcementItems, newAnnouncement.trim()],
     }));
@@ -239,7 +254,7 @@ const AdminSettings = () => {
   };
 
   const removeAnnouncement = (index: number) => {
-    setForm((current) => ({
+    updateForm((current) => ({
       ...current,
       announcementItems: current.announcementItems.filter((_, itemIndex) => itemIndex !== index),
     }));
@@ -248,7 +263,17 @@ const AdminSettings = () => {
   const save = async () => {
     try {
       setSaving(true);
-      await updateSettings(form);
+      const updated = await updateSettings({
+        ...form,
+        logoUrl: normalizeOptionalAssetUrl(form.logoUrl),
+        faviconUrl: normalizeOptionalAssetUrl(form.faviconUrl),
+        catalogueUrl: normalizeOptionalAssetUrl(form.catalogueUrl),
+        announcementItems: form.announcementItems
+          .map((item) => item.trim())
+          .filter(Boolean),
+      });
+      setForm({ ...updated });
+      setIsDirty(false);
       toast.success("Settings saved");
     } catch (error) {
       toast.error(getErrorMessage(error, "Failed to save settings"));
@@ -272,7 +297,7 @@ const AdminSettings = () => {
             <Label className="font-body">Site Title</Label>
             <Input
               value={form.siteTitle}
-              onChange={(event) => setForm((current) => ({ ...current, siteTitle: event.target.value }))}
+              onChange={(event) => updateForm((current) => ({ ...current, siteTitle: event.target.value }))}
             />
           </div>
 
@@ -281,7 +306,7 @@ const AdminSettings = () => {
             <Textarea
               value={form.metaDescription || ""}
               onChange={(event) =>
-                setForm((current) => ({ ...current, metaDescription: event.target.value }))
+                updateForm((current) => ({ ...current, metaDescription: event.target.value }))
               }
               rows={3}
             />
@@ -293,14 +318,14 @@ const AdminSettings = () => {
               value={form.logoUrl}
               accept="image/*"
               placeholder="Paste logo URL or upload one"
-              onChange={(value) => setForm((current) => ({ ...current, logoUrl: value }))}
+              onChange={(value) => updateForm((current) => ({ ...current, logoUrl: value }))}
             />
             <MediaUploadField
               label="Favicon"
               value={form.faviconUrl}
               accept="image/*"
               placeholder="Paste favicon URL or upload one"
-              onChange={(value) => setForm((current) => ({ ...current, faviconUrl: value }))}
+              onChange={(value) => updateForm((current) => ({ ...current, faviconUrl: value }))}
             />
           </div>
 
@@ -309,7 +334,7 @@ const AdminSettings = () => {
             value={form.catalogueUrl}
             accept=".pdf,image/*"
             placeholder="Paste catalogue link or upload a file"
-            onChange={(value) => setForm((current) => ({ ...current, catalogueUrl: value }))}
+            onChange={(value) => updateForm((current) => ({ ...current, catalogueUrl: value }))}
           />
 
           <div className="space-y-2">
@@ -317,7 +342,7 @@ const AdminSettings = () => {
             <Textarea
               value={form.footerText || ""}
               onChange={(event) =>
-                setForm((current) => ({ ...current, footerText: event.target.value }))
+                updateForm((current) => ({ ...current, footerText: event.target.value }))
               }
               rows={3}
             />
@@ -329,7 +354,13 @@ const AdminSettings = () => {
               {form.announcementItems.map((item, index) => (
                 <div key={`${item}-${index}`} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <span className="flex-1 rounded-md bg-muted px-3 py-2 font-body text-sm">{item}</span>
-                  <Button variant="ghost" size="sm" onClick={() => removeAnnouncement(index)}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Remove announcement ${index + 1}`}
+                    onClick={() => removeAnnouncement(index)}
+                  >
                     <X className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -340,9 +371,21 @@ const AdminSettings = () => {
                 value={newAnnouncement}
                 onChange={(event) => setNewAnnouncement(event.target.value)}
                 placeholder="New announcement..."
-                onKeyDown={(event) => event.key === "Enter" && addAnnouncement()}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    addAnnouncement();
+                  }
+                }}
               />
-              <Button variant="outline" size="sm" onClick={addAnnouncement} className="w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label="Add announcement"
+                onClick={addAnnouncement}
+                className="w-full sm:w-auto"
+              >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -354,7 +397,7 @@ const AdminSettings = () => {
               <Input
                 value={form.instagramUrl || ""}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, instagramUrl: event.target.value }))
+                  updateForm((current) => ({ ...current, instagramUrl: event.target.value }))
                 }
               />
             </div>
@@ -363,7 +406,7 @@ const AdminSettings = () => {
               <Input
                 value={form.whatsappNumber || ""}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, whatsappNumber: event.target.value }))
+                  updateForm((current) => ({ ...current, whatsappNumber: event.target.value }))
                 }
               />
               <p className="font-body text-xs text-muted-foreground">
@@ -375,7 +418,7 @@ const AdminSettings = () => {
               <Input
                 value={form.shopPhone || ""}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, shopPhone: event.target.value }))
+                  updateForm((current) => ({ ...current, shopPhone: event.target.value }))
                 }
               />
             </div>
@@ -384,7 +427,7 @@ const AdminSettings = () => {
               <Input
                 value={form.supportEmail || ""}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, supportEmail: event.target.value }))
+                  updateForm((current) => ({ ...current, supportEmail: event.target.value }))
                 }
               />
             </div>
@@ -393,7 +436,7 @@ const AdminSettings = () => {
               <Input
                 value={form.contactUrl || ""}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, contactUrl: event.target.value }))
+                  updateForm((current) => ({ ...current, contactUrl: event.target.value }))
                 }
               />
             </div>

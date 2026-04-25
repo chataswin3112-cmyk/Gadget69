@@ -67,6 +67,35 @@ const offerStatusClassName: Record<OfferStatus, string> = {
   "no-offer": "bg-muted text-muted-foreground",
 };
 
+const normalizeSpecificationValue = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
+const normalizeSpecifications = (specifications: unknown): Record<string, string> => {
+  if (!specifications || typeof specifications !== "object" || Array.isArray(specifications)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(specifications as Record<string, unknown>)
+      .map(([key, value]) => [key.trim(), normalizeSpecificationValue(value)] as const)
+      .filter(([key]) => key.length > 0)
+  );
+};
+
 const AdminProducts = () => {
   const {
     products,
@@ -108,7 +137,7 @@ const AdminProducts = () => {
     setEditing({
       ...product,
       media: getProductMedia(product),
-      specifications: product.specifications || {},
+      specifications: normalizeSpecifications(product.specifications),
       galleryImages: product.galleryImages || [],
     });
     setIsNew(false);
@@ -124,6 +153,7 @@ const AdminProducts = () => {
       setSaving(true);
       const payload: Partial<Product> = {
         ...editing,
+        specifications: normalizeSpecifications(editing.specifications),
         media: (editing.media || []).map((item, index) => ({
           ...item,
           displayOrder: index,
@@ -137,7 +167,7 @@ const AdminProducts = () => {
       setEditing({
         ...saved,
         media: getProductMedia(saved),
-        specifications: saved.specifications || {},
+        specifications: normalizeSpecifications(saved.specifications),
       });
       setIsNew(false);
       toast.success(isNew ? "Product created. You can add variants now." : "Product updated");
@@ -416,7 +446,7 @@ const AdminProducts = () => {
                   <div className="space-y-3 md:col-span-2">
                     <Label className="font-body">Specifications</Label>
                     <div className="space-y-2">
-                      {Object.entries(editing.specifications || {}).map(([key, specValue], index, entries) => (
+                      {Object.entries(normalizeSpecifications(editing.specifications)).map(([key, specValue], index, entries) => (
                         <div key={`${key}-${index}`} className="flex flex-col gap-2 sm:flex-row">
                           <Input
                             value={key}
@@ -471,8 +501,8 @@ const AdminProducts = () => {
                               ? {
                                   ...current,
                                   specifications: {
-                                    ...(current.specifications || {}),
-                                    [`Specification ${Object.keys(current.specifications || {}).length + 1}`]: "",
+                                    ...normalizeSpecifications(current.specifications),
+                                    [`Specification ${Object.keys(normalizeSpecifications(current.specifications)).length + 1}`]: "",
                                   },
                                 }
                               : current

@@ -449,11 +449,26 @@
 .animate-product-left  { animation: product-left  36s linear infinite; }
 .animate-product-right { animation: product-right 42s linear infinite; }
 
+@keyframes announcement-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.announcement-marquee-track {
+  animation: announcement-marquee 24s linear infinite;
+}
+
+.announcement-marquee-track:hover,
+.announcement-marquee-track:focus-within {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee-left,
   .animate-marquee-right,
   .animate-product-left,
-  .animate-product-right {
+  .animate-product-right,
+  .announcement-marquee-track {
     animation: none;
   }
 }

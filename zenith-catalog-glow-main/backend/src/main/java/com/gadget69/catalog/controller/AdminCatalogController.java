@@ -1,5 +1,6 @@
 package com.gadget69.catalog.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gadget69.catalog.dto.ApiDtos;
 import com.gadget69.catalog.entity.AdminUser;
 import com.gadget69.catalog.entity.Banner;
@@ -59,6 +60,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminCatalogController {
+  private static final ObjectMapper SPECIFICATION_VALUE_MAPPER = new ObjectMapper();
 
   private final AuthTokenService authTokenService;
   private final UploadStorageService uploadStorageService;
@@ -509,8 +511,7 @@ public class AdminCatalogController {
     product.setDefaultThumbnailUrl(blankToNull(payload.default_thumbnail_url()));
     product.setGalleryImages(
         payload.galleryImages() == null ? new ArrayList<>() : new ArrayList<>(payload.galleryImages()));
-    product.setSpecifications(
-        payload.specifications() == null ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(payload.specifications()));
+    product.setSpecifications(normalizeSpecifications(payload.specifications()));
     applyProductMedia(product, payload.media(), payload.imageUrl(), payload.videoUrl(), payload.galleryImages());
   }
 
@@ -532,20 +533,53 @@ public class AdminCatalogController {
     return catalogMapper.toProductResponse(hydrated);
   }
 
+  private Map<String, String> normalizeSpecifications(Map<String, Object> specifications) {
+    Map<String, String> normalized = new java.util.LinkedHashMap<>();
+    if (specifications == null || specifications.isEmpty()) {
+      return normalized;
+    }
+
+    specifications.forEach((key, value) -> {
+      String normalizedKey = blankToNull(key);
+      if (normalizedKey == null) {
+        return;
+      }
+      normalized.put(normalizedKey, stringifySpecificationValue(value));
+    });
+
+    return normalized;
+  }
+
+  private String stringifySpecificationValue(Object value) {
+    if (value == null) {
+      return "";
+    }
+    if (value instanceof String text) {
+      return text.trim();
+    }
+    if (value instanceof Number || value instanceof Boolean) {
+      return String.valueOf(value);
+    }
+    try {
+      return SPECIFICATION_VALUE_MAPPER.writeValueAsString(value);
+    } catch (Exception ex) {
+      return value.toString();
+    }
+  }
+
   private void applySettings(StoreSettings settings, ApiDtos.SettingsPayload payload) {
     settings.setSiteTitle(requiredValue(payload.siteTitle(), "Site title is required"));
-    settings.setMetaDescription(payload.metaDescription());
+    settings.setMetaDescription(blankToNull(payload.metaDescription()));
     settings.setLogoUrl(normalizePublicAssetUrl(payload.logoUrl(), "Logo URL"));
     settings.setFaviconUrl(normalizePublicAssetUrl(payload.faviconUrl(), "Favicon URL"));
-    settings.setFooterText(payload.footerText());
-    settings.setAnnouncementItems(
-        payload.announcementItems() == null ? new ArrayList<>() : new ArrayList<>(payload.announcementItems()));
-    settings.setInstagramUrl(payload.instagramUrl());
-    settings.setWhatsappNumber(payload.whatsappNumber());
+    settings.setFooterText(blankToNull(payload.footerText()));
+    settings.setAnnouncementItems(normalizeAnnouncementItems(payload.announcementItems()));
+    settings.setInstagramUrl(blankToNull(payload.instagramUrl()));
+    settings.setWhatsappNumber(blankToNull(payload.whatsappNumber()));
     settings.setShopPhone(requiredValue(blankToDefault(payload.shopPhone(), "9361586278"), "Shop phone is required"));
     settings.setSupportEmail(requiredValue(blankToDefault(payload.supportEmail(), "natrajganesh2000@gmail.com"), "Support email is required"));
     settings.setCatalogueUrl(normalizePublicAssetUrl(payload.catalogueUrl(), "Catalogue URL"));
-    settings.setContactUrl(payload.contactUrl());
+    settings.setContactUrl(blankToDefault(payload.contactUrl(), "/contact"));
   }
 
   private void applyCommunityMedia(CommunityMedia media, ApiDtos.CommunityMediaPayload payload) {
@@ -649,11 +683,20 @@ public class AdminCatalogController {
 
   private String normalizePublicAssetUrl(String value, String fieldName) {
     String normalized = blankToNull(value);
-    if (normalized == null) {
+    if (normalized == null || normalized.startsWith("#")) {
       return null;
+    }
+    if (normalized.startsWith("uploads/")) {
+      normalized = "/" + normalized;
     }
     if (normalized.startsWith("/uploads/")) {
       return normalized;
+    }
+    if (isSafeRootRelativePath(normalized)) {
+      return normalized;
+    }
+    if (!hasUriScheme(normalized) && looksLikeHostname(normalized)) {
+      normalized = "https://" + normalized;
     }
 
     URI uri;
@@ -668,7 +711,7 @@ public class AdminCatalogController {
     if (!"https".equalsIgnoreCase(scheme) || host == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          fieldName + " must use HTTPS or an uploaded /uploads/... file");
+          fieldName + " must use HTTPS, a site-relative /path, or an uploaded /uploads/... file");
     }
     if (isPrivateNetworkHost(host)) {
       throw new ResponseStatusException(
@@ -677,6 +720,36 @@ public class AdminCatalogController {
     }
 
     return normalized;
+  }
+
+  private List<String> normalizeAnnouncementItems(List<String> announcementItems) {
+    if (announcementItems == null) {
+      return new ArrayList<>();
+    }
+
+    return new ArrayList<>(announcementItems.stream()
+        .map(this::blankToNull)
+        .filter(item -> item != null)
+        .toList());
+  }
+
+  private boolean isSafeRootRelativePath(String value) {
+    return value.startsWith("/")
+        && !value.startsWith("//")
+        && !value.contains("\\")
+        && !value.contains("\r")
+        && !value.contains("\n");
+  }
+
+  private boolean hasUriScheme(String value) {
+    return value.matches("^[A-Za-z][A-Za-z0-9+.-]*:.*");
+  }
+
+  private boolean looksLikeHostname(String value) {
+    String lower = value.toLowerCase();
+    int firstSlash = lower.indexOf('/');
+    String host = firstSlash >= 0 ? lower.substring(0, firstSlash) : lower;
+    return host.contains(".") && !host.contains(" ") && (firstSlash >= 0 || host.startsWith("www."));
   }
 
   private boolean isPrivateNetworkHost(String hostname) {

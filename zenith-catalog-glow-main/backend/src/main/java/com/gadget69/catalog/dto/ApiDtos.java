@@ -119,7 +119,7 @@ public final class ApiDtos {
       String status,
       String default_thumbnail_url,
       List<String> galleryImages,
-      Map<String, String> specifications,
+      Map<String, Object> specifications,
       List<ProductMediaPayload> media
   ) {}
 

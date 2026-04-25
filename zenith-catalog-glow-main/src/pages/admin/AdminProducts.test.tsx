@@ -163,4 +163,56 @@ describe("AdminProducts", () => {
     await waitFor(() => expect(mockDeleteProduct).toHaveBeenCalledWith(7));
     expect(container.querySelector("table")).toBeInTheDocument();
   });
+
+  it("normalizes mixed specification values before updating a product", async () => {
+    mockUseAdminData.mockReturnValue({
+      products: [
+        {
+          ...baseProducts[0],
+          specifications: {
+            Display: "6.7 inch",
+            Weight: 210,
+            "Wireless Charging": true,
+            Battery: { value: 5000, unit: "mAh" },
+          },
+        },
+      ],
+      sections: baseSections,
+      addProduct: mockAddProduct,
+      updateProduct: mockUpdateProduct,
+      deleteProduct: mockDeleteProduct,
+      isLoading: false,
+      ensureProductsLoaded: mockEnsureProductsLoaded,
+      ensureSectionsLoaded: mockEnsureSectionsLoaded,
+    });
+    mockUpdateProduct.mockResolvedValue(baseProducts[0]);
+
+    render(
+      <MemoryRouter>
+        <AdminProducts />
+      </MemoryRouter>
+    );
+
+    const row = screen.getByText("Atlas Pro").closest("tr");
+    expect(row).not.toBeNull();
+    const rowButtons = row ? within(row).getAllByRole("button") : [];
+    fireEvent.click(rowButtons[0]);
+
+    await screen.findByRole("dialog");
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() =>
+      expect(mockUpdateProduct).toHaveBeenCalledWith(
+        7,
+        expect.objectContaining({
+          specifications: {
+            Display: "6.7 inch",
+            Weight: "210",
+            "Wireless Charging": "true",
+            Battery: "{\"value\":5000,\"unit\":\"mAh\"}",
+          },
+        })
+      )
+    );
+  });
 });

@@ -34,17 +34,19 @@ vi.mock("sonner", () => ({
 }));
 
 describe("AdminSettings", () => {
+  const baseSettings = {
+    id: 1,
+    siteTitle: "Gadget69",
+    announcementItems: [],
+    whatsappNumber: "8825602356",
+  };
+
   beforeEach(() => {
     mockChangePassword.mockReset();
     mockToastSuccess.mockReset();
     mockToastError.mockReset();
     mockUseAdminData.mockReturnValue({
-      settings: {
-        id: 1,
-        siteTitle: "Gadget69",
-        announcementItems: [],
-        whatsappNumber: "8825602356",
-      },
+      settings: baseSettings,
       ensureSettingsLoaded: vi.fn(),
       updateSettings: vi.fn(),
     });
@@ -60,13 +62,14 @@ describe("AdminSettings", () => {
   });
 
   it("saves store settings updates", async () => {
-    const updateSettings = vi.fn().mockResolvedValue(undefined);
+    const updateSettings = vi.fn().mockResolvedValue({
+      ...baseSettings,
+      announcementItems: ["Existing announcement", "New deal"],
+    });
     mockUseAdminData.mockReturnValue({
       settings: {
-        id: 1,
-        siteTitle: "Gadget69",
-        announcementItems: [],
-        whatsappNumber: "8825602356",
+        ...baseSettings,
+        announcementItems: ["Existing announcement"],
       },
       ensureSettingsLoaded: vi.fn(),
       updateSettings,
@@ -74,10 +77,77 @@ describe("AdminSettings", () => {
 
     render(<AdminSettings />);
 
+    fireEvent.change(screen.getByPlaceholderText("New announcement..."), {
+      target: { value: "  New deal  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add announcement" }));
     fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
 
-    await waitFor(() => expect(updateSettings).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(updateSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          announcementItems: ["Existing announcement", "New deal"],
+        })
+      )
+    );
     expect(mockToastSuccess).toHaveBeenCalledWith("Settings saved");
+  });
+
+  it("saves announcement add and remove when the catalogue URL has an old placeholder", async () => {
+    const updateSettings = vi.fn().mockResolvedValue({
+      ...baseSettings,
+      catalogueUrl: undefined,
+      announcementItems: ["Keep this", "Added deal"],
+    });
+    mockUseAdminData.mockReturnValue({
+      settings: {
+        ...baseSettings,
+        catalogueUrl: "#",
+        announcementItems: ["Keep this", "Remove this"],
+      },
+      ensureSettingsLoaded: vi.fn(),
+      updateSettings,
+    });
+
+    render(<AdminSettings />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove announcement 2" }));
+    fireEvent.change(screen.getByPlaceholderText("New announcement..."), {
+      target: { value: "  Added deal  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add announcement" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save Settings" }));
+
+    await waitFor(() =>
+      expect(updateSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          catalogueUrl: undefined,
+          announcementItems: ["Keep this", "Added deal"],
+        })
+      )
+    );
+    expect(mockToastSuccess).toHaveBeenCalledWith("Settings saved");
+  });
+
+  it("keeps unsaved edits when settings refresh in the background", () => {
+    let settings = { ...baseSettings, siteTitle: "Gadget69" };
+    const ensureSettingsLoaded = vi.fn();
+    const updateSettings = vi.fn();
+    mockUseAdminData.mockImplementation(() => ({
+      settings,
+      ensureSettingsLoaded,
+      updateSettings,
+    }));
+
+    const view = render(<AdminSettings />);
+    fireEvent.change(screen.getByDisplayValue("Gadget69"), {
+      target: { value: "Gadget69 Updated" },
+    });
+
+    settings = { ...baseSettings, siteTitle: "Server Refresh" };
+    view.rerender(<AdminSettings />);
+
+    expect(screen.getByDisplayValue("Gadget69 Updated")).toBeInTheDocument();
   });
 
   it("submits a strong current-password change", async () => {
