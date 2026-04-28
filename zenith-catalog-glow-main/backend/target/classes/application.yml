@@ -66,6 +66,7 @@ app:
     cloud-name: ${APP_CLOUDINARY_CLOUD_NAME:}
     api-key: ${APP_CLOUDINARY_API_KEY:}
     api-secret: ${APP_CLOUDINARY_API_SECRET:}
+    category-image-folder: ${APP_CLOUDINARY_CATEGORY_IMAGE_FOLDER:gadget69/categories/images}
     community-video-folder: ${APP_CLOUDINARY_COMMUNITY_VIDEO_FOLDER:gadget69/community/videos}
     secure: ${APP_CLOUDINARY_SECURE:true}
   razorpay:

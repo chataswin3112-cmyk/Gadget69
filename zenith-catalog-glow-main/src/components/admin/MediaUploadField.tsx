@@ -3,7 +3,7 @@ import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { uploadFile } from "@/api/productApi";
+import { uploadFile as uploadAdminFile } from "@/api/productApi";
 import { isVideoUrl } from "@/lib/video";
 import MediaImage from "@/components/ui/media-image";
 import VideoFrame from "@/components/ui/VideoFrame";
@@ -13,6 +13,7 @@ interface MediaUploadFieldProps {
   value?: string;
   accept?: string;
   placeholder?: string;
+  uploadFile?: (file: File) => Promise<string>;
   onChange: (value: string) => void;
 }
 
@@ -21,6 +22,7 @@ const MediaUploadField = ({
   value,
   accept = "image/*",
   placeholder,
+  uploadFile = uploadAdminFile,
   onChange,
 }: MediaUploadFieldProps) => {
   const [uploading, setUploading] = useState(false);

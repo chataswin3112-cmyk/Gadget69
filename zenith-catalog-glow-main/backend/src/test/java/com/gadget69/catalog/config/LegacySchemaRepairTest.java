@@ -190,4 +190,54 @@ class LegacySchemaRepairTest {
         .hasMessageContaining("customer_orders")
         .hasMessageContaining("address");
   }
+
+  @Test
+  void widensLegacyCatalogMediaUrlColumns() {
+    jdbcTemplate.execute("""
+        CREATE TABLE sections (
+          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          image_url VARCHAR(255)
+        )
+        """);
+    jdbcTemplate.execute("""
+        CREATE TABLE community_media (
+          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+          image_url VARCHAR(255),
+          video_url VARCHAR(255),
+          thumbnail_url VARCHAR(255)
+        )
+        """);
+    jdbcTemplate.execute("""
+        CREATE TABLE product_media (
+          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+          media_url VARCHAR(255) NOT NULL
+        )
+        """);
+
+    new LegacySchemaRepair(jdbcTemplate).afterPropertiesSet();
+
+    String longUrl = "https://res.cloudinary.com/demo/image/upload/"
+        + "a".repeat(350)
+        + "/category-image.webp";
+
+    jdbcTemplate.update(
+        "INSERT INTO sections (name, image_url) VALUES (?, ?)",
+        "Legacy Category",
+        longUrl);
+    jdbcTemplate.update(
+        "INSERT INTO community_media (image_url, video_url, thumbnail_url) VALUES (?, ?, ?)",
+        longUrl,
+        longUrl.replace("/image/", "/video/"),
+        longUrl);
+    jdbcTemplate.update(
+        "INSERT INTO product_media (media_url) VALUES (?)",
+        longUrl);
+
+    String savedUrl = jdbcTemplate.queryForObject(
+        "SELECT image_url FROM sections WHERE name = ?",
+        String.class,
+        "Legacy Category");
+    assertThat(savedUrl).isEqualTo(longUrl);
+  }
 }

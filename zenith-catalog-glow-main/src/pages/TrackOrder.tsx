@@ -7,10 +7,12 @@ import FloatingContactActions from "@/components/storefront/FloatingContactActio
 import { getOrderById } from "@/api/orderApi";
 import { getErrorMessage } from "@/lib/api-error";
 import { describeVariant } from "@/lib/catalog-media";
+import { DEFAULT_WHATSAPP_NUMBER, formatPhoneDisplay } from "@/lib/social-links";
 import { toast } from "@/hooks/use-toast";
 import type { Order } from "@/types";
 
 const statusSteps = ["CONFIRMED", "PROCESSING", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED"] as const;
+const SAMPLE_PHONE_DISPLAY = formatPhoneDisplay(DEFAULT_WHATSAPP_NUMBER);
 
 const normalizeOrderStatus = (status?: string) => {
   const normalized = status?.trim().replace(/-/g, "_").replace(/\s+/g, "_").toUpperCase() || "CONFIRMED";
@@ -129,7 +131,7 @@ const TrackOrder = () => {
                   value={form.phone}
                   onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
                   className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="+91 98765 43210"
+                  placeholder={SAMPLE_PHONE_DISPLAY}
                 />
               </div>
               <button

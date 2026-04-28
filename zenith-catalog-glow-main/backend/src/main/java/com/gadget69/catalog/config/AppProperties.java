@@ -29,6 +29,7 @@ public class AppProperties {
     private String productVideoFolder = "gadget69/products/videos";
     private String variantImageFolder = "gadget69/variants/images";
     private String variantVideoFolder = "gadget69/variants/videos";
+    private String categoryImageFolder = "gadget69/categories/images";
     private String communityVideoFolder = "gadget69/community/videos";
     private boolean secure = true;
   }

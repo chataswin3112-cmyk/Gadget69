@@ -1,6 +1,8 @@
 package com.gadget69.catalog.config;
 
 import jakarta.annotation.PostConstruct;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ public class LegacySchemaRepair {
 
   void repairLegacySchemas() {
     repairAdminUsers();
+    repairCatalogMedia();
     repairCustomerOrders();
     repairOrderItems();
     verifyAdminOrdersSchema();
@@ -40,6 +43,38 @@ public class LegacySchemaRepair {
     apply("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS token_version INTEGER");
     if (columnExists("admin_users", "token_version")) {
       apply("UPDATE admin_users SET token_version = 0 WHERE token_version IS NULL");
+    }
+  }
+
+  private void repairCatalogMedia() {
+    widenColumnIfPresent("sections", "image_url");
+    widenColumnIfPresent("products", "image_url");
+    widenColumnIfPresent("products", "video_url");
+    widenColumnIfPresent("products", "default_thumbnail_url");
+    widenColumnIfPresent("product_media", "media_url");
+    widenColumnIfPresent("variant_media", "media_url");
+    widenColumnIfPresent("community_media", "image_url");
+    widenColumnIfPresent("community_media", "video_url");
+    widenColumnIfPresent("community_media", "thumbnail_url");
+    widenColumnIfPresent("banners", "desktop_image_url");
+    widenColumnIfPresent("banners", "mobile_image_url");
+    widenColumnIfPresent("store_settings", "logo_url");
+    widenColumnIfPresent("store_settings", "favicon_url");
+    widenColumnIfPresent("store_settings", "catalogue_url");
+  }
+
+  private void widenColumnIfPresent(String tableName, String columnName) {
+    if (!tableExists(tableName) || !columnExists(tableName, columnName)) {
+      return;
+    }
+
+    switch (databaseKind()) {
+      case POSTGRESQL ->
+          apply("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " TYPE VARCHAR(2000)");
+      case MYSQL ->
+          apply("ALTER TABLE " + tableName + " MODIFY COLUMN " + columnName + " VARCHAR(2000)");
+      case H2, UNKNOWN ->
+          apply("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " VARCHAR(2000)");
     }
   }
 
@@ -224,5 +259,35 @@ public class LegacySchemaRepair {
       log.debug("Could not inspect schema metadata for table {}", tableName, exception);
       return false;
     }
+  }
+
+  private DatabaseKind databaseKind() {
+    try {
+      if (jdbcTemplate.getDataSource() == null) {
+        return DatabaseKind.UNKNOWN;
+      }
+      try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+        String productName = connection.getMetaData().getDatabaseProductName().toLowerCase();
+        if (productName.contains("postgres")) {
+          return DatabaseKind.POSTGRESQL;
+        }
+        if (productName.contains("mysql") || productName.contains("mariadb")) {
+          return DatabaseKind.MYSQL;
+        }
+        if (productName.contains("h2")) {
+          return DatabaseKind.H2;
+        }
+      }
+    } catch (SQLException exception) {
+      log.debug("Could not inspect database product name", exception);
+    }
+    return DatabaseKind.UNKNOWN;
+  }
+
+  private enum DatabaseKind {
+    POSTGRESQL,
+    MYSQL,
+    H2,
+    UNKNOWN
   }
 }

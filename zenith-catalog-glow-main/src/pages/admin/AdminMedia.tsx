@@ -171,7 +171,7 @@ const AdminMedia = () => {
               <div className="admin-actions-row sm:justify-end">
                 <Switch
                   checked={item.isActive}
-                  onCheckedChange={(value) => updateCommunityMedia(item.id, { isActive: value })}
+                  onCheckedChange={(value) => updateCommunityMedia(item.id, { ...item, isActive: value })}
                 />
                 <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
                   <Pencil className="h-3.5 w-3.5" />

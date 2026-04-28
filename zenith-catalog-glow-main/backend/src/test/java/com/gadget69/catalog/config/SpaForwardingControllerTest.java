@@ -28,6 +28,14 @@ class SpaForwardingControllerTest {
         .andExpect(status().isNotFound());
   }
 
+  @Test
+  void doesNotInterceptFontRequests() throws Exception {
+    MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller()).build();
+
+    mockMvc.perform(get("/fonts/satoshi-400.woff2"))
+        .andExpect(status().isNotFound());
+  }
+
   private SpaForwardingController controller() {
     AppProperties appProperties = new AppProperties();
     appProperties.setFrontendDevUrl("http://localhost:8080");

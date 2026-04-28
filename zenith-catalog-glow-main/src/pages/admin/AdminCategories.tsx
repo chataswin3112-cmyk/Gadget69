@@ -14,6 +14,7 @@ import MediaUploadField from "@/components/admin/MediaUploadField";
 import { getErrorMessage } from "@/lib/api-error";
 import MediaImage from "@/components/ui/media-image";
 import { getChildSections, getTopLevelSections, isSubcategory } from "@/lib/category";
+import { uploadCatalogMediaFile } from "@/api/productApi";
 
 const emptySection: Partial<Section> = {
   name: "",
@@ -24,6 +25,11 @@ const emptySection: Partial<Section> = {
   show_in_top_category: false,
   sort_order: 0,
   parentSectionId: null,
+};
+
+const uploadCategoryImage = async (file: File) => {
+  const uploaded = await uploadCatalogMediaFile(file, "CATEGORY");
+  return uploaded.secureUrl;
 };
 
 const AdminCategories = () => {
@@ -144,6 +150,9 @@ const AdminCategories = () => {
     }
   };
 
+  const updateExistingSection = (section: Section, patch: Partial<Section>) =>
+    updateSection(section.id, { ...section, ...patch });
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -194,13 +203,13 @@ const AdminCategories = () => {
                         {childCountLabel}
                       </td>
                       <td className="p-4">
-                        <Switch checked={section.is_active !== false} onCheckedChange={(value) => updateSection(section.id, { is_active: value })} />
+                        <Switch checked={section.is_active !== false} onCheckedChange={(value) => updateExistingSection(section, { is_active: value })} />
                       </td>
                       <td className="p-4">
-                        <Switch checked={section.show_in_explore !== false} onCheckedChange={(value) => updateSection(section.id, { show_in_explore: value })} />
+                        <Switch checked={section.show_in_explore !== false} onCheckedChange={(value) => updateExistingSection(section, { show_in_explore: value })} />
                       </td>
                       <td className="p-4">
-                        <Switch checked={!!section.show_in_top_category} onCheckedChange={(value) => updateSection(section.id, { show_in_top_category: value })} />
+                        <Switch checked={!!section.show_in_top_category} onCheckedChange={(value) => updateExistingSection(section, { show_in_top_category: value })} />
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
@@ -352,6 +361,7 @@ const AdminCategories = () => {
               value={editing?.imageUrl}
               accept="image/*"
               placeholder="Paste image URL or upload one"
+              uploadFile={uploadCategoryImage}
               onChange={(value) => setEditing((prev) => prev ? { ...prev, imageUrl: value } : prev)}
             />
             <div className="space-y-2">

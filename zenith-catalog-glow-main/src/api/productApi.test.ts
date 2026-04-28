@@ -48,4 +48,30 @@ describe("productApi upload fallbacks", () => {
       })
     );
   });
+
+  it("passes the category target when uploading category images", async () => {
+    const file = new File(["image"], "subcategory.png", { type: "image/png" });
+
+    vi.mocked(apiClient.post)
+      .mockRejectedValueOnce(new Error("Cloudinary unavailable"))
+      .mockResolvedValueOnce({
+        data: {
+          url: "/uploads/images/subcategory.png",
+          fileName: "subcategory.png",
+          mediaType: "IMAGES",
+        },
+      });
+
+    await expect(uploadCatalogMediaFile(file, "CATEGORY")).resolves.toEqual({
+      secureUrl: "/uploads/images/subcategory.png",
+      mediaType: "IMAGE",
+    });
+
+    expect(apiClient.post).toHaveBeenNthCalledWith(1, "/admin/catalog-media/upload-signature", {
+      fileName: "subcategory.png",
+      contentType: "image/png",
+      fileSize: file.size,
+      target: "CATEGORY",
+    });
+  });
 });

@@ -66,6 +66,12 @@ public class CloudinaryCatalogMediaService {
       case VARIANT -> sanitizeFolder(mediaKind == MediaKind.VIDEO
           ? config.getVariantVideoFolder()
           : config.getVariantImageFolder());
+      case CATEGORY -> {
+        if (mediaKind == MediaKind.VIDEO) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category uploads only support images");
+        }
+        yield sanitizeFolder(config.getCategoryImageFolder());
+      }
     };
   }
 
@@ -104,7 +110,8 @@ public class CloudinaryCatalogMediaService {
 
   private enum UploadTarget {
     PRODUCT,
-    VARIANT;
+    VARIANT,
+    CATEGORY;
 
     private static UploadTarget from(String value) {
       if (value == null || value.isBlank()) {
@@ -113,7 +120,7 @@ public class CloudinaryCatalogMediaService {
       try {
         return UploadTarget.valueOf(value.trim().toUpperCase(Locale.ROOT));
       } catch (IllegalArgumentException ex) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upload target must be PRODUCT or VARIANT");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upload target must be PRODUCT, VARIANT, or CATEGORY");
       }
     }
   }

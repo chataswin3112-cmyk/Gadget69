@@ -7,6 +7,8 @@ import {
   VariantMedia,
 } from "@/types";
 
+export type CatalogMediaUploadTarget = "PRODUCT" | "VARIANT" | "CATEGORY";
+
 export const getProducts = async (): Promise<Product[]> => {
   const res = await apiClient.get("/products");
   return res.data;
@@ -79,7 +81,7 @@ export const getCatalogMediaUploadSignature = async (data: {
   fileName: string;
   contentType: string;
   fileSize: number;
-  target: "PRODUCT" | "VARIANT";
+  target: CatalogMediaUploadTarget;
 }): Promise<CatalogMediaUploadSignature> => {
   const res = await apiClient.post("/admin/catalog-media/upload-signature", data);
   return res.data;
@@ -87,7 +89,7 @@ export const getCatalogMediaUploadSignature = async (data: {
 
 export const uploadCatalogMediaFile = async (
   file: File,
-  target: "PRODUCT" | "VARIANT"
+  target: CatalogMediaUploadTarget
 ): Promise<{
   secureUrl: string;
   mediaType: "IMAGE" | "VIDEO";

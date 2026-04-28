@@ -107,10 +107,10 @@ describe("Checkout", () => {
     fireEvent.change(screen.getByPlaceholderText("John Doe"), {
       target: { value: "Hari" },
     });
-    fireEvent.change(screen.getByPlaceholderText("+91 98765 43210"), {
+    fireEvent.change(screen.getByPlaceholderText("+91 93615 86278"), {
       target: { value: "9876543210" },
     });
-    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+    fireEvent.change(screen.getByPlaceholderText("natrajganesh2000@gmail.com"), {
       target: { value: "hari@example.com" },
     });
     fireEvent.change(screen.getByPlaceholderText("Street address, apartment, city, state"), {

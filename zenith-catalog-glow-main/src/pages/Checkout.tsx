@@ -10,10 +10,13 @@ import { createOrder, verifyPayment } from "@/api/orderApi";
 import { getErrorMessage } from "@/lib/api-error";
 import { describeVariant } from "@/lib/catalog-media";
 import { resolveMediaUrl } from "@/lib/media";
+import { DEFAULT_WHATSAPP_NUMBER, formatPhoneDisplay } from "@/lib/social-links";
+import { SUPPORT_EMAIL } from "@/lib/store-info";
 
 const RAZORPAY_SCRIPT_ID = "razorpay-checkout-js";
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
 const LAST_ORDER_STORAGE_KEY = "gadget69:last-order";
+const SAMPLE_PHONE_DISPLAY = formatPhoneDisplay(DEFAULT_WHATSAPP_NUMBER);
 
 interface RazorpayCheckoutResponse {
   razorpay_order_id: string;
@@ -253,7 +256,7 @@ const Checkout = () => {
                   value={form.phone}
                   onChange={handleChange}
                   className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="+91 98765 43210"
+                  placeholder={SAMPLE_PHONE_DISPLAY}
                 />
               </div>
 
@@ -265,7 +268,7 @@ const Checkout = () => {
                   value={form.email}
                   onChange={handleChange}
                   className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="you@example.com"
+                  placeholder={SUPPORT_EMAIL}
                 />
               </div>
             </div>

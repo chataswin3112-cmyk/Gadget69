@@ -19,8 +19,8 @@ public class SpaForwardingController {
   private final AppProperties appProperties;
 
   @GetMapping({
-      "/{path:^(?!api$|uploads$|assets$)[^\\.]*}",
-      "/{path:^(?!api$|uploads$|assets$)[^\\.]*}/**"
+      "/{path:^(?!api$|uploads$|assets$|fonts$)[^\\.]*}",
+      "/{path:^(?!api$|uploads$|assets$|fonts$)[^\\.]*}/**"
   })
   public String forward(HttpServletRequest request) {
     if (!hasBundledSpa()) {

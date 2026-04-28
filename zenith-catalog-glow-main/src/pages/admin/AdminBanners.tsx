@@ -88,8 +88,8 @@ const AdminBanners = () => {
     if (swapIndex < 0 || swapIndex >= sorted.length) return;
 
     try {
-      await updateBanner(sorted[index].id, { displayOrder: sorted[swapIndex].displayOrder });
-      await updateBanner(sorted[swapIndex].id, { displayOrder: sorted[index].displayOrder });
+      await updateBanner(sorted[index].id, { ...sorted[index], displayOrder: sorted[swapIndex].displayOrder });
+      await updateBanner(sorted[swapIndex].id, { ...sorted[swapIndex], displayOrder: sorted[index].displayOrder });
     } catch (error) {
       toast.error(getErrorMessage(error, "Failed to reorder banners"));
     }
@@ -120,7 +120,7 @@ const AdminBanners = () => {
                   </p>
                 </div>
                 <div className="admin-actions-row sm:justify-end">
-                  <Switch checked={banner.isActive} onCheckedChange={(value) => updateBanner(banner.id, { isActive: value })} />
+                  <Switch checked={banner.isActive} onCheckedChange={(value) => updateBanner(banner.id, { ...banner, isActive: value })} />
                   <Button variant="ghost" size="sm" onClick={() => moveOrder(banner.id, -1)} disabled={index === 0}>
                     <ArrowUp className="h-3.5 w-3.5" />
                   </Button>

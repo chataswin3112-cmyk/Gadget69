@@ -158,12 +158,16 @@ describe("AdminCategories", () => {
     const dialog = await screen.findByRole("dialog", { name: /add subcategory under phones/i });
     const textboxes = within(dialog).getAllByRole("textbox");
     fireEvent.change(textboxes[0], { target: { value: "Android" } });
+    fireEvent.change(screen.getByLabelText("Category Image"), {
+      target: { value: "https://cdn.example.com/android.jpg" },
+    });
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
 
     await waitFor(() =>
       expect(mockAddSection).toHaveBeenCalledWith(
         expect.objectContaining({
           name: "Android",
+          imageUrl: "https://cdn.example.com/android.jpg",
           parentSectionId: 1,
         })
       )

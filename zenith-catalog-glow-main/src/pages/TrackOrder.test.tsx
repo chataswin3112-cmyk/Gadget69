@@ -82,7 +82,7 @@ describe("TrackOrder", () => {
     fireEvent.change(screen.getByPlaceholderText("12345"), {
       target: { value: "321" },
     });
-    fireEvent.change(screen.getByPlaceholderText("+91 98765 43210"), {
+    fireEvent.change(screen.getByPlaceholderText("+91 93615 86278"), {
       target: { value: "9876543210" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Track Order" }));
@@ -124,7 +124,7 @@ describe("TrackOrder", () => {
     fireEvent.change(screen.getByPlaceholderText("12345"), {
       target: { value: "654" },
     });
-    fireEvent.change(screen.getByPlaceholderText("+91 98765 43210"), {
+    fireEvent.change(screen.getByPlaceholderText("+91 93615 86278"), {
       target: { value: "9999999999" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Track Order" }));

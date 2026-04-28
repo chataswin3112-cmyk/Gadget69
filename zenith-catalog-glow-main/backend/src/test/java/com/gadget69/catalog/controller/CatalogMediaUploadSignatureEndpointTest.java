@@ -49,6 +49,30 @@ class CatalogMediaUploadSignatureEndpointTest {
   }
 
   @Test
+  void imageUploadSignatureUsesCategoryImageFolder() throws Exception {
+    String token = loginAndExtractToken();
+
+    mockMvc.perform(post("/api/admin/catalog-media/upload-signature")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "fileName": "subcategory.png",
+                  "contentType": "image/png",
+                  "fileSize": 4096,
+                  "target": "CATEGORY"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.cloudName").value("demo-cloud"))
+        .andExpect(jsonPath("$.apiKey").value("demo-key"))
+        .andExpect(jsonPath("$.folder").value("gadget69/categories/images"))
+        .andExpect(jsonPath("$.resourceType").value("image"))
+        .andExpect(jsonPath("$.signature").isString())
+        .andExpect(jsonPath("$.timestamp").isNumber());
+  }
+
+  @Test
   void rejectsUnsupportedCatalogMediaTypes() throws Exception {
     String token = loginAndExtractToken();
 
