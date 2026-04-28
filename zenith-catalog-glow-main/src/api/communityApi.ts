@@ -1,8 +1,8 @@
 import axios from "axios";
 import apiClient from "./client";
-import { uploadAdminFile } from "./productApi";
 import { CommunityMedia } from "@/types";
 import { buildCloudinaryPosterUrl } from "@/lib/cloudinary";
+import { getErrorMessage } from "@/lib/api-error";
 
 export interface CommunityVideoUploadSignature {
   cloudName: string;
@@ -92,10 +92,12 @@ export const uploadCommunityVideo = async (
       videoHeight: res.data.height,
       videoDuration: res.data.duration,
     };
-  } catch {
-    const storedFile = await uploadAdminFile(file, onProgress);
-    return {
-      videoUrl: storedFile.url,
-    };
+  } catch (error) {
+    throw new Error(
+      getErrorMessage(
+        error,
+        "Cloudinary video upload failed. Configure Cloudinary storage before uploading live admin media."
+      )
+    );
   }
 };

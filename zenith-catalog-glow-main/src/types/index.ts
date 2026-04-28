@@ -235,7 +235,7 @@ export interface CatalogMediaUploadSignature {
   timestamp: number;
   signature: string;
   folder: string;
-  resourceType: "image" | "video";
+  resourceType: "image" | "video" | "raw";
 }
 
 export interface CommunityMedia {

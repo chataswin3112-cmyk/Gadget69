@@ -3,7 +3,7 @@ import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { uploadFile as uploadAdminFile } from "@/api/productApi";
+import { CatalogMediaUploadTarget, uploadCatalogAssetFile } from "@/api/productApi";
 import { isVideoUrl } from "@/lib/video";
 import MediaImage from "@/components/ui/media-image";
 import VideoFrame from "@/components/ui/VideoFrame";
@@ -14,6 +14,7 @@ interface MediaUploadFieldProps {
   accept?: string;
   placeholder?: string;
   uploadFile?: (file: File) => Promise<string>;
+  uploadTarget?: CatalogMediaUploadTarget;
   onChange: (value: string) => void;
 }
 
@@ -22,7 +23,8 @@ const MediaUploadField = ({
   value,
   accept = "image/*",
   placeholder,
-  uploadFile = uploadAdminFile,
+  uploadFile,
+  uploadTarget = "GENERAL",
   onChange,
 }: MediaUploadFieldProps) => {
   const [uploading, setUploading] = useState(false);
@@ -33,7 +35,9 @@ const MediaUploadField = ({
 
     try {
       setUploading(true);
-      const url = await uploadFile(file);
+      const url = uploadFile
+        ? await uploadFile(file)
+        : (await uploadCatalogAssetFile(file, uploadTarget)).secureUrl;
       onChange(url);
       toast.success(`${file.name} uploaded`);
     } catch (error) {

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import MediaUploadField from "@/components/admin/MediaUploadField";
 
 vi.mock("@/api/productApi", () => ({
-  uploadFile: vi.fn(),
+  uploadCatalogAssetFile: vi.fn(),
 }));
 
 vi.mock("sonner", () => ({

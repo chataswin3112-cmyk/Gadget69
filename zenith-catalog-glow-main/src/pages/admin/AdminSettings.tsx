@@ -318,6 +318,7 @@ const AdminSettings = () => {
               value={form.logoUrl}
               accept="image/*"
               placeholder="Paste logo URL or upload one"
+              uploadTarget="SETTINGS"
               onChange={(value) => updateForm((current) => ({ ...current, logoUrl: value }))}
             />
             <MediaUploadField
@@ -325,6 +326,7 @@ const AdminSettings = () => {
               value={form.faviconUrl}
               accept="image/*"
               placeholder="Paste favicon URL or upload one"
+              uploadTarget="SETTINGS"
               onChange={(value) => updateForm((current) => ({ ...current, faviconUrl: value }))}
             />
           </div>
@@ -334,6 +336,7 @@ const AdminSettings = () => {
             value={form.catalogueUrl}
             accept=".pdf,image/*"
             placeholder="Paste catalogue link or upload a file"
+            uploadTarget="SETTINGS"
             onChange={(value) => updateForm((current) => ({ ...current, catalogueUrl: value }))}
           />
 

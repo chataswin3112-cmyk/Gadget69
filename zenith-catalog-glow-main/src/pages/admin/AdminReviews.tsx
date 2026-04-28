@@ -252,6 +252,7 @@ const AdminReviews = () => {
               value={editing?.avatar || ""}
               accept="image/*"
               placeholder="Upload or paste a reviewer image URL"
+              uploadTarget="REVIEW"
               onChange={(value) =>
                 setEditing((prev) => prev ? { ...prev, avatar: value } : prev)
               }

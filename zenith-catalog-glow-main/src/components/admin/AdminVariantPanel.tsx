@@ -507,7 +507,7 @@ const AdminVariantPanel = ({ productId }: AdminVariantPanelProps) => {
                         />
                       </label>
                       <p className="text-xs text-muted-foreground">
-                        Images and videos upload to Cloudinary when configured, otherwise secure local storage.
+                        Images and videos upload to Cloudinary so they survive redeploys.
                       </p>
                     </div>
                   </div>

@@ -155,6 +155,7 @@ const AdminBanners = () => {
               value={editing?.desktopImageUrl}
               accept="image/*"
               placeholder="Paste image URL or upload one"
+              uploadTarget="BANNER"
               onChange={(value) => setEditing((prev) => prev ? { ...prev, desktopImageUrl: value } : prev)}
             />
             <MediaUploadField
@@ -162,6 +163,7 @@ const AdminBanners = () => {
               value={editing?.mobileImageUrl}
               accept="image/*"
               placeholder="Optional mobile image"
+              uploadTarget="BANNER"
               onChange={(value) => setEditing((prev) => prev ? { ...prev, mobileImageUrl: value } : prev)}
             />
             <div className="admin-dialog-grid-2">

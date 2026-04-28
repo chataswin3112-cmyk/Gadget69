@@ -274,6 +274,7 @@ const AdminMedia = () => {
                       value={editing?.imageUrl}
                       accept="image/*"
                       placeholder="Paste image URL or upload one"
+                      uploadTarget="COMMUNITY"
                       onChange={(value) =>
                         setEditing((prev) => (prev ? { ...prev, imageUrl: value } : prev))
                       }
@@ -285,6 +286,7 @@ const AdminMedia = () => {
                       value={editing?.thumbnailUrl}
                       accept="image/*"
                       placeholder="Paste thumbnail URL or upload one"
+                      uploadTarget="COMMUNITY"
                       onChange={(value) =>
                         setEditing((prev) => (prev ? { ...prev, thumbnailUrl: value } : prev))
                       }

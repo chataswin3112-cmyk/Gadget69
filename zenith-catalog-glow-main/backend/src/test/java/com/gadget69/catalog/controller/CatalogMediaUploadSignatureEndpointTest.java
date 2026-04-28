@@ -73,7 +73,31 @@ class CatalogMediaUploadSignatureEndpointTest {
   }
 
   @Test
-  void rejectsUnsupportedCatalogMediaTypes() throws Exception {
+  void imageUploadSignatureUsesBannerImageFolder() throws Exception {
+    String token = loginAndExtractToken();
+
+    mockMvc.perform(post("/api/admin/catalog-media/upload-signature")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "fileName": "homepage-banner.jpg",
+                  "contentType": "image/jpeg",
+                  "fileSize": 4096,
+                  "target": "BANNER"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.cloudName").value("demo-cloud"))
+        .andExpect(jsonPath("$.apiKey").value("demo-key"))
+        .andExpect(jsonPath("$.folder").value("gadget69/banners/images"))
+        .andExpect(jsonPath("$.resourceType").value("image"))
+        .andExpect(jsonPath("$.signature").isString())
+        .andExpect(jsonPath("$.timestamp").isNumber());
+  }
+
+  @Test
+  void videoUploadSignatureAcceptsMovFilesForProductMedia() throws Exception {
     String token = loginAndExtractToken();
 
     mockMvc.perform(post("/api/admin/catalog-media/upload-signature")
@@ -84,11 +108,51 @@ class CatalogMediaUploadSignatureEndpointTest {
                   "fileName": "clip.mov",
                   "contentType": "video/quicktime",
                   "fileSize": 2048,
+                  "target": "PRODUCT"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.folder").value("gadget69/products/videos"))
+        .andExpect(jsonPath("$.resourceType").value("video"));
+  }
+
+  @Test
+  void settingsUploadSignatureAcceptsPdfFilesAsRawAssets() throws Exception {
+    String token = loginAndExtractToken();
+
+    mockMvc.perform(post("/api/admin/catalog-media/upload-signature")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "fileName": "catalogue.pdf",
+                  "contentType": "application/pdf",
+                  "fileSize": 2048,
+                  "target": "SETTINGS"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.folder").value("gadget69/settings/files"))
+        .andExpect(jsonPath("$.resourceType").value("raw"));
+  }
+
+  @Test
+  void rejectsUnsupportedCatalogMediaTypes() throws Exception {
+    String token = loginAndExtractToken();
+
+    mockMvc.perform(post("/api/admin/catalog-media/upload-signature")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "fileName": "script.exe",
+                  "contentType": "application/octet-stream",
+                  "fileSize": 2048,
                   "target": "VARIANT"
                 }
                 """))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("Only jpg, jpeg, png, webp images and mp4 videos are supported"));
+        .andExpect(jsonPath("$.message").value("Only jpg, jpeg, png, webp, gif, svg images, mp4, mov, webm videos, and PDF files are supported"));
   }
 
   private String loginAndExtractToken() throws Exception {

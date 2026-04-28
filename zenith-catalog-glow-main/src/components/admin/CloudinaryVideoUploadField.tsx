@@ -106,7 +106,7 @@ const CloudinaryVideoUploadField = ({ value, onChange }: CloudinaryVideoUploadFi
       <div className="space-y-1">
         <Label className="font-body">Community Video</Label>
         <p className="text-sm text-muted-foreground">
-          Paste a Cloudinary, YouTube, or Instagram link, or upload any MP4, MOV, or WebM file. When Cloudinary is unavailable, uploads fall back to local storage automatically.
+          Paste a Cloudinary, YouTube, or Instagram link, or upload any MP4, MOV, or WebM file. Uploaded files are stored in Cloudinary so they survive redeploys.
         </p>
       </div>
 

@@ -66,8 +66,18 @@ app:
     cloud-name: ${APP_CLOUDINARY_CLOUD_NAME:}
     api-key: ${APP_CLOUDINARY_API_KEY:}
     api-secret: ${APP_CLOUDINARY_API_SECRET:}
+    product-image-folder: ${APP_CLOUDINARY_PRODUCT_IMAGE_FOLDER:gadget69/products/images}
+    product-video-folder: ${APP_CLOUDINARY_PRODUCT_VIDEO_FOLDER:gadget69/products/videos}
+    variant-image-folder: ${APP_CLOUDINARY_VARIANT_IMAGE_FOLDER:gadget69/variants/images}
+    variant-video-folder: ${APP_CLOUDINARY_VARIANT_VIDEO_FOLDER:gadget69/variants/videos}
     category-image-folder: ${APP_CLOUDINARY_CATEGORY_IMAGE_FOLDER:gadget69/categories/images}
+    banner-image-folder: ${APP_CLOUDINARY_BANNER_IMAGE_FOLDER:gadget69/banners/images}
+    community-image-folder: ${APP_CLOUDINARY_COMMUNITY_IMAGE_FOLDER:gadget69/community/images}
     community-video-folder: ${APP_CLOUDINARY_COMMUNITY_VIDEO_FOLDER:gadget69/community/videos}
+    review-image-folder: ${APP_CLOUDINARY_REVIEW_IMAGE_FOLDER:gadget69/reviews/images}
+    settings-image-folder: ${APP_CLOUDINARY_SETTINGS_IMAGE_FOLDER:gadget69/settings/images}
+    settings-file-folder: ${APP_CLOUDINARY_SETTINGS_FILE_FOLDER:gadget69/settings/files}
+    admin-asset-folder: ${APP_CLOUDINARY_ADMIN_ASSET_FOLDER:gadget69/admin/assets}
     secure: ${APP_CLOUDINARY_SECURE:true}
   razorpay:
     enabled: ${APP_RAZORPAY_ENABLED:${RAZORPAY_ENABLED:false}}

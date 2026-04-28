@@ -1,5 +1,13 @@
+import axios from "axios";
 import apiClient from "@/api/client";
 import { uploadCommunityVideo } from "@/api/communityApi";
+
+vi.mock("axios", () => ({
+  default: {
+    isAxiosError: vi.fn(() => false),
+    post: vi.fn(),
+  },
+}));
 
 vi.mock("@/api/client", () => ({
   default: {
@@ -10,42 +18,70 @@ vi.mock("@/api/client", () => ({
   },
 }));
 
-describe("communityApi upload fallbacks", () => {
+describe("communityApi persistent uploads", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("falls back to local admin storage when community video signatures are unavailable", async () => {
+  it("uploads community videos to Cloudinary and returns the poster payload", async () => {
     const file = new File(["video"], "launch.webm", { type: "video/webm" });
     const progress = vi.fn();
 
-    vi.mocked(apiClient.post)
-      .mockRejectedValueOnce(new Error("Cloudinary unavailable"))
-      .mockResolvedValueOnce({
-        data: {
-          url: "/uploads/videos/launch.webm",
-          fileName: "launch.webm",
-          mediaType: "VIDEOS",
-        },
-      });
-
-    await expect(uploadCommunityVideo(file, progress)).resolves.toEqual({
-      videoUrl: "/uploads/videos/launch.webm",
+    vi.mocked(apiClient.post).mockResolvedValueOnce({
+      data: {
+        cloudName: "demo-cloud",
+        apiKey: "demo-key",
+        timestamp: 123,
+        signature: "signed",
+        folder: "gadget69/community/videos",
+        resourceType: "video",
+      },
+    });
+    vi.mocked(axios.post).mockResolvedValueOnce({
+      data: {
+        secure_url: "https://res.cloudinary.com/demo-cloud/video/upload/gadget69/community/videos/launch.webm",
+        public_id: "gadget69/community/videos/launch",
+        width: 1080,
+        height: 1920,
+        duration: 6.5,
+      },
     });
 
-    expect(progress).toHaveBeenCalledWith(100);
-    expect(apiClient.post).toHaveBeenNthCalledWith(1, "/admin/community-media/upload-signature", {
+    await expect(uploadCommunityVideo(file, progress)).resolves.toEqual({
+      videoUrl: "https://res.cloudinary.com/demo-cloud/video/upload/gadget69/community/videos/launch.webm",
+      thumbnailUrl:
+        "https://res.cloudinary.com/demo-cloud/video/upload/c_fill,g_auto,h_720,w_1280,so_0/gadget69/community/videos/launch.jpg",
+      videoPublicId: "gadget69/community/videos/launch",
+      videoWidth: 1080,
+      videoHeight: 1920,
+      videoDuration: 6.5,
+    });
+
+    expect(apiClient.post).toHaveBeenCalledTimes(1);
+    expect(apiClient.post).toHaveBeenCalledWith("/admin/community-media/upload-signature", {
       fileName: "launch.webm",
       contentType: "video/webm",
       fileSize: file.size,
     });
-    expect(apiClient.post).toHaveBeenNthCalledWith(
-      2,
+    expect(apiClient.post).not.toHaveBeenCalledWith(
       "/admin/upload",
       expect.any(FormData),
-      expect.objectContaining({
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      expect.anything()
+    );
+  });
+
+  it("does not fall back to redeploy-unsafe local storage when video signatures are unavailable", async () => {
+    const file = new File(["video"], "launch.webm", { type: "video/webm" });
+
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error("Cloudinary unavailable"));
+
+    await expect(uploadCommunityVideo(file)).rejects.toThrow("Cloudinary unavailable");
+
+    expect(apiClient.post).toHaveBeenCalledTimes(1);
+    expect(apiClient.post).not.toHaveBeenCalledWith(
+      "/admin/upload",
+      expect.any(FormData),
+      expect.anything()
     );
   });
 });

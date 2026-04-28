@@ -30,7 +30,13 @@ public class AppProperties {
     private String variantImageFolder = "gadget69/variants/images";
     private String variantVideoFolder = "gadget69/variants/videos";
     private String categoryImageFolder = "gadget69/categories/images";
+    private String bannerImageFolder = "gadget69/banners/images";
+    private String communityImageFolder = "gadget69/community/images";
     private String communityVideoFolder = "gadget69/community/videos";
+    private String reviewImageFolder = "gadget69/reviews/images";
+    private String settingsImageFolder = "gadget69/settings/images";
+    private String settingsFileFolder = "gadget69/settings/files";
+    private String adminAssetFolder = "gadget69/admin/assets";
     private boolean secure = true;
   }
 

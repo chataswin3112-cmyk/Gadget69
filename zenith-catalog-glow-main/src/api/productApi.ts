@@ -6,8 +6,19 @@ import {
   ProductVariant,
   VariantMedia,
 } from "@/types";
+import { getErrorMessage } from "@/lib/api-error";
 
-export type CatalogMediaUploadTarget = "PRODUCT" | "VARIANT" | "CATEGORY";
+export type CatalogMediaUploadTarget =
+  | "PRODUCT"
+  | "VARIANT"
+  | "CATEGORY"
+  | "BANNER"
+  | "COMMUNITY"
+  | "REVIEW"
+  | "SETTINGS"
+  | "GENERAL";
+
+type CloudinaryResourceType = "image" | "video" | "raw";
 
 export const getProducts = async (): Promise<Product[]> => {
   const res = await apiClient.get("/products");
@@ -50,9 +61,6 @@ interface AdminStoredFileResponse {
   mediaType: string;
 }
 
-const inferLocalMediaType = (file: File): "IMAGE" | "VIDEO" =>
-  file.type.toLowerCase().startsWith("video/") ? "VIDEO" : "IMAGE";
-
 export const uploadAdminFile = async (
   file: File,
   onProgress?: (progress: number) => void
@@ -73,8 +81,8 @@ export const uploadAdminFile = async (
 };
 
 export const uploadFile = async (file: File): Promise<string> => {
-  const storedFile = await uploadAdminFile(file);
-  return storedFile.url;
+  const uploaded = await uploadCatalogAssetFile(file, "GENERAL");
+  return uploaded.secureUrl;
 };
 
 export const getCatalogMediaUploadSignature = async (data: {
@@ -93,6 +101,32 @@ export const uploadCatalogMediaFile = async (
 ): Promise<{
   secureUrl: string;
   mediaType: "IMAGE" | "VIDEO";
+  publicId?: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+}> => {
+  const uploaded = await uploadCatalogAssetFile(file, target);
+  if (uploaded.resourceType === "raw") {
+    throw new Error("Only image and video uploads are supported here");
+  }
+
+  return {
+    secureUrl: uploaded.secureUrl,
+    mediaType: uploaded.resourceType === "video" ? "VIDEO" : "IMAGE",
+    publicId: uploaded.publicId,
+    width: uploaded.width,
+    height: uploaded.height,
+    duration: uploaded.duration,
+  };
+};
+
+export const uploadCatalogAssetFile = async (
+  file: File,
+  target: CatalogMediaUploadTarget
+): Promise<{
+  secureUrl: string;
+  resourceType: CloudinaryResourceType;
   publicId?: string;
   width?: number;
   height?: number;
@@ -128,18 +162,19 @@ export const uploadCatalogMediaFile = async (
 
     return {
       secureUrl: payload.secure_url as string,
-      mediaType: signature.resourceType === "video" ? "VIDEO" : "IMAGE",
       publicId: payload.public_id as string | undefined,
       width: payload.width as number | undefined,
       height: payload.height as number | undefined,
       duration: payload.duration as number | undefined,
+      resourceType: signature.resourceType as CloudinaryResourceType,
     };
-  } catch {
-    const storedFile = await uploadAdminFile(file);
-    return {
-      secureUrl: storedFile.url,
-      mediaType: inferLocalMediaType(file),
-    };
+  } catch (error) {
+    throw new Error(
+      getErrorMessage(
+        error,
+        "Cloudinary upload failed. Configure Cloudinary storage before uploading live admin media."
+      )
+    );
   }
 };
 
