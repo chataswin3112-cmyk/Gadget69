@@ -39,6 +39,7 @@ const TopCategoryGrid = ({ sections }: TopCategoryGridProps) => {
                     padding="p-0"
                     className="rounded-none"
                     optimizeWidth={180}
+                    optimizeHeight={135}
                   />
                   <div className="space-y-2 px-4 py-4">
                     <h3 className="font-heading text-lg font-bold text-foreground">{section.name}</h3>

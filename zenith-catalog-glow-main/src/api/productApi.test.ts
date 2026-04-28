@@ -20,7 +20,7 @@ describe("productApi persistent uploads", () => {
     vi.unstubAllGlobals();
   });
 
-  it("uploads catalog product media directly to Cloudinary without local fallback", async () => {
+  it("uploads catalog product media directly to Cloudinary when configured", async () => {
     const file = new File(["video"], "clip.mov", { type: "video/quicktime" });
 
     vi.mocked(apiClient.post).mockResolvedValueOnce({
@@ -135,18 +135,42 @@ describe("productApi persistent uploads", () => {
     });
   });
 
-  it("does not fall back to redeploy-unsafe local storage when Cloudinary is unavailable", async () => {
+  it("falls back to local admin storage when Cloudinary is unavailable", async () => {
     const file = new File(["image"], "banner.png", { type: "image/png" });
 
     vi.mocked(apiClient.post).mockRejectedValueOnce(new Error("Cloudinary unavailable"));
+    vi.mocked(apiClient.post).mockResolvedValueOnce({
+      data: {
+        url: "/uploads/images/banner.png",
+        fileName: "banner.png",
+        mediaType: "IMAGES",
+      },
+    });
 
-    await expect(uploadCatalogMediaFile(file, "BANNER")).rejects.toThrow("Cloudinary unavailable");
+    await expect(uploadCatalogMediaFile(file, "BANNER")).resolves.toEqual({
+      secureUrl: "/uploads/images/banner.png",
+      mediaType: "IMAGE",
+      publicId: "banner.png",
+      width: undefined,
+      height: undefined,
+      duration: undefined,
+    });
 
-    expect(apiClient.post).toHaveBeenCalledTimes(1);
-    expect(apiClient.post).not.toHaveBeenCalledWith(
+    expect(apiClient.post).toHaveBeenCalledTimes(2);
+    expect(apiClient.post).toHaveBeenLastCalledWith(
       "/admin/upload",
       expect.any(FormData),
       expect.anything()
     );
+  });
+
+  it("does not bypass catalog validation errors with local fallback", async () => {
+    const file = new File(["pdf"], "subcategory.pdf", { type: "application/pdf" });
+
+    await expect(uploadCatalogMediaFile(file, "CATEGORY")).rejects.toThrow(
+      "Category uploads only support images"
+    );
+
+    expect(apiClient.post).not.toHaveBeenCalled();
   });
 });

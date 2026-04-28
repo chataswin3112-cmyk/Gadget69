@@ -4,6 +4,9 @@ import com.gadget69.catalog.config.AppProperties;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -28,32 +31,31 @@ public class UploadImageController {
       CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
   private static final MediaType IMAGE_WEBP = MediaType.valueOf("image/webp");
 
-  private final Path uploadImagesDirectory;
+  private final List<Path> uploadImageDirectories;
 
   public UploadImageController(AppProperties appProperties) {
-    this.uploadImagesDirectory = Path.of(appProperties.getUploadDir())
-        .toAbsolutePath()
-        .normalize()
-        .resolve("images");
+    this.uploadImageDirectories = resolveUploadImageDirectories(appProperties.getUploadDir());
   }
 
   @GetMapping("/uploads/images/{filename:.+}")
   public ResponseEntity<Resource> image(
       @PathVariable String filename,
       @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptHeader) {
-    Path requestedImage = uploadImagesDirectory.resolve(filename).normalize();
-    if (!requestedImage.startsWith(uploadImagesDirectory)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
-    }
+    for (Path uploadImagesDirectory : uploadImageDirectories) {
+      Path requestedImage = uploadImagesDirectory.resolve(filename).normalize();
+      if (!requestedImage.startsWith(uploadImagesDirectory)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
+      }
 
-    Path bestImage = selectBestImagePath(requestedImage, acceptHeader);
-    if (bestImage != null) {
-      FileSystemResource image = new FileSystemResource(bestImage);
-      return ResponseEntity.ok()
-          .cacheControl(FOUND_IMAGE_CACHE)
-          .header(HttpHeaders.VARY, HttpHeaders.ACCEPT)
-          .contentType(resolveMediaType(image))
-          .body(image);
+      Path bestImage = selectBestImagePath(requestedImage, acceptHeader, uploadImagesDirectory);
+      if (bestImage != null) {
+        FileSystemResource image = new FileSystemResource(bestImage);
+        return ResponseEntity.ok()
+            .cacheControl(FOUND_IMAGE_CACHE)
+            .header(HttpHeaders.VARY, HttpHeaders.ACCEPT)
+            .contentType(resolveMediaType(image))
+            .body(image);
+      }
     }
 
     ClassPathResource placeholder = new ClassPathResource("static/placeholder.svg");
@@ -65,9 +67,33 @@ public class UploadImageController {
         .body(placeholder);
   }
 
-  private Path selectBestImagePath(Path requestedImage, String acceptHeader) {
+  private List<Path> resolveUploadImageDirectories(String uploadDir) {
+    List<Path> directories = new ArrayList<>();
+    Path configuredUploadRoot = Path.of(uploadDir).toAbsolutePath().normalize();
+    addImageDirectory(directories, configuredUploadRoot.resolve("images"));
+
+    Path uploadDirPath = Path.of(uploadDir);
+    if (!uploadDirPath.isAbsolute()) {
+      Path backendUploadRoot = Path.of("backend").resolve(uploadDirPath).toAbsolutePath().normalize();
+      addImageDirectory(directories, backendUploadRoot.resolve("images"));
+    }
+
+    Path seedUploadRoot = Path.of("backend", "uploads").toAbsolutePath().normalize();
+    addImageDirectory(directories, seedUploadRoot.resolve("images"));
+
+    return List.copyOf(directories);
+  }
+
+  private void addImageDirectory(List<Path> directories, Path imageDirectory) {
+    Path normalized = imageDirectory.toAbsolutePath().normalize();
+    if (!directories.contains(normalized)) {
+      directories.add(normalized);
+    }
+  }
+
+  private Path selectBestImagePath(Path requestedImage, String acceptHeader, Path uploadImagesDirectory) {
     if (acceptsWebp(acceptHeader)) {
-      Path webpVariant = resolveWebpVariant(requestedImage);
+      Path webpVariant = resolveWebpVariant(requestedImage, uploadImagesDirectory);
       if (webpVariant != null && Files.isRegularFile(webpVariant) && Files.isReadable(webpVariant)) {
         return webpVariant;
       }
@@ -81,12 +107,12 @@ public class UploadImageController {
   }
 
   private boolean acceptsWebp(String acceptHeader) {
-    return acceptHeader != null && acceptHeader.toLowerCase(java.util.Locale.ROOT).contains("image/webp");
+    return acceptHeader != null && acceptHeader.toLowerCase(Locale.ROOT).contains("image/webp");
   }
 
-  private Path resolveWebpVariant(Path requestedImage) {
+  private Path resolveWebpVariant(Path requestedImage, Path uploadImagesDirectory) {
     String requestedFileName = requestedImage.getFileName().toString();
-    if (requestedFileName.toLowerCase(java.util.Locale.ROOT).endsWith(".webp")) {
+    if (requestedFileName.toLowerCase(Locale.ROOT).endsWith(".webp")) {
       return requestedImage;
     }
 
@@ -100,7 +126,7 @@ public class UploadImageController {
 
   private MediaType resolveMediaType(Resource resource) {
     String filename = resource.getFilename();
-    if (filename != null && filename.toLowerCase(java.util.Locale.ROOT).endsWith(".webp")) {
+    if (filename != null && filename.toLowerCase(Locale.ROOT).endsWith(".webp")) {
       return IMAGE_WEBP;
     }
 

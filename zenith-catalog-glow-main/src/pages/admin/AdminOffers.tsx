@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -128,7 +127,7 @@ const AdminOffers = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="admin-page-header">
           <div>
@@ -346,7 +345,7 @@ const AdminOffers = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </>
   );
 };
 

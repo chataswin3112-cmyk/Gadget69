@@ -132,43 +132,19 @@ export const uploadCatalogAssetFile = async (
   height?: number;
   duration?: number;
 }> => {
+  validateCatalogUploadFile(file, target);
+
   try {
-    const signature = await getCatalogMediaUploadSignature({
-      fileName: file.name,
-      contentType: file.type,
-      fileSize: file.size,
-      target,
-    });
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("api_key", signature.apiKey);
-    formData.append("timestamp", String(signature.timestamp));
-    formData.append("signature", signature.signature);
-    formData.append("folder", signature.folder);
-
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`,
-      {
-        method: "POST",
-        body: formData,
+    return await uploadCloudinaryCatalogAssetFile(file, target);
+  } catch (error) {
+    if (shouldUseLocalUploadFallback(error)) {
+      try {
+        return await uploadLocalCatalogAssetFile(file);
+      } catch (fallbackError) {
+        throw new Error(getErrorMessage(fallbackError, "Local upload failed"));
       }
-    );
-    const payload = await response.json();
-
-    if (!response.ok || !payload.secure_url) {
-      throw new Error(payload?.error?.message || "Upload failed");
     }
 
-    return {
-      secureUrl: payload.secure_url as string,
-      publicId: payload.public_id as string | undefined,
-      width: payload.width as number | undefined,
-      height: payload.height as number | undefined,
-      duration: payload.duration as number | undefined,
-      resourceType: signature.resourceType as CloudinaryResourceType,
-    };
-  } catch (error) {
     throw new Error(
       getErrorMessage(
         error,
@@ -177,6 +153,173 @@ export const uploadCatalogAssetFile = async (
     );
   }
 };
+
+const uploadCloudinaryCatalogAssetFile = async (
+  file: File,
+  target: CatalogMediaUploadTarget
+): Promise<{
+  secureUrl: string;
+  resourceType: CloudinaryResourceType;
+  publicId?: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+}> => {
+  const signature = await getCatalogMediaUploadSignature({
+    fileName: file.name,
+    contentType: file.type,
+    fileSize: file.size,
+    target,
+  });
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("api_key", signature.apiKey);
+  formData.append("timestamp", String(signature.timestamp));
+  formData.append("signature", signature.signature);
+  formData.append("folder", signature.folder);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+  const payload = await response.json();
+
+  if (!response.ok || !payload.secure_url) {
+    throw new Error(payload?.error?.message || "Upload failed");
+  }
+
+  return {
+    secureUrl: payload.secure_url as string,
+    publicId: payload.public_id as string | undefined,
+    width: payload.width as number | undefined,
+    height: payload.height as number | undefined,
+    duration: payload.duration as number | undefined,
+    resourceType: signature.resourceType as CloudinaryResourceType,
+  };
+};
+
+const uploadLocalCatalogAssetFile = async (
+  file: File
+): Promise<{
+  secureUrl: string;
+  resourceType: CloudinaryResourceType;
+  publicId?: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+}> => {
+  const uploaded = await uploadAdminFile(file);
+
+  return {
+    secureUrl: uploaded.url,
+    publicId: uploaded.fileName,
+    resourceType: localUploadResourceType(uploaded.mediaType, file),
+  };
+};
+
+const localUploadResourceType = (
+  mediaType: string | undefined,
+  file: File
+): CloudinaryResourceType => {
+  const normalizedMediaType = (mediaType || "").toUpperCase();
+  if (normalizedMediaType === "VIDEOS" || file.type.startsWith("video/")) {
+    return "video";
+  }
+  if (normalizedMediaType === "IMAGES" || file.type.startsWith("image/")) {
+    return "image";
+  }
+  return "raw";
+};
+
+const shouldUseLocalUploadFallback = (error: unknown) => {
+  const status =
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof (error as { response?: { status?: unknown } }).response?.status === "number"
+      ? (error as { response: { status: number } }).response.status
+      : undefined;
+
+  if (status && status < 500) {
+    return false;
+  }
+
+  const message = getErrorMessage(error, "").toLowerCase();
+  return (
+    (status !== undefined && status >= 500) ||
+    message.includes("cloudinary") ||
+    message.includes("failed to fetch") ||
+    message.includes("network")
+  );
+};
+
+const validateCatalogUploadFile = (file: File, target: CatalogMediaUploadTarget) => {
+  const resourceType = detectCatalogResourceType(file);
+  const maxBytes =
+    resourceType === "image"
+      ? 10 * 1024 * 1024
+      : resourceType === "video"
+        ? 50 * 1024 * 1024
+        : 25 * 1024 * 1024;
+
+  if (file.size > maxBytes) {
+    throw new Error(
+      resourceType === "image"
+        ? "Image must be 10 MB or smaller"
+        : resourceType === "video"
+          ? "Video must be 50 MB or smaller"
+          : "File must be 25 MB or smaller"
+    );
+  }
+
+  if (["PRODUCT", "VARIANT"].includes(target)) {
+    if (resourceType !== "image" && resourceType !== "video") {
+      throw new Error(`${target === "PRODUCT" ? "Product" : "Variant"} uploads only support images or videos`);
+    }
+    return;
+  }
+
+  if (["CATEGORY", "BANNER", "COMMUNITY", "REVIEW"].includes(target) && resourceType !== "image") {
+    const targetLabel = target.charAt(0) + target.slice(1).toLowerCase();
+    throw new Error(`${targetLabel} uploads only support images`);
+  }
+
+  if (target === "SETTINGS" && resourceType === "video") {
+    throw new Error("Settings uploads only support images or PDF files");
+  }
+};
+
+const detectCatalogResourceType = (file: File): CloudinaryResourceType => {
+  const contentType = file.type.trim().toLowerCase();
+  const fileName = file.name.trim().toLowerCase();
+
+  if (
+    ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"].includes(contentType) ||
+    hasFileExtension(fileName, ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg")
+  ) {
+    return "image";
+  }
+
+  if (
+    ["video/mp4", "video/quicktime", "video/webm"].includes(contentType) ||
+    hasFileExtension(fileName, ".mp4", ".mov", ".webm")
+  ) {
+    return "video";
+  }
+
+  if (contentType === "application/pdf" || hasFileExtension(fileName, ".pdf")) {
+    return "raw";
+  }
+
+  throw new Error("Only jpg, jpeg, png, webp, gif, svg images, mp4, mov, webm videos, and PDF files are supported");
+};
+
+const hasFileExtension = (fileName: string, ...extensions: string[]) =>
+  extensions.some((extension) => fileName.endsWith(extension));
 
 export const getProductMedia = async (productId: number): Promise<ProductMedia[]> => {
   const res = await apiClient.get(`/admin/products/${productId}/media`);

@@ -1,10 +1,12 @@
 package com.gadget69.catalog.config;
 
-import java.time.Duration;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.CacheControl;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -47,10 +49,32 @@ public class WebConfig implements WebMvcConfigurer {
         .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)).cachePublic())
         .resourceChain(true);
 
-    Path uploadPath = Path.of(appProperties.getUploadDir()).toAbsolutePath().normalize();
     registry.addResourceHandler("/uploads/**")
-        .addResourceLocations(uploadPath.toUri().toString())
+        .addResourceLocations(resolveUploadResourceLocations())
         .setCacheControl(IMMUTABLE_ASSET_CACHE)
         .resourceChain(true);
+  }
+
+  private String[] resolveUploadResourceLocations() {
+    List<Path> uploadPaths = new ArrayList<>();
+    Path uploadDirPath = Path.of(appProperties.getUploadDir());
+    addUploadPath(uploadPaths, uploadDirPath.toAbsolutePath().normalize());
+
+    if (!uploadDirPath.isAbsolute()) {
+      Path backendUploadPath = Path.of("backend").resolve(uploadDirPath).toAbsolutePath().normalize();
+      addUploadPath(uploadPaths, backendUploadPath);
+    }
+
+    addUploadPath(uploadPaths, Path.of("backend", "uploads").toAbsolutePath().normalize());
+
+    return uploadPaths.stream()
+        .map(path -> path.toUri().toString())
+        .toArray(String[]::new);
+  }
+
+  private void addUploadPath(List<Path> uploadPaths, Path uploadPath) {
+    if (!uploadPaths.contains(uploadPath)) {
+      uploadPaths.add(uploadPath);
+    }
   }
 }

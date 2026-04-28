@@ -48,6 +48,7 @@ const Categories = () => {
                     className="rounded-xl"
                     sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
                     optimizeWidth={480}
+                    optimizeHeight={360}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-5">

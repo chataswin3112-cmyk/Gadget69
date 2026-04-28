@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import AdminLayout from "@/components/admin/AdminLayout";
 import CloudinaryVideoUploadField from "@/components/admin/CloudinaryVideoUploadField";
 import MediaUploadField from "@/components/admin/MediaUploadField";
 import { useAdminData } from "@/contexts/AdminDataContext";
@@ -132,7 +131,7 @@ const AdminMedia = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="admin-page-header">
           <div>
@@ -348,7 +347,7 @@ const AdminMedia = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 

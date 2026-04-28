@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Section } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -154,7 +153,7 @@ const AdminCategories = () => {
     updateSection(section.id, { ...section, ...patch });
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="admin-page-header">
           <div>
@@ -404,7 +403,7 @@ const AdminCategories = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 

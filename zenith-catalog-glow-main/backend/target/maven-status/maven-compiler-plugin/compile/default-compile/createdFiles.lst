@@ -17,6 +17,7 @@ com\gadget69\catalog\service\CatalogSyncService$CatalogSyncResult.class
 com\gadget69\catalog\dto\ApiDtos$ApiErrorResponse.class
 com\gadget69\catalog\dto\ApiDtos$CommunityVideoUploadSignatureResponse.class
 com\gadget69\catalog\config\LocalEnvLoader$LoadResult.class
+com\gadget69\catalog\config\LegacySchemaRepair$1.class
 com\gadget69\catalog\dto\ApiDtos$UpdateOrderStatusRequest.class
 com\gadget69\catalog\service\UploadStorageService.class
 com\gadget69\catalog\dto\ApiDtos$VariantResponse.class

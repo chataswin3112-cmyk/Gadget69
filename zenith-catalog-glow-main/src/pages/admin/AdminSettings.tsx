@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Eye, EyeOff, KeyRound, Lock, Plus, Shield, X } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import MediaUploadField from "@/components/admin/MediaUploadField";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { changePassword } from "@/api/adminApi";
@@ -283,7 +282,7 @@ const AdminSettings = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="max-w-3xl space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Settings</h1>
@@ -454,7 +453,7 @@ const AdminSettings = () => {
           </Button>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

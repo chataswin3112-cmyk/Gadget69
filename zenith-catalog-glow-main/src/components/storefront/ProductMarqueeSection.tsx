@@ -92,10 +92,11 @@ const CompactProductCard = ({ product }: { product: Product }) => {
         <MediaImage
           src={product.imageUrl}
           alt={product.name}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain p-4"
           loading="lazy"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 220px, 240px"
           optimizeWidth={160}
+          optimizeHeight={160}
         />
         {hasOffer && (
           <span className="absolute left-2 top-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-foreground">

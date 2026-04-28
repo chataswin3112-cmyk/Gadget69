@@ -6,6 +6,7 @@ import { AdminDataProvider, useAdminData } from "@/contexts/AdminDataContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminSessionGuard from "@/components/AdminSessionGuard";
 import ScrollToTop from "@/components/ScrollToTop";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { scheduleAfterPaint } from "@/lib/idle";
 import Index from "./pages/Index";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -112,7 +113,9 @@ const AdminRouteShell = () => (
     <AdminSessionGuard>
       <AdminDataProvider eager={false}>
         <AdminSettingsBootstrap />
-        <Outlet />
+        <AdminLayout>
+          <Outlet />
+        </AdminLayout>
       </AdminDataProvider>
     </AdminSessionGuard>
   </ProtectedRoute>

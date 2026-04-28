@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { Banner } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -96,7 +95,7 @@ const AdminBanners = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="admin-page-header">
           <div>
@@ -208,7 +207,7 @@ const AdminBanners = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 

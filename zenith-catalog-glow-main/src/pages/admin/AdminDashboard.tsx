@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CircleDollarSign, FolderOpen, Package, Percent, ShoppingBag, TrendingUp } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { getDashboardStats } from "@/api/adminApi";
 import { DashboardStats } from "@/types";
@@ -62,7 +61,7 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-8">
         <div className="admin-page-header">
           <div>
@@ -149,7 +148,7 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

@@ -151,7 +151,7 @@ const ProductMediaManager = ({ value, onChange }: ProductMediaManagerProps) => {
             {uploading ? "Uploading…" : "Drop images or videos here"}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Supports JPG, PNG, WEBP, MP4, MOV, WebM · Files upload to Cloudinary
+            Supports JPG, PNG, WEBP, MP4, MOV, WebM · Cloudinary or local storage
           </p>
           <Button
             type="button"

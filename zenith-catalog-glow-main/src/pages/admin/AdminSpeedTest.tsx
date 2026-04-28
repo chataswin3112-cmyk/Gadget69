@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Activity, Download, Gauge, RefreshCw, Wifi } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -154,7 +153,7 @@ const AdminSpeedTest = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-8">
         <div className="admin-page-header">
           <div>
@@ -258,7 +257,7 @@ const AdminSpeedTest = () => {
           </Card>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

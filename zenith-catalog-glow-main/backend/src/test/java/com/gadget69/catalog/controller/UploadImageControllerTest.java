@@ -32,7 +32,7 @@ class UploadImageControllerTest {
         .andExpect(status().isOk())
         .andExpect(header().string(
             "Cache-Control",
-            CacheControl.maxAge(Duration.ofDays(30)).cachePublic().getHeaderValue()))
+            CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable().getHeaderValue()))
         .andExpect(content().string("png"));
   }
 

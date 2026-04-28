@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Archive, Eye, RefreshCw, Trash2, XCircle } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import {
   archiveAdminOrder,
   cancelAdminOrder,
@@ -615,7 +614,7 @@ const AdminOrders = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="admin-page-header">
           <div>
@@ -1407,7 +1406,7 @@ const AdminOrders = () => {
         </DialogContent>
         </Dialog>
       ) : null}
-    </AdminLayout>
+    </>
   );
 };
 

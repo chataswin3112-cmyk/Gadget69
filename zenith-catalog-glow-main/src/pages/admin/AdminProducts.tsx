@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import AdminVariantPanel from "@/components/admin/AdminVariantPanel";
 import ProductMediaManager from "@/components/admin/ProductMediaManager";
 import MediaImage from "@/components/ui/media-image";
@@ -204,7 +203,7 @@ const AdminProducts = () => {
   };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="admin-page-header">
           <div>
@@ -638,7 +637,7 @@ const AdminProducts = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 
