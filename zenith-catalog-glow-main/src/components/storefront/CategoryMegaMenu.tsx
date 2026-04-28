@@ -1,14 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { ChevronRight } from "lucide-react";
 import MediaImage from "@/components/ui/media-image";
 import { getEffectivePrice } from "@/lib/pricing";
+import { getChildSections, getTopLevelSections } from "@/lib/category";
 
 const CategoryMegaMenu = () => {
   const { sections, products } = useAdminData();
-  const activeSections = sections.filter(s => s.is_active !== false);
+  const activeSections = getTopLevelSections(sections, true);
   const [hoveredId, setHoveredId] = useState<number | null>(activeSections[0]?.id ?? null);
+  const hoveredSection = activeSections.find(s => s.id === hoveredId);
+  const hoveredSubcategories = hoveredId ? getChildSections(sections, hoveredId, true) : [];
+
+  useEffect(() => {
+    if (!activeSections.length) {
+      return;
+    }
+    if (hoveredId === null || !activeSections.some((section) => section.id === hoveredId)) {
+      setHoveredId(activeSections[0].id);
+    }
+  }, [activeSections, hoveredId]);
 
   const hoveredProducts = products
     .filter(p => p.sectionId === hoveredId)
@@ -43,9 +55,31 @@ const CategoryMegaMenu = () => {
           {/* Products list */}
           <div className="col-span-6">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 font-body">
-              {activeSections.find(s => s.id === hoveredId)?.name ?? "Products"}
+              {hoveredSubcategories.length ? "Subcategories" : hoveredSection?.name ?? "Products"}
             </p>
-            {hoveredProducts.length > 0 ? (
+            {hoveredSubcategories.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {hoveredSubcategories.map((section) => (
+                  <Link
+                    key={section.id}
+                    to={`/categories/${section.id}`}
+                    className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted"
+                  >
+                    <MediaImage
+                      src={section.imageUrl}
+                      alt={section.name}
+                      className="h-12 w-12 rounded-md object-cover bg-secondary/30"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium font-body">{section.name}</p>
+                      {section.description ? (
+                        <p className="truncate text-xs text-muted-foreground">{section.description}</p>
+                      ) : null}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : hoveredProducts.length > 0 ? (
               <div className="space-y-2">
                 {hoveredProducts.map(product => {
                   const price = getEffectivePrice(product);
@@ -80,7 +114,7 @@ const CategoryMegaMenu = () => {
           <div className="col-span-3">
             <div className="rounded-xl overflow-hidden aspect-square bg-secondary/30">
               <MediaImage
-                src={activeSections.find(s => s.id === hoveredId)?.imageUrl || "/placeholder.svg"}
+                src={hoveredSection?.imageUrl || "/placeholder.svg"}
                 alt="Category"
                 className="w-full h-full object-cover"
               />

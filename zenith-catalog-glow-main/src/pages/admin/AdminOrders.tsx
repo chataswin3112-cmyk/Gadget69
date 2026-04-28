@@ -26,6 +26,7 @@ import { useAdminData } from "@/contexts/AdminDataContext";
 import MediaImage from "@/components/ui/media-image";
 import { cn } from "@/lib/utils";
 import { scheduleIdleTask } from "@/lib/idle";
+import { getProductCategoryLabel } from "@/lib/category";
 
 const AUTO_REFRESH_MS = 30000;
 const STATUS_OPTIONS = [
@@ -217,7 +218,7 @@ const tabMatches = (order: Order, tab: OrderTab) => {
 };
 
 const getProductMeta = (product?: Product) => {
-  const metaParts = [product?.sectionName, product?.model_number].filter(Boolean);
+  const metaParts = [product ? getProductCategoryLabel(product) : undefined, product?.model_number].filter(Boolean);
   return metaParts.length ? metaParts.join(" - ") : "Catalog item";
 };
 

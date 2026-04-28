@@ -226,6 +226,10 @@ public class AdminCatalogController {
   @DeleteMapping("/sections/{id}")
   public ResponseEntity<Void> deleteSection(HttpServletRequest httpRequest, @PathVariable Long id) {
     authTokenService.requireAdmin(httpRequest);
+    if (sectionRepository.countByParentSection_Id(id) > 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Delete subcategories in this category before deleting the category");
+    }
     if (productRepository.countBySection_Id(id) > 0) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Delete products in this category before deleting the category");
@@ -238,7 +242,7 @@ public class AdminCatalogController {
   @Transactional(readOnly = true)
   public List<ApiDtos.ProductResponse> adminProducts(HttpServletRequest httpRequest) {
     authTokenService.requireAdmin(httpRequest);
-    return productRepository.findAllByOrderByDisplayOrderAscCreatedAtDesc().stream()
+    return productRepository.findAllByOrderByDisplayOrderAscCreatedAtDescIdAsc().stream()
         .map(catalogMapper::toProductResponse)
         .toList();
   }
@@ -479,11 +483,36 @@ public class AdminCatalogController {
     section.setShowInTopCategory(payload.show_in_top_category() == null ? false : payload.show_in_top_category());
     section.setAccentTone(payload.accent_tone());
     section.setSortOrder(payload.sort_order() == null ? 0 : payload.sort_order());
+    section.setParentSection(resolveParentSection(section, payload.parentSectionId()));
+  }
+
+  private Section resolveParentSection(Section section, Long parentSectionId) {
+    if (parentSectionId == null) {
+      return null;
+    }
+
+    if (section.getId() != null && section.getId().equals(parentSectionId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A category cannot be its own parent");
+    }
+
+    Section parent = sectionRepository.findById(parentSectionId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Select a valid parent category"));
+    if (parent.getParentSection() != null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only one subcategory level is supported");
+    }
+    if (section.getId() != null && sectionRepository.countByParentSection_Id(section.getId()) > 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Move or delete this category's subcategories before assigning a parent");
+    }
+    return parent;
   }
 
   private void applyProduct(Product product, ApiDtos.ProductPayload payload) {
     Section section = sectionRepository.findById(payload.sectionId())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Select a valid category"));
+    if (product.getId() == null && section.getParentSection() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Select a subcategory for new products");
+    }
 
     product.setName(requiredValue(payload.name(), "Product name is required"));
     product.setDescription(requiredValue(payload.description(), "Product description is required"));

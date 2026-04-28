@@ -30,7 +30,9 @@ public class CatalogMapper {
         section.getShowInExplore(),
         section.getShowInTopCategory(),
         section.getAccentTone(),
-        section.getSortOrder()
+        section.getSortOrder(),
+        section.getParentSection() == null ? null : section.getParentSection().getId(),
+        section.getParentSection() == null ? null : section.getParentSection().getName()
     );
   }
 
@@ -68,6 +70,8 @@ public class CatalogMapper {
         product.getStockQuantity(),
         product.getSection().getId(),
         product.getSection().getName(),
+        product.getSection().getParentSection() == null ? null : product.getSection().getParentSection().getId(),
+        product.getSection().getParentSection() == null ? null : product.getSection().getParentSection().getName(),
         primaryImageUrl,
         primaryVideoUrl,
         product.getCreatedAt() == null ? null : product.getCreatedAt().toString(),

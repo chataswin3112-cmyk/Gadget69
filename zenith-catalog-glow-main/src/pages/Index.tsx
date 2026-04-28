@@ -7,6 +7,7 @@ import { useAdminData } from "@/contexts/AdminDataContext";
 import { SECTION_BG_COLORS } from "@/hooks/useScrollBgColor";
 import CategoryRail from "@/components/storefront/CategoryRail";
 import DeferredRender from "@/components/ui/deferred-render";
+import { getTopLevelSections } from "@/lib/category";
 
 const TopCategoryGrid = lazy(() => import("@/components/storefront/TopCategoryGrid"));
 const ProductMarqueeSection = lazy(() => import("@/components/storefront/ProductMarqueeSection"));
@@ -91,18 +92,19 @@ const Index = () => {
 
   const productsBySection = useMemo(() => {
     return products.reduce<Map<number, typeof products>>((accumulator, product) => {
-      const currentProducts = accumulator.get(product.sectionId);
+      const rowSectionId = product.parentSectionId ?? product.sectionId;
+      const currentProducts = accumulator.get(rowSectionId);
       if (currentProducts) {
         currentProducts.push(product);
       } else {
-        accumulator.set(product.sectionId, [product]);
+        accumulator.set(rowSectionId, [product]);
       }
       return accumulator;
     }, new Map());
   }, [products]);
 
   const categoryRows = useMemo(() => {
-    const activeSections = sections.filter((section) => section.is_active !== false);
+    const activeSections = getTopLevelSections(sections, true);
     return activeSections
       .map((section, index) => ({
         section,

@@ -9,6 +9,7 @@ import { useAdminData } from "@/contexts/AdminDataContext";
 import { getErrorMessage } from "@/lib/api-error";
 import { getOfferStatus, getEffectivePrice, type OfferStatus } from "@/lib/pricing";
 import { getPrimaryImageUrl, getProductMedia } from "@/lib/catalog-media";
+import { getChildSections, getProductCategoryLabel, getTopLevelSections, isSubcategory } from "@/lib/category";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -113,12 +114,18 @@ const AdminProducts = () => {
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const topLevelSections = useMemo(() => getTopLevelSections(sections), [sections]);
+  const subcategorySections = useMemo(
+    () => sections.filter((section) => isSubcategory(section)),
+    [sections]
+  );
+
   const filteredProducts = useMemo(
     () =>
       products.filter(
         (product) =>
           product.name.toLowerCase().includes(search.toLowerCase()) ||
-          product.sectionName?.toLowerCase().includes(search.toLowerCase())
+          getProductCategoryLabel(product).toLowerCase().includes(search.toLowerCase())
       ),
     [products, search]
   );
@@ -128,7 +135,11 @@ const AdminProducts = () => {
   }, [ensureProductsLoaded, ensureSectionsLoaded]);
 
   const openNew = () => {
-    const firstSectionId = sections[0]?.id ?? 1;
+    if (!subcategorySections.length) {
+      toast.error("Add a subcategory before creating products");
+      return;
+    }
+    const firstSectionId = subcategorySections[0].id;
     setEditing(emptyProduct(firstSectionId));
     setIsNew(true);
   };
@@ -250,7 +261,7 @@ const AdminProducts = () => {
                         <p className="text-sm font-medium font-body">{product.name}</p>
                         <p className="text-xs text-muted-foreground">{product.model_number || "No model number"}</p>
                       </td>
-                      <td className="p-4 text-sm font-body">{product.sectionName}</td>
+                      <td className="p-4 text-sm font-body">{getProductCategoryLabel(product)}</td>
                       <td className="p-4 text-sm font-semibold font-body">
                         Rs. {getEffectivePrice(product).toLocaleString()}
                       </td>
@@ -346,11 +357,36 @@ const AdminProducts = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {sections.map((section) => (
-                          <SelectItem key={section.id} value={String(section.id)}>
-                            {section.name}
-                          </SelectItem>
-                        ))}
+                        {topLevelSections.map((section) => {
+                          const children = getChildSections(sections, section.id);
+                          if (!children.length) {
+                            return null;
+                          }
+                          return (
+                            <SelectGroup key={section.id}>
+                              <SelectLabel>{section.name}</SelectLabel>
+                              {children.map((child) => (
+                                <SelectItem key={child.id} value={String(child.id)}>
+                                  {child.name}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          );
+                        })}
+                        {(() => {
+                          const selectedSection = sections.find((section) => section.id === editing.sectionId);
+                          if (!selectedSection || isSubcategory(selectedSection)) {
+                            return null;
+                          }
+                          return (
+                            <SelectGroup>
+                              <SelectLabel>Legacy category</SelectLabel>
+                              <SelectItem value={String(selectedSection.id)}>
+                                {selectedSection.name}
+                              </SelectItem>
+                            </SelectGroup>
+                          );
+                        })()}
                       </SelectContent>
                     </Select>
                   </div>

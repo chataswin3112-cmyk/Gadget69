@@ -10,6 +10,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = "mzflow_admin_token";
+const SESSION_TOKEN_KEY = "mzflow_admin_session_token";
 
 const decodeBase64Url = (value: string) => {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -37,9 +38,11 @@ export function isTokenExpired(token: string): boolean {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(() => {
     const stored = localStorage.getItem(TOKEN_KEY);
+    const sessionStored = sessionStorage.getItem(SESSION_TOKEN_KEY);
     // On init, reject expired tokens immediately
-    if (stored && isTokenExpired(stored)) {
+    if (stored && (isTokenExpired(stored) || sessionStored !== stored)) {
       localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(SESSION_TOKEN_KEY);
       return null;
     }
     return stored;
@@ -47,11 +50,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback((newToken: string) => {
     localStorage.setItem(TOKEN_KEY, newToken);
+    sessionStorage.setItem(SESSION_TOKEN_KEY, newToken);
     setToken(newToken);
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
     setToken(null);
   }, []);
 

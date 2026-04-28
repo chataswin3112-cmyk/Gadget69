@@ -2,13 +2,14 @@ import { Link } from "react-router-dom";
 import { Section } from "@/types";
 import SectionHeader from "./SectionHeader";
 import MediaFrame from "./MediaFrame";
+import { getTopLevelSections } from "@/lib/category";
 
 interface TopCategoryGridProps {
   sections: Section[];
 }
 
 const TopCategoryGrid = ({ sections }: TopCategoryGridProps) => {
-  const topSections = sections.filter((s) => s.show_in_top_category);
+  const topSections = getTopLevelSections(sections, true).filter((s) => s.show_in_top_category);
 
   if (!topSections.length) return null;
 

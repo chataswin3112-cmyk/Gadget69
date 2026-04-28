@@ -74,7 +74,9 @@ const PublicSettingsBootstrap = () => {
 
   useEffect(() => {
     const cancel = scheduleAfterPaint(() => {
-      void ensureSettingsLoaded();
+      void ensureSettingsLoaded().catch(() => {
+        // Admin auth failures are handled globally by the API interceptor.
+      });
     }, 120);
 
     return cancel;

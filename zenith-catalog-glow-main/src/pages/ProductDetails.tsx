@@ -13,6 +13,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { getProductById, getVariant } from "@/api/productApi";
 import { getProductMedia, getVariantMedia } from "@/lib/catalog-media";
+import { getProductCategoryLabel } from "@/lib/category";
 import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
 import { Product, ProductMedia, VariantMedia } from "@/types";
 import { scheduleIdleTask } from "@/lib/idle";
@@ -256,6 +257,22 @@ const ProductDetails = () => {
             Products
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
+          {product.parentSectionId && product.parentSectionName ? (
+            <>
+              <Link to={`/categories/${product.parentSectionId}`} className="hover:text-accent">
+                {product.parentSectionName}
+              </Link>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </>
+          ) : null}
+          {product.sectionName ? (
+            <>
+              <Link to={`/categories/${product.sectionId}`} className="hover:text-accent">
+                {product.sectionName}
+              </Link>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </>
+          ) : null}
           <span className="text-foreground">{product.name}</span>
         </nav>
       </div>
@@ -347,7 +364,7 @@ const ProductDetails = () => {
                 to={`/categories/${product.sectionId}`}
                 className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-accent hover:underline font-body"
               >
-                {product.sectionName}
+                {getProductCategoryLabel(product)}
               </Link>
             ) : null}
 

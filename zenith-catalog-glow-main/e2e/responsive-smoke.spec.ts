@@ -52,6 +52,18 @@ const createMockState = () => ({
       show_in_top_category: true,
       sort_order: 2,
     },
+    {
+      id: 4,
+      name: "Android",
+      description: "Android phones",
+      imageUrl: "/placeholder.svg",
+      is_active: true,
+      show_in_explore: true,
+      show_in_top_category: false,
+      sort_order: 0,
+      parentSectionId: 1,
+      parentSectionName: "Phones",
+    },
   ],
   banners: [
     {
@@ -460,13 +472,12 @@ test("public storefront flows remain responsive across devices", async ({ page }
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "New Launches" })).toBeVisible();
   const homeSectionHeadings = page.locator("section h2");
-  await expect(homeSectionHeadings.filter({ hasText: /^Phones$/ })).toBeVisible();
-  await expect(homeSectionHeadings.filter({ hasText: /^Audio$/ })).toBeVisible();
-  await expect(homeSectionHeadings.filter({ hasText: /^Wearables$/ })).toBeVisible();
+  await expect(homeSectionHeadings.filter({ hasText: /^Explore Categories$/ })).toBeVisible();
+  await expect(homeSectionHeadings.filter({ hasText: /^Featured Picks$/ })).toBeVisible();
   await page.evaluate(() => {
     window.scrollTo({ top: Math.max(window.innerHeight * 2, document.body.scrollHeight / 2) });
   });
-  await expect(homeSectionHeadings.filter({ hasText: /^Join The Clan$/ })).toBeVisible({ timeout: 15_000 });
+  await expect(homeSectionHeadings.filter({ hasText: /^Featured Picks$/ })).toBeVisible({ timeout: 15_000 });
   const headingLayout = await homeSectionHeadings.evaluateAll((elements) =>
     elements.map((element) => ({
       text: element.textContent?.trim() || "",
@@ -474,12 +485,9 @@ test("public storefront flows remain responsive across devices", async ({ page }
     }))
   );
   const findHeading = (text: string) => headingLayout.find((entry) => entry.text === text);
-  expect(findHeading("Top Categories")?.top ?? -1).toBeGreaterThanOrEqual(0);
-  expect(findHeading("Phones")?.top ?? -1).toBeGreaterThan(findHeading("Top Categories")?.top ?? -1);
-  expect(findHeading("Audio")?.top ?? -1).toBeGreaterThan(findHeading("Phones")?.top ?? -1);
-  expect(findHeading("Wearables")?.top ?? -1).toBeGreaterThan(findHeading("Audio")?.top ?? -1);
-  expect(findHeading("Join The Clan")?.top ?? -1).toBeGreaterThan(findHeading("Wearables")?.top ?? -1);
-  expect((findHeading("Join The Clan")?.top ?? 0) - (findHeading("Wearables")?.top ?? 0)).toBeLessThan(1000);
+  expect(findHeading("Explore Categories")?.top ?? -1).toBeGreaterThanOrEqual(0);
+  expect(findHeading("New Launches")?.top ?? -1).toBeGreaterThan(findHeading("Explore Categories")?.top ?? -1);
+  expect(findHeading("Featured Picks")?.top ?? -1).toBeGreaterThan(findHeading("New Launches")?.top ?? -1);
   await expect(page.locator('a[href="/products/1"] h3').first()).toContainText("Atlas Pro");
   await expectNoHorizontalOverflow(page);
 
@@ -520,14 +528,28 @@ test("admin login, orders, and editor flows remain usable across devices", async
   await page.keyboard.press("Escape");
 
   await page.goto("/admin/categories");
-  await page.getByRole("button", { name: /add category/i }).click();
+  await page.getByRole("button", { name: /add main category/i }).click();
   const categoryDialog = page.getByRole("dialog");
   await categoryDialog.getByRole("textbox").nth(0).fill("Tablets");
   await categoryDialog.getByRole("textbox").nth(1).fill("Portable work and play");
   await categoryDialog.getByRole("textbox").nth(2).fill("/placeholder.svg");
   await page.getByRole("button", { name: /^save$/i }).click();
-  await expect(page.getByText("Tablets")).toBeVisible();
+  await expect(page.getByRole("row", { name: /tablets tablets category/i })).toBeVisible();
   await expectNoHorizontalOverflow(page);
+  await page
+    .getByRole("button", { name: /view subcategories for tablets, 0 subcategories/i })
+    .click();
+  const subcategoryDialog = page.getByRole("dialog", { name: /subcategories - tablets/i });
+  await expect(subcategoryDialog.getByRole("button", { name: /add subcategory/i })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await subcategoryDialog.getByRole("button", { name: /add subcategory/i }).click();
+  const subcategoryForm = page.getByRole("dialog", { name: /add subcategory under tablets/i });
+  await subcategoryForm.getByRole("textbox").nth(0).fill("Tablet Cases");
+  await subcategoryForm.getByRole("textbox").nth(1).fill("Protection and stands");
+  await subcategoryForm.getByRole("textbox").nth(2).fill("/placeholder.svg");
+  await page.getByRole("button", { name: /^save$/i }).click();
+  await expect(page.getByRole("dialog", { name: /subcategories - tablets/i })).toContainText("Tablet Cases");
+  await page.keyboard.press("Escape");
 
   await page.goto("/admin/products");
   await page.getByRole("button", { name: /add product/i }).click();

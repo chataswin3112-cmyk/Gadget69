@@ -44,8 +44,10 @@ vi.mock("sonner", () => ({
 }));
 
 const baseSections = [
-  { id: 1, name: "Phones" },
-  { id: 2, name: "Audio" },
+  { id: 1, name: "Phones", parentSectionId: null },
+  { id: 2, name: "Flagship Phones", parentSectionId: 1, parentSectionName: "Phones" },
+  { id: 3, name: "Audio", parentSectionId: null },
+  { id: 4, name: "Earbuds", parentSectionId: 3, parentSectionName: "Audio" },
 ];
 
 const baseProducts = [
@@ -55,8 +57,10 @@ const baseProducts = [
     description: "Flagship phone",
     price: 79999,
     stockQuantity: 4,
-    sectionId: 1,
-    sectionName: "Phones",
+    sectionId: 2,
+    sectionName: "Flagship Phones",
+    parentSectionId: 1,
+    parentSectionName: "Phones",
     imageUrl: "/placeholder.svg",
     media: [{ id: 10, mediaUrl: "/placeholder.svg", mediaType: "IMAGE", mediaRole: "MAIN", isPrimary: true }],
     model_number: "ATL-01",

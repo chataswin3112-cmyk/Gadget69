@@ -19,6 +19,7 @@ import { getErrorMessage } from "@/lib/api-error";
 import { getEffectivePrice, getOfferStatus, type OfferStatus } from "@/lib/pricing";
 import MediaImage from "@/components/ui/media-image";
 import { cn } from "@/lib/utils";
+import { getProductCategoryLabel } from "@/lib/category";
 
 type OfferFormState = {
   enabled: boolean;
@@ -52,7 +53,7 @@ const buildFormState = (product: Product): OfferFormState => ({
 });
 
 const getProductMeta = (product: Product) => {
-  const metaParts = [product.sectionName || "Uncategorized", product.model_number].filter(Boolean);
+  const metaParts = [getProductCategoryLabel(product), product.model_number].filter(Boolean);
   return metaParts.join(" - ");
 };
 
@@ -68,7 +69,7 @@ const AdminOffers = () => {
       products.filter(
         (product) =>
           product.name.toLowerCase().includes(search.toLowerCase()) ||
-          product.sectionName?.toLowerCase().includes(search.toLowerCase()) ||
+          getProductCategoryLabel(product).toLowerCase().includes(search.toLowerCase()) ||
           product.model_number?.toLowerCase().includes(search.toLowerCase())
       ),
     [products, search]

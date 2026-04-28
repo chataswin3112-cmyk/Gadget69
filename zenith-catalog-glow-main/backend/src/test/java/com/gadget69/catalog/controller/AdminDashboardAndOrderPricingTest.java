@@ -60,6 +60,7 @@ class AdminDashboardAndOrderPricingTest {
         .thenAnswer(invocation -> objectMapper.readTree(invocation.getArgument(0, String.class)));
 
     String token = loginAndExtractToken();
+    long sectionId = createSubcategory(token);
 
     String today = java.time.LocalDate.now().toString();
     String tomorrow = java.time.LocalDate.now().plusDays(1).toString();
@@ -73,7 +74,7 @@ class AdminDashboardAndOrderPricingTest {
                   "description": "Offer-enabled product",
                   "price": 999.99,
                   "stockQuantity": 25,
-                  "sectionId": 1,
+                  "sectionId": %d,
                   "imageUrl": "https://example.com/offer-phone.png",
                   "offer": true,
                   "offerPrice": 799.99,
@@ -81,7 +82,7 @@ class AdminDashboardAndOrderPricingTest {
                   "offerEndDate": "%s",
                   "status": "ACTIVE"
                 }
-                """.formatted(today, tomorrow)))
+                """.formatted(sectionId, today, tomorrow)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.offerStartDate").value(today))
         .andExpect(jsonPath("$.offerEndDate").value(tomorrow))
@@ -182,5 +183,27 @@ class AdminDashboardAndOrderPricingTest {
 
     JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
     return response.get("token").asText();
+  }
+
+  private long createSubcategory(String token) throws Exception {
+    long parentId = createSection(token, "Dashboard Category", null);
+    return createSection(token, "Dashboard Subcategory", parentId);
+  }
+
+  private long createSection(String token, String name, Long parentSectionId) throws Exception {
+    MvcResult result = mockMvc.perform(post("/api/admin/sections")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "name": "%s",
+                  "description": "Dashboard test category",
+                  "imageUrl": "/placeholder.svg",
+                  "parentSectionId": %s
+                }
+                """.formatted(name, parentSectionId == null ? "null" : parentSectionId.toString())))
+        .andExpect(status().isOk())
+        .andReturn();
+    return objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
   }
 }

@@ -80,7 +80,8 @@ public final class ApiDtos {
       Boolean show_in_explore,
       Boolean show_in_top_category,
       String accent_tone,
-      Integer sort_order
+      Integer sort_order,
+      Long parentSectionId
   ) {}
 
   public record SectionResponse(
@@ -92,7 +93,9 @@ public final class ApiDtos {
       Boolean show_in_explore,
       Boolean show_in_top_category,
       String accent_tone,
-      Integer sort_order
+      Integer sort_order,
+      Long parentSectionId,
+      String parentSectionName
   ) {}
 
   public record ProductPayload(
@@ -131,6 +134,8 @@ public final class ApiDtos {
       Integer stockQuantity,
       Long sectionId,
       String sectionName,
+      Long parentSectionId,
+      String parentSectionName,
       String imageUrl,
       String videoUrl,
       String createdAt,

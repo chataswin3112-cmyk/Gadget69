@@ -130,6 +130,7 @@ class OrderManagementLegacySchemaCompatibilityTest {
   }
 
   private long createProduct(String token, String productName) throws Exception {
+    long sectionId = createSubcategory(token);
     MvcResult createProductResult = mockMvc.perform(post("/api/admin/products")
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
@@ -139,15 +140,37 @@ class OrderManagementLegacySchemaCompatibilityTest {
                   "description": "Legacy schema compatibility product",
                   "price": 1499.00,
                   "stockQuantity": 10,
-                  "sectionId": 1,
+                  "sectionId": %d,
                   "imageUrl": "https://example.com/legacy-schema-phone.png",
                   "status": "ACTIVE"
                 }
-                """.formatted(productName)))
+                """.formatted(productName, sectionId)))
         .andExpect(status().isOk())
         .andReturn();
 
     return objectMapper.readTree(createProductResult.getResponse().getContentAsString()).get("id").asLong();
+  }
+
+  private long createSubcategory(String token) throws Exception {
+    long parentId = createSection(token, "Legacy Category", null);
+    return createSection(token, "Legacy Subcategory", parentId);
+  }
+
+  private long createSection(String token, String name, Long parentSectionId) throws Exception {
+    MvcResult result = mockMvc.perform(post("/api/admin/sections")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "name": "%s",
+                  "description": "Legacy test category",
+                  "imageUrl": "/placeholder.svg",
+                  "parentSectionId": %s
+                }
+                """.formatted(name, parentSectionId == null ? "null" : parentSectionId.toString())))
+        .andExpect(status().isOk())
+        .andReturn();
+    return objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
   }
 
   private JsonNode createOrder(long productId, String customerName, String phone, String email) throws Exception {

@@ -11,6 +11,8 @@ export interface Section {
   show_in_top_category?: boolean;
   accent_tone?: string;
   sort_order?: number;
+  parentSectionId?: number | null;
+  parentSectionName?: string | null;
 }
 
 export interface ProductMedia {
@@ -67,6 +69,8 @@ export interface Product {
   stockQuantity: number;
   sectionId: number;
   sectionName?: string;
+  parentSectionId?: number | null;
+  parentSectionName?: string | null;
   imageUrl: string;
   videoUrl?: string;
   createdAt: string;

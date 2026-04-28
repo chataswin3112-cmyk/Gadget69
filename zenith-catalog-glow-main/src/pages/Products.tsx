@@ -8,6 +8,7 @@ import SectionHeader from "@/components/storefront/SectionHeader";
 import DeferredRender from "@/components/ui/deferred-render";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { scheduleAfterPaint, scheduleIdleTask } from "@/lib/idle";
+import { getChildSections, getProductCategoryLabel, getSectionFamilyIds, getTopLevelSections } from "@/lib/category";
 
 const Footer = lazy(() => import("@/components/storefront/Footer"));
 const FloatingContactActions = lazy(() => import("@/components/storefront/FloatingContactActions"));
@@ -47,6 +48,7 @@ const Products = () => {
   const deferredSearch = useDeferredValue(search);
   const deferredSortBy = useDeferredValue(sortBy);
   const deferredCategoryFilter = useDeferredValue(categoryFilter);
+  const topLevelSections = useMemo(() => getTopLevelSections(sections, true), [sections]);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,7 +87,8 @@ const Products = () => {
     }
 
     if (deferredCategoryFilter !== "all") {
-      products = products.filter((product) => product.sectionId === Number(deferredCategoryFilter));
+      const sectionIds = new Set(getSectionFamilyIds(sections, Number(deferredCategoryFilter)));
+      products = products.filter((product) => sectionIds.has(product.sectionId));
     }
 
     if (deferredSearch.trim()) {
@@ -94,7 +97,7 @@ const Products = () => {
         (product) =>
           product.name.toLowerCase().includes(query) ||
           product.model_number?.toLowerCase().includes(query) ||
-          product.sectionName?.toLowerCase().includes(query)
+          getProductCategoryLabel(product).toLowerCase().includes(query)
       );
     }
 
@@ -116,7 +119,7 @@ const Products = () => {
     }
 
     return products;
-  }, [activeFilter, allProducts, deferredCategoryFilter, deferredSearch, deferredSortBy]);
+  }, [activeFilter, allProducts, deferredCategoryFilter, deferredSearch, deferredSortBy, sections]);
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE_PRODUCTS);
@@ -185,11 +188,19 @@ const Products = () => {
             className="rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body"
           >
             <option value="all">All Categories</option>
-            {sections.map((section) => (
-              <option key={section.id} value={section.id}>
-                {section.name}
-              </option>
-            ))}
+            {topLevelSections.map((section) => {
+              const children = getChildSections(sections, section.id, true);
+              return (
+                <optgroup key={section.id} label={section.name}>
+                  <option value={section.id}>{section.name}</option>
+                  {children.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.name}
+                    </option>
+                  ))}
+                </optgroup>
+              );
+            })}
           </select>
           <select
             value={sortBy}

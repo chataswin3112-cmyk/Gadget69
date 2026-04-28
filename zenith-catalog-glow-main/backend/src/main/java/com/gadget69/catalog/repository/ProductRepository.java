@@ -7,12 +7,18 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-  @EntityGraph(attributePaths = "section")
-  List<Product> findAllByOrderByDisplayOrderAscCreatedAtDesc();
+  @EntityGraph(attributePaths = {"section", "section.parentSection"})
+  List<Product> findAllByOrderByDisplayOrderAscCreatedAtDescIdAsc();
+
+  @EntityGraph(attributePaths = {"section", "section.parentSection"})
+  List<Product> findAllByStatusIgnoreCaseOrderByDisplayOrderAscCreatedAtDescIdAsc(String status);
 
   @Override
-  @EntityGraph(attributePaths = "section")
+  @EntityGraph(attributePaths = {"section", "section.parentSection"})
   Optional<Product> findById(Long id);
+
+  @EntityGraph(attributePaths = {"section", "section.parentSection"})
+  Optional<Product> findByIdAndStatusIgnoreCase(Long id, String status);
 
   long countBySection_Id(Long sectionId);
 }

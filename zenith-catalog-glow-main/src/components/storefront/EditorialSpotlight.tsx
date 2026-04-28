@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import MediaImage from "@/components/ui/media-image";
 import { Product, Section } from "@/types";
 import { getEffectivePrice } from "@/lib/pricing";
+import { getProductCategoryLabel } from "@/lib/category";
 
 interface EditorialSpotlightProps {
   products: Product[];
@@ -85,7 +86,7 @@ const EditorialSpotlight = ({ products, sections }: EditorialSpotlightProps) => 
                 <div className="flex flex-col gap-3 border-t border-[hsl(var(--surface-line))] pt-4 sm:pt-5 sm:flex-row sm:items-end sm:justify-between mt-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-foreground/48">
-                      {sectionLookup.get(leadProduct.sectionId)?.name || leadProduct.sectionName || "Featured"}
+                      {getProductCategoryLabel(leadProduct) || sectionLookup.get(leadProduct.sectionId)?.name || "Featured"}
                     </p>
                     <p className="mt-1.5 sm:mt-2 text-xl sm:text-2xl font-semibold text-foreground">
                       Rs. {getEffectivePrice(leadProduct).toLocaleString()}
@@ -101,7 +102,6 @@ const EditorialSpotlight = ({ products, sections }: EditorialSpotlightProps) => 
 
             <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-1">
               {supportingProducts.map((product, index) => {
-                const relatedSection = sectionLookup.get(product.sectionId);
                 const motionSide = index === 0 ? "left" : "right";
 
                 return (
@@ -129,7 +129,7 @@ const EditorialSpotlight = ({ products, sections }: EditorialSpotlightProps) => 
                       </span>
                       <h3 className="font-heading text-xl sm:text-2xl font-bold leading-tight">{product.name}</h3>
                       <div className="mt-2 sm:mt-3 flex items-center justify-between gap-3 text-sm text-foreground/62">
-                        <span>{relatedSection?.name || product.sectionName || "Shop now"}</span>
+                        <span>{getProductCategoryLabel(product)}</span>
                         <span className="inline-flex items-center gap-1 text-foreground">
                           Explore
                           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />

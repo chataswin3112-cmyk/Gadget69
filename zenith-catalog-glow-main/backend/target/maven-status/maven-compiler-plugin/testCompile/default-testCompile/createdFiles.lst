@@ -2,6 +2,7 @@ com\gadget69\catalog\controller\PaymentEmailNotificationFlowTest.class
 com\gadget69\catalog\config\SpaForwardingControllerTest.class
 com\gadget69\catalog\controller\OrderManagementLegacySchemaCompatibilityTest.class
 com\gadget69\catalog\service\OtpServiceTest$TestOtpService.class
+com\gadget69\catalog\controller\AdminSettingsUpdateTest.class
 com\gadget69\catalog\config\LocalEnvLoaderTest.class
 com\gadget69\catalog\config\RateLimitFilterTest.class
 com\gadget69\catalog\controller\CreateOrderPaymentGatewayBehaviorTest.class

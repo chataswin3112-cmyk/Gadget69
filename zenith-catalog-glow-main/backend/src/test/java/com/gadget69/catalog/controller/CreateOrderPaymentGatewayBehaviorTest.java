@@ -108,6 +108,7 @@ class CreateOrderPaymentGatewayBehaviorTest {
     String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
         .get("token")
         .asText();
+    long sectionId = createSubcategory(token);
 
     MvcResult productResult = mockMvc.perform(post("/api/admin/products")
             .header("Authorization", "Bearer " + token)
@@ -118,15 +119,37 @@ class CreateOrderPaymentGatewayBehaviorTest {
                   "description": "Gateway behavior product",
                   "price": 1499.00,
                   "stockQuantity": 10,
-                  "sectionId": 1,
+                  "sectionId": %d,
                   "imageUrl": "https://example.com/gateway-test-phone.png",
                   "status": "ACTIVE"
                 }
-                """))
+                """.formatted(sectionId)))
         .andExpect(status().isOk())
         .andReturn();
 
     return objectMapper.readTree(productResult.getResponse().getContentAsString()).get("id").asLong();
+  }
+
+  private long createSubcategory(String token) throws Exception {
+    long parentId = createSection(token, "Gateway Category", null);
+    return createSection(token, "Gateway Subcategory", parentId);
+  }
+
+  private long createSection(String token, String name, Long parentSectionId) throws Exception {
+    MvcResult result = mockMvc.perform(post("/api/admin/sections")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "name": "%s",
+                  "description": "Test category",
+                  "imageUrl": "/placeholder.svg",
+                  "parentSectionId": %s
+                }
+                """.formatted(name, parentSectionId == null ? "null" : parentSectionId.toString())))
+        .andExpect(status().isOk())
+        .andReturn();
+    return objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
   }
 
   private String validOrderRequest(long productId, String customerName, String phone, String email) {

@@ -9,6 +9,7 @@ import MediaFrame from "./MediaFrame";
 import ColorSwatchSelector from "./ColorSwatchSelector";
 import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
 import { getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
+import { getProductCategoryLabel } from "@/lib/category";
 
 interface ProductCardProps {
   product: Product;
@@ -106,7 +107,7 @@ const ProductCard = ({ product, animationPreset, className, priority = false, dr
       <div className="p-4 flex flex-col flex-1">
         {product.sectionName && (
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-body">
-            {product.sectionName}
+            {getProductCategoryLabel(product)}
           </p>
         )}
         <Link to={`/products/${product.id}`}>

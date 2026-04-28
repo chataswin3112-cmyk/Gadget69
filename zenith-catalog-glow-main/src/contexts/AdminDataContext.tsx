@@ -147,7 +147,7 @@ const sortReviews = (items: Review[]) =>
   [...items].sort((a, b) => (b.date || "").localeCompare(a.date || "") || b.id - a.id);
 
 const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
-const CATALOG_CACHE_VERSION = 2;
+const CATALOG_CACHE_VERSION = 4;
 
 interface CatalogCacheSnapshot {
   banners: Banner[];
@@ -183,6 +183,12 @@ const getLoadedResourceList = (state: ResourceLoadMap) =>
 
 const getCatalogCacheKey = (isAuthenticated: boolean) =>
   `gadget69_catalog_cache_${isAuthenticated ? "admin" : "public"}`;
+
+const isUnauthorizedError = (error: unknown) =>
+  typeof error === "object" &&
+  error !== null &&
+  "response" in error &&
+  (error as { response?: { status?: number } }).response?.status === 401;
 
 const loadCatalogCache = (isAuthenticated: boolean): CatalogCacheSnapshot | null => {
   if (typeof window === "undefined") {
@@ -408,7 +414,9 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
 
           updateLoadedState(resource);
         } catch (error) {
-          console.warn(`Failed to load ${resource}`, error);
+          if (!isUnauthorizedError(error)) {
+            console.warn(`Failed to load ${resource}`, error);
+          }
           throw error;
         } finally {
           delete inFlightLoadsRef.current[resource];
@@ -454,7 +462,9 @@ export const AdminDataProvider: React.FC<AdminDataProviderProps> = ({
         });
         updateLoadedStates(STOREFRONT_BOOTSTRAP_RESOURCES);
       } catch (error) {
-        console.warn("Failed to load storefront bootstrap", error);
+        if (!isUnauthorizedError(error)) {
+          console.warn("Failed to load storefront bootstrap", error);
+        }
         storefrontBootstrapRef.current = null;
         await Promise.all(
           STOREFRONT_BOOTSTRAP_RESOURCES.map((resource) =>

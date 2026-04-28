@@ -7,6 +7,7 @@ import FloatingContactActions from "@/components/storefront/FloatingContactActio
 import SectionHeader from "@/components/storefront/SectionHeader";
 import MediaFrame from "@/components/storefront/MediaFrame";
 import { useAdminData } from "@/contexts/AdminDataContext";
+import { getTopLevelSections } from "@/lib/category";
 
 const Categories = () => {
   const { sections, ensureSectionsLoaded } = useAdminData();
@@ -15,7 +16,7 @@ const Categories = () => {
     void ensureSectionsLoaded();
   }, [ensureSectionsLoaded]);
 
-  const activeSections = sections.filter((s) => s.is_active !== false);
+  const activeSections = getTopLevelSections(sections, true);
 
   return (
     <div className="min-h-screen bg-background">

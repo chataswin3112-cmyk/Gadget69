@@ -5,6 +5,7 @@ import MediaImage from "@/components/ui/media-image";
 import { getEffectivePrice } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types";
+import { getProductCategoryLabel } from "@/lib/category";
 
 const ProductMarqueeSection = () => {
   const { products } = useAdminData();
@@ -104,7 +105,7 @@ const CompactProductCard = ({ product }: { product: Product }) => {
       </div>
       <div className="p-3">
         <p className="truncate text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground font-body">
-          {product.sectionName}
+          {getProductCategoryLabel(product)}
         </p>
         <p className="mt-0.5 truncate text-sm font-semibold leading-tight text-foreground font-heading">
           {product.name}

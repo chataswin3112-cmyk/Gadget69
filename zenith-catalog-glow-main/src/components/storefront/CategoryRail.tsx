@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Section } from "@/types";
 import SectionHeader from "./SectionHeader";
 import MediaFrame from "./MediaFrame";
+import { getTopLevelSections } from "@/lib/category";
 
 interface CategoryRailProps {
   sections: Section[];
@@ -18,7 +19,7 @@ const CARD_GRADIENTS = [
 ];
 
 const CategoryRail = ({ sections }: CategoryRailProps) => {
-  const exploreSections = sections.filter((s) => s.show_in_explore !== false);
+  const exploreSections = getTopLevelSections(sections, true).filter((s) => s.show_in_explore !== false);
 
   if (!exploreSections.length) return null;
 

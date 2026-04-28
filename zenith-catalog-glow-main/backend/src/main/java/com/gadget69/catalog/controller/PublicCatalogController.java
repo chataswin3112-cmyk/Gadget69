@@ -83,7 +83,7 @@ public class PublicCatalogController {
   @GetMapping("/products")
   @Transactional(readOnly = true)
   public List<ApiDtos.ProductResponse> products() {
-    return productRepository.findAllByOrderByDisplayOrderAscCreatedAtDesc().stream()
+    return productRepository.findAllByStatusIgnoreCaseOrderByDisplayOrderAscCreatedAtDescIdAsc("ACTIVE").stream()
         .map(catalogMapper::toProductResponse)
         .toList();
   }
@@ -91,7 +91,7 @@ public class PublicCatalogController {
   @GetMapping("/products/{id}")
   @Transactional(readOnly = true)
   public ApiDtos.ProductResponse product(@PathVariable Long id) {
-    Product product = productRepository.findById(id)
+    Product product = productRepository.findByIdAndStatusIgnoreCase(id, "ACTIVE")
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     return catalogMapper.toProductResponse(product);
   }
@@ -118,7 +118,7 @@ public class PublicCatalogController {
             .map(catalogMapper::toSectionResponse)
             .toList();
     List<ApiDtos.ProductResponse> productResponses =
-        productRepository.findAllByOrderByDisplayOrderAscCreatedAtDesc().stream()
+        productRepository.findAllByStatusIgnoreCaseOrderByDisplayOrderAscCreatedAtDescIdAsc("ACTIVE").stream()
             .map(catalogMapper::toProductResponse)
             .toList();
     List<ApiDtos.BannerResponse> bannerResponses =
