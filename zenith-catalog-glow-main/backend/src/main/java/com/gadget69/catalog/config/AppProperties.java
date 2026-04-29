@@ -15,6 +15,8 @@ public class AppProperties {
   private String frontendDevUrl = "http://localhost:8080";
   private String adminSecret = "change-this-secret-before-production";
   private long adminTokenHours = 24;
+  private boolean catalogSeedEnabled = true;
+  private boolean demoCatalogReplaceEnabled = true;
   private List<String> allowedOrigins = new ArrayList<>();
   private Cloudinary cloudinary = new Cloudinary();
   private Razorpay razorpay = new Razorpay();

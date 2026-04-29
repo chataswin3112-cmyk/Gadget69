@@ -1,5 +1,6 @@
 package com.gadget69.catalog.service;
 
+import com.gadget69.catalog.config.AppProperties;
 import com.gadget69.catalog.entity.AdminUser;
 import com.gadget69.catalog.entity.Product;
 import com.gadget69.catalog.entity.ProductMedia;
@@ -23,7 +24,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -52,6 +52,7 @@ public class SeedDataService implements ApplicationRunner {
   private final AuthTokenService authTokenService;
   private final CatalogSyncService catalogSyncService;
   private final JdbcTemplate jdbcTemplate;
+  private final AppProperties appProperties;
 
   @Override
   @Transactional
@@ -105,6 +106,11 @@ public class SeedDataService implements ApplicationRunner {
   }
 
   private void seedCatalog() {
+    if (!appProperties.isCatalogSeedEnabled()) {
+      LOGGER.info("Catalog seed is disabled; preserving existing catalog rows.");
+      return;
+    }
+
     if (sectionRepository.count() == 0 && productRepository.count() == 0) {
       catalogSyncService.seedFreshCatalog();
       return;

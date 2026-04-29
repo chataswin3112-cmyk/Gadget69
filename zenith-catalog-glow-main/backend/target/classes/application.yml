@@ -58,6 +58,8 @@ app:
   frontend-dev-url: ${APP_FRONTEND_DEV_URL:http://localhost:8080}
   admin-secret: ${APP_ADMIN_SECRET:change-this-secret-before-production}
   admin-token-hours: 24
+  catalog-seed-enabled: ${APP_CATALOG_SEED_ENABLED:true}
+  demo-catalog-replace-enabled: ${APP_DEMO_CATALOG_REPLACE_ENABLED:true}
   twilio:
     account-sid: ${APP_TWILIO_ACCOUNT_SID:}
     auth-token: ${APP_TWILIO_AUTH_TOKEN:}

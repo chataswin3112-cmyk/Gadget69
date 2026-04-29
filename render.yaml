@@ -27,6 +27,10 @@ services:
         value: https://www.gadget69.in,https://gadget69.in
       - key: APP_REQUIRE_POSTGRES
         value: "true"
+      - key: APP_CATALOG_SEED_ENABLED
+        value: "false"
+      - key: APP_DEMO_CATALOG_REPLACE_ENABLED
+        value: "false"
       - key: APP_ADMIN_SECRET
         sync: false
       - key: APP_RAZORPAY_ENABLED

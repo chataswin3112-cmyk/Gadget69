@@ -1,6 +1,7 @@
 package com.gadget69.catalog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gadget69.catalog.config.AppProperties;
 import com.gadget69.catalog.dto.ApiDtos;
 import com.gadget69.catalog.entity.AdminUser;
 import com.gadget69.catalog.entity.Banner;
@@ -79,6 +80,7 @@ public class AdminCatalogController {
   private final VariantMediaRepository variantMediaRepository;
   private final ProductMediaRepository productMediaRepository;
   private final CloudinaryCatalogMediaService cloudinaryCatalogMediaService;
+  private final AppProperties appProperties;
 
   @PostMapping("/login")
   public ApiDtos.AdminLoginResponse login(@RequestBody ApiDtos.AdminLoginRequest request) {
@@ -193,6 +195,11 @@ public class AdminCatalogController {
   @PostMapping("/catalog/replace-demo-data")
   public CatalogSyncService.CatalogSyncResult replaceDemoCatalog(HttpServletRequest httpRequest) {
     authTokenService.requireAdmin(httpRequest);
+    if (!appProperties.isDemoCatalogReplaceEnabled()) {
+      throw new ResponseStatusException(
+          HttpStatus.FORBIDDEN,
+          "Demo catalog replacement is disabled for this environment");
+    }
     return catalogSyncService.replaceDemoData();
   }
 

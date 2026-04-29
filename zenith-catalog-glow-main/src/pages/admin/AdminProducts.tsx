@@ -30,7 +30,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-const emptyProduct = (sectionId: number): Partial<Product> => ({
+const emptyProduct = (sectionId?: number): Partial<Product> => ({
   name: "",
   description: "",
   price: 0,
@@ -112,11 +112,19 @@ const AdminProducts = () => {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
   const topLevelSections = useMemo(() => getTopLevelSections(sections), [sections]);
-  const subcategorySections = useMemo(
-    () => sections.filter((section) => isSubcategory(section)),
-    [sections]
+  const selectedCategorySubcategories = useMemo(
+    () => (selectedCategoryId === null ? [] : getChildSections(sections, selectedCategoryId)),
+    [sections, selectedCategoryId]
+  );
+  const selectedSection = useMemo(
+    () => sections.find((section) => section.id === editing?.sectionId),
+    [editing?.sectionId, sections]
+  );
+  const isLegacyMainCategoryProduct = Boolean(
+    !isNew && selectedSection && !isSubcategory(selectedSection)
   );
 
   const filteredProducts = useMemo(
@@ -134,16 +142,23 @@ const AdminProducts = () => {
   }, [ensureProductsLoaded, ensureSectionsLoaded]);
 
   const openNew = () => {
-    if (!subcategorySections.length) {
-      toast.error("Add a subcategory before creating products");
+    if (!topLevelSections.length) {
+      toast.error("Add a category before creating products");
       return;
     }
-    const firstSectionId = subcategorySections[0].id;
-    setEditing(emptyProduct(firstSectionId));
+
+    const firstCategoryWithChildren =
+      topLevelSections.find((section) => getChildSections(sections, section.id).length > 0) ||
+      topLevelSections[0];
+    const firstSubcategory = getChildSections(sections, firstCategoryWithChildren.id)[0];
+
+    setSelectedCategoryId(firstCategoryWithChildren.id);
+    setEditing(emptyProduct(firstSubcategory?.id));
     setIsNew(true);
   };
 
   const openEdit = (product: Product) => {
+    setSelectedCategoryId(product.parentSectionId ?? product.sectionId ?? null);
     setEditing({
       ...product,
       media: getProductMedia(product),
@@ -156,6 +171,18 @@ const AdminProducts = () => {
   const saveProduct = async () => {
     if (!editing?.name?.trim()) {
       toast.error("Product name is required");
+      return;
+    }
+    if (!editing.description?.trim()) {
+      toast.error("Product description is required");
+      return;
+    }
+    if (editing.price === null || editing.price === undefined || Number(editing.price) <= 0) {
+      toast.error("Product price is required");
+      return;
+    }
+    if (!editing.sectionId || (isNew && !isSubcategory(selectedSection))) {
+      toast.error("Select a subcategory before saving this product");
       return;
     }
 
@@ -179,6 +206,7 @@ const AdminProducts = () => {
         media: getProductMedia(saved),
         specifications: normalizeSpecifications(saved.specifications),
       });
+      setSelectedCategoryId(saved.parentSectionId ?? saved.sectionId ?? null);
       setIsNew(false);
       toast.success(isNew ? "Product created. You can add variants now." : "Product updated");
     } catch (error) {
@@ -345,7 +373,41 @@ const AdminProducts = () => {
                   <div className="space-y-2">
                     <Label className="font-body">Category</Label>
                     <Select
-                      value={String(editing.sectionId || sections[0]?.id || 1)}
+                      value={selectedCategoryId === null ? "" : String(selectedCategoryId)}
+                      onValueChange={(value) => {
+                        const categoryId = Number.parseInt(value, 10);
+                        const firstSubcategory = getChildSections(sections, categoryId)[0];
+                        setSelectedCategoryId(categoryId);
+                        setEditing((current) =>
+                          current
+                            ? {
+                                ...current,
+                                sectionId: firstSubcategory?.id,
+                              }
+                            : current
+                        );
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Main categories</SelectLabel>
+                          {topLevelSections.map((section) => (
+                            <SelectItem key={section.id} value={String(section.id)}>
+                              {section.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Subcategory</Label>
+                    <Select
+                      value={editing.sectionId ? String(editing.sectionId) : ""}
+                      disabled={!selectedCategorySubcategories.length && !isLegacyMainCategoryProduct}
                       onValueChange={(value) =>
                         setEditing((current) =>
                           current ? { ...current, sectionId: Number.parseInt(value, 10) } : current
@@ -353,41 +415,34 @@ const AdminProducts = () => {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select subcategory" />
                       </SelectTrigger>
                       <SelectContent>
-                        {topLevelSections.map((section) => {
-                          const children = getChildSections(sections, section.id);
-                          if (!children.length) {
-                            return null;
-                          }
-                          return (
-                            <SelectGroup key={section.id}>
-                              <SelectLabel>{section.name}</SelectLabel>
-                              {children.map((child) => (
-                                <SelectItem key={child.id} value={String(child.id)}>
-                                  {child.name}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          );
-                        })}
-                        {(() => {
-                          const selectedSection = sections.find((section) => section.id === editing.sectionId);
-                          if (!selectedSection || isSubcategory(selectedSection)) {
-                            return null;
-                          }
-                          return (
-                            <SelectGroup>
-                              <SelectLabel>Legacy category</SelectLabel>
-                              <SelectItem value={String(selectedSection.id)}>
-                                {selectedSection.name}
+                        {selectedCategorySubcategories.length ? (
+                          <SelectGroup>
+                            <SelectLabel>Subcategories</SelectLabel>
+                            {selectedCategorySubcategories.map((section) => (
+                              <SelectItem key={section.id} value={String(section.id)}>
+                                {section.name}
                               </SelectItem>
-                            </SelectGroup>
-                          );
-                        })()}
+                            ))}
+                          </SelectGroup>
+                        ) : null}
+                        {isLegacyMainCategoryProduct && selectedSection ? (
+                          <SelectGroup>
+                            <SelectLabel>Legacy category</SelectLabel>
+                            <SelectItem value={String(selectedSection.id)}>
+                              {selectedSection.name}
+                            </SelectItem>
+                          </SelectGroup>
+                        ) : null}
                       </SelectContent>
                     </Select>
+                    {!selectedCategorySubcategories.length && !isLegacyMainCategoryProduct ? (
+                      <p className="text-xs text-muted-foreground">
+                        Add a subcategory under this category before saving a product.
+                      </p>
+                    ) : null}
                   </div>
                   <div className="space-y-2">
                     <Label className="font-body">Base Price</Label>
