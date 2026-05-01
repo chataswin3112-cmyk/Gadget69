@@ -105,7 +105,7 @@ class CreateOrderPaymentGatewayBehaviorTest {
                 "Needs Note",
                 "9000000000",
                 "note@example.com",
-                "Please send the blue color if available"))))
+                "Please send the blue color if available")))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.specialInstructions").value("Please send the blue color if available"))
         .andReturn();
