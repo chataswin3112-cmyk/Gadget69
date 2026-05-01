@@ -29,6 +29,7 @@ const CategoryDetails = () => {
   const parentSection = section?.parentSectionId
     ? sections.find((item) => item.id === section.parentSectionId)
     : null;
+  const heroSection = parentSection ?? section;
   const childSections = useMemo(
     () => (section && !isSubcategory(section) ? getChildSections(sections, section.id, true) : []),
     [section, sections]
@@ -74,10 +75,10 @@ const CategoryDetails = () => {
 
       {/* Hero banner */}
       <div className="relative h-48 md:h-64 overflow-hidden bg-muted">
-        {section.imageUrl && (
+        {heroSection?.imageUrl && (
           <MediaImage
-            src={section.imageUrl}
-            alt={section.name}
+            src={heroSection.imageUrl}
+            alt={heroSection.name}
             className="w-full h-full object-cover"
             sizes="100vw"
             optimizeWidth={800}
@@ -102,10 +103,10 @@ const CategoryDetails = () => {
               <span className="text-white">{section.name}</span>
             </nav>
             <h1 className="font-heading text-3xl md:text-4xl font-bold text-white">
-              {section.name}
+              {heroSection?.name}
             </h1>
-            {section.description && (
-              <p className="text-white/70 mt-2 font-body">{section.description}</p>
+            {heroSection?.description && (
+              <p className="text-white/70 mt-2 font-body">{heroSection.description}</p>
             )}
           </div>
         </div>

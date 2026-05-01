@@ -55,6 +55,9 @@ public class CustomerOrder {
   @Column(nullable = false)
   private String pincode;
 
+  @Column(name = "special_instructions", length = 500)
+  private String specialInstructions;
+
   @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
   private BigDecimal totalAmount;
 

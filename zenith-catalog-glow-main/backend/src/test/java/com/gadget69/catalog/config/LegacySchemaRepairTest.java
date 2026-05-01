@@ -95,6 +95,16 @@ class LegacySchemaRepairTest {
         Integer.class);
     assertThat(emailColumnCount).isEqualTo(1);
 
+    Integer specialInstructionsColumnCount = jdbcTemplate.queryForObject(
+        """
+            SELECT COUNT(*)
+            FROM information_schema.columns
+            WHERE UPPER(table_name) = 'CUSTOMER_ORDERS'
+              AND UPPER(column_name) = 'SPECIAL_INSTRUCTIONS'
+            """,
+        Integer.class);
+    assertThat(specialInstructionsColumnCount).isEqualTo(1);
+
     String paymentStatus = jdbcTemplate.queryForObject(
         "SELECT payment_status FROM customer_orders WHERE customer_name = ?",
         String.class,

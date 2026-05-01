@@ -276,8 +276,20 @@ public class AdminCatalogController {
   }
 
   @DeleteMapping("/products/{id}")
+  @Transactional
   public ResponseEntity<Void> deleteProduct(HttpServletRequest httpRequest, @PathVariable Long id) {
     authTokenService.requireAdmin(httpRequest);
+    productRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+    List<Long> variantIds = productVariantRepository.findByProductIdOrderByDisplayOrderAscIdAsc(id).stream()
+        .map(ProductVariant::getId)
+        .toList();
+    for (Long variantId : variantIds) {
+      variantMediaRepository.deleteByVariantId(variantId);
+    }
+    productMediaRepository.deleteByProductId(id);
+    productVariantRepository.deleteByProductId(id);
     productRepository.deleteById(id);
     return ResponseEntity.noContent().build();
   }
@@ -517,9 +529,6 @@ public class AdminCatalogController {
   private void applyProduct(Product product, ApiDtos.ProductPayload payload) {
     Section section = sectionRepository.findById(payload.sectionId())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Select a valid category"));
-    if (product.getId() == null && section.getParentSection() == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Select a subcategory for new products");
-    }
 
     product.setName(requiredValue(payload.name(), "Product name is required"));
     product.setDescription(requiredValue(payload.description(), "Product description is required"));

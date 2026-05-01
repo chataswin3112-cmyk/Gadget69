@@ -80,6 +80,7 @@ class OrderManagementLegacySchemaCompatibilityTest {
     jdbcTemplate.update("UPDATE customer_orders SET phone = ? WHERE id = ?", "9876543210", orderId);
     jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS customer_phone");
     jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS email");
+    jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS special_instructions");
     jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS order_status");
     jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS payment_status");
     jdbcTemplate.execute("ALTER TABLE customer_orders DROP COLUMN IF EXISTS updated_at");

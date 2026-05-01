@@ -153,6 +153,45 @@ class OrderManagementControllerTest {
   }
 
   @Test
+  void updatesSpecialInstructionsThroughAdminOrderDetails() throws Exception {
+    String token = loginAndExtractToken();
+    long productId = createProduct(token, "Instruction Test Phone");
+    JsonNode order = createOrder(
+        productId,
+        "Nila",
+        "9012345678",
+        "nila@example.com",
+        "Please keep the invoice inside the box");
+    long orderId = order.get("id").asLong();
+
+    mockMvc.perform(get("/api/admin/orders/{id}", orderId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.specialInstructions").value("Please keep the invoice inside the box"));
+
+    mockMvc.perform(put("/api/admin/orders/{id}/details", orderId)
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "customerName": "Nila",
+                  "phone": "9012345678",
+                  "email": "nila@example.com",
+                  "address": "88 Lake Road",
+                  "pincode": "560001",
+                  "specialInstructions": "Blue color preferred"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.specialInstructions").value("Blue color preferred"));
+
+    mockMvc.perform(get("/api/orders/{id}", orderId)
+            .param("phone", "9012345678"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.specialInstructions").value("Blue color preferred"));
+  }
+
+  @Test
   void deleteRulesAllowPendingOrdersAndBlockSuccessfulPayments() throws Exception {
     String token = loginAndExtractToken();
     long productId = createProduct(token, "Delete Rules Phone");
@@ -286,6 +325,15 @@ class OrderManagementControllerTest {
   }
 
   private JsonNode createOrder(long productId, String customerName, String phone, String email) throws Exception {
+    return createOrder(productId, customerName, phone, email, null);
+  }
+
+  private JsonNode createOrder(
+      long productId,
+      String customerName,
+      String phone,
+      String email,
+      String specialInstructions) throws Exception {
     MvcResult createOrderResult = mockMvc.perform(post("/api/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -295,6 +343,7 @@ class OrderManagementControllerTest {
                   "email": "%s",
                   "address": "88 Lake Road",
                   "pincode": "560001",
+                  "specialInstructions": %s,
                   "items": [
                     {
                       "productId": %d,
@@ -302,7 +351,12 @@ class OrderManagementControllerTest {
                     }
                   ]
                 }
-                """.formatted(customerName, phone, email, productId)))
+                """.formatted(
+                customerName,
+                phone,
+                email,
+                specialInstructions == null ? "null" : "\"" + specialInstructions + "\"",
+                productId)))
         .andExpect(status().isOk())
         .andReturn();
 

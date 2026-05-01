@@ -8,7 +8,7 @@ import { useAdminData } from "@/contexts/AdminDataContext";
 import { getErrorMessage } from "@/lib/api-error";
 import { getOfferStatus, getEffectivePrice, type OfferStatus } from "@/lib/pricing";
 import { getPrimaryImageUrl, getProductMedia } from "@/lib/catalog-media";
-import { getChildSections, getProductCategoryLabel, getTopLevelSections, isSubcategory } from "@/lib/category";
+import { getChildSections, getProductCategoryLabel, getTopLevelSections } from "@/lib/category";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,8 @@ import {
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+
+const DIRECT_CATEGORY_VALUE = "__DIRECT_CATEGORY__";
 
 const emptyProduct = (sectionId?: number): Partial<Product> => ({
   name: "",
@@ -119,13 +121,14 @@ const AdminProducts = () => {
     () => (selectedCategoryId === null ? [] : getChildSections(sections, selectedCategoryId)),
     [sections, selectedCategoryId]
   );
-  const selectedSection = useMemo(
-    () => sections.find((section) => section.id === editing?.sectionId),
-    [editing?.sectionId, sections]
-  );
-  const isLegacyMainCategoryProduct = Boolean(
-    !isNew && selectedSection && !isSubcategory(selectedSection)
-  );
+  const subcategorySelectValue = useMemo(() => {
+    if (selectedCategoryId === null || !editing?.sectionId) {
+      return "";
+    }
+    return editing.sectionId === selectedCategoryId
+      ? DIRECT_CATEGORY_VALUE
+      : String(editing.sectionId);
+  }, [editing?.sectionId, selectedCategoryId]);
 
   const filteredProducts = useMemo(
     () =>
@@ -147,13 +150,10 @@ const AdminProducts = () => {
       return;
     }
 
-    const firstCategoryWithChildren =
-      topLevelSections.find((section) => getChildSections(sections, section.id).length > 0) ||
-      topLevelSections[0];
-    const firstSubcategory = getChildSections(sections, firstCategoryWithChildren.id)[0];
+    const firstCategory = topLevelSections[0];
 
-    setSelectedCategoryId(firstCategoryWithChildren.id);
-    setEditing(emptyProduct(firstSubcategory?.id));
+    setSelectedCategoryId(firstCategory.id);
+    setEditing(emptyProduct(firstCategory.id));
     setIsNew(true);
   };
 
@@ -181,8 +181,8 @@ const AdminProducts = () => {
       toast.error("Product price is required");
       return;
     }
-    if (!editing.sectionId || (isNew && !isSubcategory(selectedSection))) {
-      toast.error("Select a subcategory before saving this product");
+    if (!editing.sectionId) {
+      toast.error("Select a category before saving this product");
       return;
     }
 
@@ -376,13 +376,12 @@ const AdminProducts = () => {
                       value={selectedCategoryId === null ? "" : String(selectedCategoryId)}
                       onValueChange={(value) => {
                         const categoryId = Number.parseInt(value, 10);
-                        const firstSubcategory = getChildSections(sections, categoryId)[0];
                         setSelectedCategoryId(categoryId);
                         setEditing((current) =>
                           current
                             ? {
                                 ...current,
-                                sectionId: firstSubcategory?.id,
+                                sectionId: categoryId,
                               }
                             : current
                         );
@@ -406,18 +405,32 @@ const AdminProducts = () => {
                   <div className="space-y-2">
                     <Label className="font-body">Subcategory</Label>
                     <Select
-                      value={editing.sectionId ? String(editing.sectionId) : ""}
-                      disabled={!selectedCategorySubcategories.length && !isLegacyMainCategoryProduct}
-                      onValueChange={(value) =>
+                      value={subcategorySelectValue}
+                      disabled={selectedCategoryId === null}
+                      onValueChange={(value) => {
+                        if (value === DIRECT_CATEGORY_VALUE) {
+                          setEditing((current) =>
+                            current && selectedCategoryId !== null
+                              ? { ...current, sectionId: selectedCategoryId }
+                              : current
+                          );
+                          return;
+                        }
                         setEditing((current) =>
                           current ? { ...current, sectionId: Number.parseInt(value, 10) } : current
-                        )
-                      }
+                        );
+                      }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select subcategory" />
+                        <SelectValue placeholder="Add directly under category" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Placement</SelectLabel>
+                          <SelectItem value={DIRECT_CATEGORY_VALUE}>
+                            Add directly under category
+                          </SelectItem>
+                        </SelectGroup>
                         {selectedCategorySubcategories.length ? (
                           <SelectGroup>
                             <SelectLabel>Subcategories</SelectLabel>
@@ -428,21 +441,17 @@ const AdminProducts = () => {
                             ))}
                           </SelectGroup>
                         ) : null}
-                        {isLegacyMainCategoryProduct && selectedSection ? (
-                          <SelectGroup>
-                            <SelectLabel>Legacy category</SelectLabel>
-                            <SelectItem value={String(selectedSection.id)}>
-                              {selectedSection.name}
-                            </SelectItem>
-                          </SelectGroup>
-                        ) : null}
                       </SelectContent>
                     </Select>
-                    {!selectedCategorySubcategories.length && !isLegacyMainCategoryProduct ? (
+                    {selectedCategorySubcategories.length ? (
                       <p className="text-xs text-muted-foreground">
-                        Add a subcategory under this category before saving a product.
+                        Keep the direct category option selected, or move the product into a subcategory.
                       </p>
-                    ) : null}
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        No subcategories yet. This product will be placed directly under the category.
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label className="font-body">Base Price</Label>

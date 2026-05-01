@@ -87,6 +87,7 @@ public class LegacySchemaRepair {
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS currency VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS amount_paise INTEGER");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(255)");
+    apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS special_instructions VARCHAR(500)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS order_status VARCHAR(255)");
     apply("ALTER TABLE customer_orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP");
@@ -162,6 +163,7 @@ public class LegacySchemaRepair {
         "email",
         "address",
         "pincode",
+        "special_instructions",
         "total_amount",
         "currency",
         "amount_paise",

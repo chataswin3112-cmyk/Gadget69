@@ -165,6 +165,7 @@ export interface Order {
   email: string;
   address: string;
   pincode: string;
+  specialInstructions?: string;
   totalAmount: number;
   paymentStatus: PaymentStatus;
   orderStatus?: OrderStatus;

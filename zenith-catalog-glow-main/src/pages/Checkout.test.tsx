@@ -119,11 +119,25 @@ describe("Checkout", () => {
     fireEvent.change(screen.getByPlaceholderText("560001"), {
       target: { value: "600001" },
     });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Optional: color preference, delivery note, gift request, or packing instruction"
+      ),
+      {
+        target: { value: "Please send the blue color if available" },
+      }
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /pay securely/i }));
 
     await waitFor(() => expect(mockCreateOrder).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(razorpayConstructor).toHaveBeenCalledTimes(1));
+
+    expect(mockCreateOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        specialInstructions: "Please send the blue color if available",
+      })
+    );
 
     const options = razorpayConstructor.mock.calls[0][0];
     expect(options.key).toBe("rzp_test_123");

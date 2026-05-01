@@ -182,12 +182,15 @@ public class OrderManagementController {
         InputSanitizer.sanitize(updateRequest.pincode()), "Pincode is required");
     InputSanitizer.validatePincode(pincode);
 
+    String specialInstructions = sanitizeSpecialInstructions(updateRequest.specialInstructions());
+
     CustomerOrder order = getActiveOrder(id);
     order.setCustomerName(customerName);
     order.setPhone(phone);
     order.setEmail(email.toLowerCase(java.util.Locale.ROOT));
     order.setAddress(address);
     order.setPincode(pincode);
+    order.setSpecialInstructions(specialInstructions);
     return catalogMapper.toOrderResponse(customerOrderRepository.save(order));
   }
 
@@ -312,6 +315,19 @@ public class OrderManagementController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
     return value.trim();
+  }
+
+  private String sanitizeSpecialInstructions(String specialInstructions) {
+    String sanitized = InputSanitizer.sanitizeAndValidate(specialInstructions, "specialInstructions");
+    if (sanitized == null || sanitized.isBlank()) {
+      return null;
+    }
+    if (sanitized.length() > 500) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Special instructions are too long (max 500 chars)");
+    }
+    return sanitized;
   }
 
   private record NormalizedAdminOrderFilters(

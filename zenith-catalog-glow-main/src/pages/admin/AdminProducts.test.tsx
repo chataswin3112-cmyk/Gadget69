@@ -131,13 +131,24 @@ describe("AdminProducts", () => {
           price: 45999,
           stockQuantity: 9,
           description: "Tablet for everyday use",
-          sectionId: 2,
+          sectionId: 1,
         })
       )
     );
   });
 
-  it("shows live main categories and blocks saving until a subcategory is selected", async () => {
+  it("allows saving directly under a main category when no subcategory is selected", async () => {
+    mockAddProduct.mockResolvedValue({
+      ...baseProducts[0],
+      id: 9,
+      name: "Nova Band",
+      sectionId: 5,
+      sectionName: "Wearables",
+      parentSectionId: null,
+      parentSectionName: null,
+      variants: [],
+    });
+
     render(
       <MemoryRouter>
         <AdminProducts />
@@ -153,7 +164,7 @@ describe("AdminProducts", () => {
     fireEvent.click(screen.getByRole("option", { name: "Wearables" }));
 
     expect(
-      within(dialog).getByText(/add a subcategory under this category before saving a product/i)
+      within(dialog).getByText(/this product will be placed directly under the category/i)
     ).toBeInTheDocument();
 
     const textboxes = within(dialog).getAllByRole("textbox");
@@ -163,19 +174,25 @@ describe("AdminProducts", () => {
     fireEvent.change(textboxes[2], { target: { value: "Fitness band" } });
     fireEvent.click(screen.getByRole("button", { name: /create product/i }));
 
-    expect(mockToast.error).toHaveBeenCalledWith("Select a subcategory before saving this product");
-    expect(mockAddProduct).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(mockAddProduct).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Nova Band",
+          sectionId: 5,
+        })
+      )
+    );
   });
 
-  it("filters subcategories by selected main category when creating a product", async () => {
+  it("filters subcategories by selected main category and supports direct category placement", async () => {
     mockAddProduct.mockResolvedValue({
       ...baseProducts[0],
       id: 8,
       name: "Nova Buds",
-      sectionId: 4,
-      sectionName: "Earbuds",
-      parentSectionId: 3,
-      parentSectionName: "Audio",
+      sectionId: 3,
+      sectionName: "Audio",
+      parentSectionId: null,
+      parentSectionName: null,
       variants: [],
     });
 
@@ -194,8 +211,9 @@ describe("AdminProducts", () => {
 
     fireEvent.keyDown(subcategorySelect, { key: "ArrowDown" });
     expect(await screen.findByRole("option", { name: "Earbuds" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Add directly under category" })).toBeInTheDocument();
     expect(screen.queryByRole("option", { name: "Flagship Phones" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("option", { name: "Earbuds" }));
+    fireEvent.click(screen.getByRole("option", { name: "Add directly under category" }));
 
     const textboxes = within(dialog).getAllByRole("textbox");
     const spinbuttons = within(dialog).getAllByRole("spinbutton");
@@ -208,7 +226,7 @@ describe("AdminProducts", () => {
       expect(mockAddProduct).toHaveBeenCalledWith(
         expect.objectContaining({
           name: "Nova Buds",
-          sectionId: 4,
+          sectionId: 3,
         })
       )
     );

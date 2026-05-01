@@ -287,6 +287,7 @@ public final class ApiDtos {
       String email,
       String address,
       String pincode,
+      String specialInstructions,
       BigDecimal totalAmount,
       String paymentStatus,
       List<OrderItemPayload> items
@@ -306,6 +307,7 @@ public final class ApiDtos {
       String email,
       String address,
       String pincode,
+      String specialInstructions,
       BigDecimal totalAmount,
       String paymentStatus,
       String orderStatus,
@@ -346,7 +348,8 @@ public final class ApiDtos {
       String phone,
       String email,
       String address,
-      String pincode
+      String pincode,
+      String specialInstructions
   ) {}
 
   // ── Variant DTOs ────────────────────────────────────────────────────────────

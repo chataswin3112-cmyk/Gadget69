@@ -93,6 +93,29 @@ class CreateOrderPaymentGatewayBehaviorTest {
     assertNull(savedOrder.getRazorpayOrderId());
   }
 
+  @Test
+  void persistsSpecialInstructionsWhenProvidedAtCheckout() throws Exception {
+    when(razorpayPaymentService.isGatewayReady()).thenReturn(false);
+
+    long productId = createProduct();
+    MvcResult createOrderResult = mockMvc.perform(post("/api/orders")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(validOrderRequest(
+                productId,
+                "Needs Note",
+                "9000000000",
+                "note@example.com",
+                "Please send the blue color if available"))))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.specialInstructions").value("Please send the blue color if available"))
+        .andReturn();
+
+    JsonNode response = objectMapper.readTree(createOrderResult.getResponse().getContentAsString());
+    Long orderId = response.get("id").asLong();
+    CustomerOrder savedOrder = customerOrderRepository.findById(orderId).orElseThrow();
+    assertEquals("Please send the blue color if available", savedOrder.getSpecialInstructions());
+  }
+
   private long createProduct() throws Exception {
     MvcResult loginResult = mockMvc.perform(post("/api/admin/login")
             .contentType(MediaType.APPLICATION_JSON)
@@ -153,6 +176,15 @@ class CreateOrderPaymentGatewayBehaviorTest {
   }
 
   private String validOrderRequest(long productId, String customerName, String phone, String email) {
+    return validOrderRequest(productId, customerName, phone, email, null);
+  }
+
+  private String validOrderRequest(
+      long productId,
+      String customerName,
+      String phone,
+      String email,
+      String specialInstructions) {
     return """
         {
           "customerName": "%s",
@@ -160,6 +192,7 @@ class CreateOrderPaymentGatewayBehaviorTest {
           "email": "%s",
           "address": "88 Lake Road",
           "pincode": "560001",
+          "specialInstructions": %s,
           "items": [
             {
               "productId": %d,
@@ -167,6 +200,11 @@ class CreateOrderPaymentGatewayBehaviorTest {
             }
           ]
         }
-        """.formatted(customerName, phone, email, productId);
+        """.formatted(
+        customerName,
+        phone,
+        email,
+        specialInstructions == null ? "null" : "\"" + specialInstructions + "\"",
+        productId);
   }
 }

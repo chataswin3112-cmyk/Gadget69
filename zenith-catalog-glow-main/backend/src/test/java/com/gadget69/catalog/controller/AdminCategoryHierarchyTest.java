@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,9 @@ class AdminCategoryHierarchyTest {
 
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   @Test
   void createsSubcategoryAndReturnsParentFields() throws Exception {
@@ -63,7 +67,7 @@ class AdminCategoryHierarchyTest {
   }
 
   @Test
-  void requiresSubcategoryForNewProductsAndReturnsParentFields() throws Exception {
+  void allowsNewProductsOnMainCategoriesAndReturnsParentFieldsForSubcategoryProducts() throws Exception {
     String token = loginAndExtractToken();
     long parentId = createSection(token, "Audio", null);
     long childId = createSection(token, "Earbuds", parentId);
@@ -72,7 +76,11 @@ class AdminCategoryHierarchyTest {
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(productPayload("Parent Level Product", parentId)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.sectionId").value(parentId))
+        .andExpect(jsonPath("$.sectionName").value("Audio"))
+        .andExpect(jsonPath("$.parentSectionId").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.parentSectionName").value(org.hamcrest.Matchers.nullValue()));
 
     mockMvc.perform(post("/api/admin/products")
             .header("Authorization", "Bearer " + token)
@@ -83,6 +91,59 @@ class AdminCategoryHierarchyTest {
         .andExpect(jsonPath("$.sectionName").value("Earbuds"))
         .andExpect(jsonPath("$.parentSectionId").value(parentId))
         .andExpect(jsonPath("$.parentSectionName").value("Audio"));
+  }
+
+  @Test
+  void deletesProductsWithRelatedMediaAndVariants() throws Exception {
+    String token = loginAndExtractToken();
+    long categoryId = createSection(token, "Cleanup Audio", null);
+    long productId = createProduct(token, "Cleanup Earbuds", categoryId, 0, "ACTIVE");
+
+    jdbcTemplate.update("""
+        INSERT INTO product_variants (
+          product_id, color_name, hex_code, price_adjustment, stock, is_default, display_order, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, productId, "Blue", "#0000FF", 0, 5, true, 0);
+    Long variantId = jdbcTemplate.queryForObject(
+        "SELECT id FROM product_variants WHERE product_id = ? AND color_name = ?",
+        Long.class,
+        productId,
+        "Blue");
+
+    jdbcTemplate.update("""
+        INSERT INTO product_media (product_id, media_url, media_type, media_role, display_order, is_primary)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, productId, "https://example.com/product-media.png", "IMAGE", "MAIN", 0, true);
+    jdbcTemplate.update("""
+        INSERT INTO variant_media (variant_id, media_url, media_type, media_role, display_order, is_primary)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, variantId, "https://example.com/variant-media.png", "IMAGE", "MAIN", 0, true);
+
+    mockMvc.perform(delete("/api/admin/products/{id}", productId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isNoContent());
+
+    Integer productCount = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM products WHERE id = ?",
+        Integer.class,
+        productId);
+    Integer variantCount = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM product_variants WHERE product_id = ?",
+        Integer.class,
+        productId);
+    Integer productMediaCount = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM product_media WHERE product_id = ?",
+        Integer.class,
+        productId);
+    Integer variantMediaCount = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM variant_media WHERE variant_id = ?",
+        Integer.class,
+        variantId);
+
+    org.assertj.core.api.Assertions.assertThat(productCount).isZero();
+    org.assertj.core.api.Assertions.assertThat(variantCount).isZero();
+    org.assertj.core.api.Assertions.assertThat(productMediaCount).isZero();
+    org.assertj.core.api.Assertions.assertThat(variantMediaCount).isZero();
   }
 
   @Test

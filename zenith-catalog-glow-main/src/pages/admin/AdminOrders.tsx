@@ -447,6 +447,7 @@ const AdminOrders = () => {
         email: order.email,
         address: order.address,
         pincode: order.pincode,
+        specialInstructions: order.specialInstructions,
       });
       setEditMode(false);
     } catch (viewError) {
@@ -1236,6 +1237,12 @@ const AdminOrders = () => {
                       <p className="mt-1 text-sm text-muted-foreground">
                         {selectedOrder.email || "--"}
                       </p>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        Special Instructions
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedOrder.specialInstructions || "No special instructions"}
+                      </p>
                     </>
                   ) : (
                     <div className="space-y-3">
@@ -1264,6 +1271,15 @@ const AdminOrders = () => {
                           value={editForm.email || ""}
                           onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                           className="w-full rounded-md border border-border bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">Special Instructions</label>
+                        <textarea
+                          value={editForm.specialInstructions || ""}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, specialInstructions: e.target.value }))}
+                          rows={3}
+                          className="w-full resize-none rounded-md border border-border bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                     </div>

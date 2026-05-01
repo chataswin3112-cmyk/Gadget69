@@ -10,6 +10,7 @@ const {
   mockGetAdminOrderById,
   mockGetAdminOrders,
   mockToast,
+  mockUpdateAdminOrderDetails,
   mockUpdateAdminOrderStatus,
   mockUseAdminData,
 } = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const {
   mockGetAdminOrderById: vi.fn(),
   mockGetAdminOrders: vi.fn(),
   mockToast: vi.fn(),
+  mockUpdateAdminOrderDetails: vi.fn(),
   mockUpdateAdminOrderStatus: vi.fn(),
   mockUseAdminData: vi.fn(),
 }));
@@ -27,6 +29,7 @@ const {
 vi.mock("@/api/orderApi", () => ({
   getAdminOrders: mockGetAdminOrders,
   getAdminOrderById: mockGetAdminOrderById,
+  updateAdminOrderDetails: mockUpdateAdminOrderDetails,
   updateAdminOrderStatus: mockUpdateAdminOrderStatus,
   cancelAdminOrder: mockCancelAdminOrder,
   archiveAdminOrder: mockArchiveAdminOrder,
@@ -61,6 +64,7 @@ describe("AdminOrders", () => {
     mockGetAdminOrderById.mockReset();
     mockGetAdminOrders.mockReset();
     mockToast.mockReset();
+    mockUpdateAdminOrderDetails.mockReset();
     mockUpdateAdminOrderStatus.mockReset();
     mockUseAdminData.mockReset();
     setDocumentVisibility("visible");
@@ -401,6 +405,7 @@ describe("AdminOrders", () => {
         email: "meera@example.com",
         address: "River Street",
         pincode: "600028",
+        specialInstructions: "Please send the blue color if available",
         totalAmount: 8998,
         paymentStatus: "SUCCESS",
         orderStatus: "SHIPPED",
@@ -418,6 +423,7 @@ describe("AdminOrders", () => {
       email: "meera@example.com",
       address: "River Street",
       pincode: "600028",
+      specialInstructions: "Please send the blue color if available",
       totalAmount: 8998,
       paymentStatus: "SUCCESS",
       orderStatus: "SHIPPED",
@@ -441,6 +447,9 @@ describe("AdminOrders", () => {
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Order #52")).toBeInTheDocument();
     expect(within(dialog).getByText("Delivery")).toBeInTheDocument();
+    expect(
+      within(dialog).getByText("Please send the blue color if available")
+    ).toBeInTheDocument();
     expect(within(dialog).getAllByText("Qty 1")).toHaveLength(2);
     expect(within(dialog).getByText("SUCCESS", { selector: "p" })).toHaveAttribute(
       "data-tone",
@@ -457,6 +466,80 @@ describe("AdminOrders", () => {
     if (itemsSection) {
       expect(within(itemsSection).getByText("Delivery Speaker")).toHaveAttribute("data-clamp", "2");
     }
+  });
+
+  it("updates special instructions from the order details dialog", async () => {
+    mockGetAdminOrders.mockResolvedValue([
+      {
+        id: 63,
+        customerName: "Maya",
+        phone: "9444444444",
+        email: "maya@example.com",
+        address: "Garden Street",
+        pincode: "600063",
+        specialInstructions: "Keep the invoice outside the box",
+        totalAmount: 2599,
+        paymentStatus: "PENDING",
+        orderStatus: "PENDING",
+        createdAt: "2026-04-12T09:30:00",
+        items: [{ productId: 1, productName: "Alpha", quantity: 1, price: 2599 }],
+      },
+    ]);
+    mockGetAdminOrderById.mockResolvedValue({
+      id: 63,
+      customerName: "Maya",
+      phone: "9444444444",
+      email: "maya@example.com",
+      address: "Garden Street",
+      pincode: "600063",
+      specialInstructions: "Keep the invoice outside the box",
+      totalAmount: 2599,
+      paymentStatus: "PENDING",
+      orderStatus: "PENDING",
+      createdAt: "2026-04-12T09:30:00",
+      updatedAt: "2026-04-12T09:45:00",
+      items: [{ productId: 1, productName: "Alpha", quantity: 1, price: 2599 }],
+    });
+    mockUpdateAdminOrderDetails.mockResolvedValue({
+      id: 63,
+      customerName: "Maya",
+      phone: "9444444444",
+      email: "maya@example.com",
+      address: "Garden Street",
+      pincode: "600063",
+      specialInstructions: "Blue color preferred",
+      totalAmount: 2599,
+      paymentStatus: "PENDING",
+      orderStatus: "PENDING",
+      createdAt: "2026-04-12T09:30:00",
+      updatedAt: "2026-04-12T10:00:00",
+      items: [{ productId: 1, productName: "Alpha", quantity: 1, price: 2599 }],
+    });
+
+    render(
+      <MemoryRouter>
+        <AdminOrders />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Order #63")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /view/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: /edit details/i }));
+
+    const textarea = within(dialog).getByDisplayValue("Keep the invoice outside the box");
+    fireEvent.change(textarea, { target: { value: "Blue color preferred" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() =>
+      expect(mockUpdateAdminOrderDetails).toHaveBeenCalledWith(
+        63,
+        expect.objectContaining({
+          specialInstructions: "Blue color preferred",
+        })
+      )
+    );
   });
 
   it("keeps delete clickable for paid orders and shows the not-allowed toast", async () => {

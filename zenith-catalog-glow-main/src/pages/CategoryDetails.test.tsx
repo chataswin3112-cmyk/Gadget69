@@ -173,8 +173,8 @@ describe("CategoryDetails", () => {
   it("shows products for a subcategory with the parent breadcrumb", () => {
     renderCategoryDetails("/categories/2");
 
-    expect(screen.getByRole("heading", { name: "Android" })).toBeInTheDocument();
-    expect(screen.getByText("Phones")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Phones" })).toBeInTheDocument();
+    expect(screen.getByText("Android")).toBeInTheDocument();
     expect(screen.getByText("Pixel Alpha")).toBeInTheDocument();
     expect(screen.getByText("Pixel Nova")).toBeInTheDocument();
     expect(screen.getAllByTestId("product-card").map((card) => card.textContent)).toEqual([

@@ -171,6 +171,7 @@ public class CatalogMapper {
         order.getEmail(),
         order.getAddress(),
         order.getPincode(),
+        order.getSpecialInstructions(),
         order.getTotalAmount(),
         OrderStateSupport.normalizePaymentStatus(order.getPaymentStatus()),
         OrderStateSupport.normalizeOrderStatus(order.getOrderStatus()),

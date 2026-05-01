@@ -109,6 +109,7 @@ const Checkout = () => {
     email: "",
     address: "",
     pincode: "",
+    specialInstructions: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -294,6 +295,20 @@ const Checkout = () => {
                 onChange={handleChange}
                 className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="560001"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground font-body">
+                Special Instructions
+              </label>
+              <textarea
+                name="specialInstructions"
+                value={form.specialInstructions}
+                onChange={handleChange}
+                rows={3}
+                className="w-full resize-none rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Optional: color preference, delivery note, gift request, or packing instruction"
               />
             </div>
 

@@ -240,12 +240,15 @@ public class PublicCatalogController {
         InputSanitizer.sanitize(request.pincode()), "Pincode is required");
     InputSanitizer.validatePincode(pincode);
 
+    String specialInstructions = sanitizeSpecialInstructions(request.specialInstructions());
+
     CustomerOrder order = new CustomerOrder();
     order.setCustomerName(customerName);
     order.setPhone(phone);
     order.setEmail(email.toLowerCase(Locale.ROOT));
     order.setAddress(address);
     order.setPincode(pincode);
+    order.setSpecialInstructions(specialInstructions);
     order.setPaymentStatus("PENDING");
     order.setOrderStatus("PENDING");
     order.setCurrency("INR");
@@ -502,6 +505,7 @@ public class PublicCatalogController {
         response.email(),
         response.address(),
         response.pincode(),
+        response.specialInstructions(),
         response.totalAmount(),
         response.paymentStatus(),
         response.orderStatus(),
@@ -532,6 +536,19 @@ public class PublicCatalogController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be at least 1");
     }
     return quantity;
+  }
+
+  private String sanitizeSpecialInstructions(String specialInstructions) {
+    String sanitized = InputSanitizer.sanitizeAndValidate(specialInstructions, "specialInstructions");
+    if (sanitized == null || sanitized.isBlank()) {
+      return null;
+    }
+    if (sanitized.length() > 500) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Special instructions are too long (max 500 chars)");
+    }
+    return sanitized;
   }
 
   private String normalizePhoneForComparison(String phone) {
