@@ -67,6 +67,7 @@ public class CatalogMapper {
         product.getName(),
         product.getDescription(),
         product.getPrice(),
+        product.getShippingCharge() == null ? java.math.BigDecimal.ZERO : product.getShippingCharge(),
         product.getStockQuantity(),
         product.getSection().getId(),
         product.getSection().getName(),

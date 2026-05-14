@@ -51,6 +51,9 @@ public class Product {
   @Column(nullable = false, precision = 12, scale = 2)
   private BigDecimal price;
 
+  @Column(name = "shipping_charge", precision = 12, scale = 2)
+  private BigDecimal shippingCharge;
+
   @Column(name = "stock_quantity", nullable = false)
   private Integer stockQuantity = 0;
 

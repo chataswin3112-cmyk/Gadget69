@@ -307,7 +307,9 @@ public class PublicCatalogController {
       orderItem.setPrice(unitPrice);
       order.getItems().add(orderItem);
 
-      totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(quantity)));
+      totalAmount = totalAmount
+          .add(unitPrice.multiply(BigDecimal.valueOf(quantity)))
+          .add(resolveShippingCharge(product).multiply(BigDecimal.valueOf(quantity)));
     }
 
     order.setTotalAmount(totalAmount);
@@ -536,6 +538,14 @@ public class PublicCatalogController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be at least 1");
     }
     return quantity;
+  }
+
+  private BigDecimal resolveShippingCharge(Product product) {
+    BigDecimal shippingCharge = product.getShippingCharge();
+    if (shippingCharge == null || shippingCharge.signum() <= 0) {
+      return BigDecimal.ZERO;
+    }
+    return shippingCharge;
   }
 
   private String sanitizeSpecialInstructions(String specialInstructions) {

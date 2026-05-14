@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import MediaFrame from "./MediaFrame";
 import ColorSwatchSelector from "./ColorSwatchSelector";
-import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
+import { getDisplayMrp, getShippingLabel, getVariantPrice } from "@/lib/pricing";
 import { getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
 import { getProductCategoryLabel } from "@/lib/category";
 
@@ -119,6 +119,9 @@ const ProductCard = ({ product, animationPreset, className, priority = false, dr
         {product.model_number && (
           <p className="text-xs text-muted-foreground mb-2 font-body">{product.model_number}</p>
         )}
+        <p className="mb-2 text-xs font-medium text-accent font-body">
+          {getShippingLabel(product)}
+        </p>
 
         {variants.length > 1 && (
           <div className="mb-3">

@@ -12,7 +12,7 @@ interface CartDrawerProps {
 }
 
 const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
-  const { items, updateQuantity, removeFromCart, totalItems, totalAmount } = useCart();
+  const { items, updateQuantity, removeFromCart, totalItems, subtotalAmount, shippingAmount, totalAmount } = useCart();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -82,8 +82,18 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
             </div>
 
             <SheetFooter className="flex-col gap-3 border-t pt-4">
-              <div className="flex w-full justify-between text-base font-body">
+              <div className="flex w-full justify-between text-sm font-body">
                 <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium">Rs. {subtotalAmount.toLocaleString()}</span>
+              </div>
+              <div className="flex w-full justify-between text-sm font-body">
+                <span className="text-muted-foreground">Shipping</span>
+                <span className={shippingAmount > 0 ? "font-medium" : "font-medium text-green-600"}>
+                  {shippingAmount > 0 ? `Rs. ${shippingAmount.toLocaleString()}` : "Free"}
+                </span>
+              </div>
+              <div className="flex w-full justify-between text-base font-body">
+                <span className="text-muted-foreground">Total</span>
                 <span className="font-bold">Rs. {totalAmount.toLocaleString()}</span>
               </div>
               <div className="flex w-full gap-2">

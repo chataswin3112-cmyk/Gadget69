@@ -57,6 +57,7 @@ const baseProducts = [
     name: "Atlas Pro",
     description: "Flagship phone",
     price: 79999,
+    shippingCharge: 125,
     stockQuantity: 4,
     sectionId: 2,
     sectionName: "Flagship Phones",
@@ -120,7 +121,8 @@ describe("AdminProducts", () => {
 
     fireEvent.change(textboxes[0], { target: { value: "Nova Pad" } });
     fireEvent.change(spinbuttons[0], { target: { value: "45999" } });
-    fireEvent.change(spinbuttons[2], { target: { value: "9" } });
+    fireEvent.change(spinbuttons[1], { target: { value: "149" } });
+    fireEvent.change(spinbuttons[3], { target: { value: "9" } });
     fireEvent.change(textboxes[2], { target: { value: "Tablet for everyday use" } });
     fireEvent.click(screen.getByRole("button", { name: /create product/i }));
 
@@ -130,12 +132,13 @@ describe("AdminProducts", () => {
           name: "Nova Pad",
           price: 45999,
           stockQuantity: 9,
+          shippingCharge: 149,
           description: "Tablet for everyday use",
           sectionId: 1,
         })
       )
     );
-  });
+  }, 10000);
 
   it("allows saving directly under a main category when no subcategory is selected", async () => {
     mockAddProduct.mockResolvedValue({

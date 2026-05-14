@@ -14,7 +14,7 @@ import { useAdminData } from "@/contexts/AdminDataContext";
 import { getProductById, getVariant } from "@/api/productApi";
 import { getProductMedia, getVariantMedia } from "@/lib/catalog-media";
 import { getProductCategoryLabel } from "@/lib/category";
-import { getDisplayMrp, getVariantPrice } from "@/lib/pricing";
+import { getDisplayMrp, getShippingLabel, getVariantPrice } from "@/lib/pricing";
 import { Product, ProductMedia, VariantMedia } from "@/types";
 import { scheduleIdleTask } from "@/lib/idle";
 
@@ -435,6 +435,10 @@ const ProductDetails = () => {
               </span>
               {sku ? <span className="text-muted-foreground">SKU: {sku}</span> : null}
             </div>
+
+            <p className="mb-6 text-sm font-medium text-accent font-body">
+              {getShippingLabel(product)}
+            </p>
 
             <p className="mb-8 whitespace-pre-wrap text-muted-foreground font-body leading-relaxed">
               {product.description}

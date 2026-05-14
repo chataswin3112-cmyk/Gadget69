@@ -100,7 +100,7 @@ const getCheckoutItemUnitPrice = (item: (typeof useCart extends () => infer T ? 
   item.unitPrice ?? item.product.offerPrice ?? item.product.price;
 
 const Checkout = () => {
-  const { items, totalAmount, totalItems, clearCart } = useCart();
+  const { items, subtotalAmount, shippingAmount, totalAmount, totalItems, clearCart } = useCart();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -343,11 +343,13 @@ const Checkout = () => {
                 <div className="mt-3 border-t border-border pt-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
-                    <span className="font-medium">Rs. {totalAmount.toLocaleString()}</span>
+                    <span className="font-medium">Rs. {subtotalAmount.toLocaleString()}</span>
                   </div>
                   <div className="mt-1 flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span className="font-medium text-green-600">Free</span>
+                    <span className={shippingAmount > 0 ? "font-medium" : "font-medium text-green-600"}>
+                      {shippingAmount > 0 ? `Rs. ${shippingAmount.toLocaleString()}` : "Free"}
+                    </span>
                   </div>
                 </div>
 

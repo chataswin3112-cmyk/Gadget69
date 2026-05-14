@@ -533,6 +533,7 @@ public class AdminCatalogController {
     product.setName(requiredValue(payload.name(), "Product name is required"));
     product.setDescription(requiredValue(payload.description(), "Product description is required"));
     product.setPrice(requiredNumber(payload.price(), "Product price is required"));
+    product.setShippingCharge(normalizeShippingCharge(payload.shippingCharge()));
     product.setStockQuantity(payload.stockQuantity() == null ? 0 : payload.stockQuantity());
     product.setSection(section);
     product.setImageUrl(payload.imageUrl());
@@ -695,6 +696,16 @@ public class AdminCatalogController {
   private BigDecimal requiredNumber(BigDecimal value, String message) {
     if (value == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    }
+    return value;
+  }
+
+  private BigDecimal normalizeShippingCharge(BigDecimal value) {
+    if (value == null) {
+      return BigDecimal.ZERO;
+    }
+    if (value.signum() < 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Shipping charge cannot be negative");
     }
     return value;
   }

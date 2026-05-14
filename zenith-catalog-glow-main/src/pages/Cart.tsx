@@ -9,7 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 import { describeVariant } from "@/lib/catalog-media";
 
 const Cart = () => {
-  const { items, updateQuantity, removeFromCart, totalAmount, totalItems } = useCart();
+  const { items, updateQuantity, removeFromCart, subtotalAmount, shippingAmount, totalAmount, totalItems } = useCart();
 
   if (items.length === 0) {
     return (
@@ -123,11 +123,13 @@ const Cart = () => {
               <div className="space-y-3 text-sm font-body">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Items ({totalItems})</span>
-                  <span className="font-medium">Rs. {totalAmount.toLocaleString()}</span>
+                  <span className="font-medium">Rs. {subtotalAmount.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span className="font-medium text-green-600">Free</span>
+                  <span className={shippingAmount > 0 ? "font-medium" : "font-medium text-green-600"}>
+                    {shippingAmount > 0 ? `Rs. ${shippingAmount.toLocaleString()}` : "Free"}
+                  </span>
                 </div>
                 <div className="mt-3 border-t border-border pt-3">
                   <div className="flex justify-between">

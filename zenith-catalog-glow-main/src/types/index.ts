@@ -66,6 +66,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  shippingCharge?: number;
   stockQuantity: number;
   sectionId: number;
   sectionName?: string;

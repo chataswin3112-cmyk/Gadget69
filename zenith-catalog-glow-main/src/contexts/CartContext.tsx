@@ -4,7 +4,7 @@ import { CartItem, Product, ProductVariant } from "@/types";
 import { useAdminData } from "@/contexts/AdminDataContext";
 import { getCartLineId, getPrimaryImageUrl, getProductMedia, getVariantMedia } from "@/lib/catalog-media";
 import { scheduleIdleTask } from "@/lib/idle";
-import { getVariantPrice } from "@/lib/pricing";
+import { getShippingCharge, getVariantPrice } from "@/lib/pricing";
 
 interface CartContextType {
   items: CartItem[];
@@ -13,6 +13,8 @@ interface CartContextType {
   updateQuantity: (lineId: string, qty: number) => void;
   clearCart: () => void;
   totalItems: number;
+  subtotalAmount: number;
+  shippingAmount: number;
   totalAmount: number;
 }
 
@@ -33,7 +35,8 @@ const areCartItemsEqual = (current: CartItem[], next: CartItem[]) =>
       item.unitPrice === candidate.unitPrice &&
       item.mediaUrl === candidate.mediaUrl &&
       item.variantId === candidate.variantId &&
-      item.product.id === candidate.product.id
+      item.product.id === candidate.product.id &&
+      getShippingCharge(item.product) === getShippingCharge(candidate.product)
     );
   });
 
@@ -160,13 +163,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = useCallback(() => setItems([]), []);
 
   const totalItems = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
-  const totalAmount = useMemo(
+  const subtotalAmount = useMemo(
     () => items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
     [items]
   );
+  const shippingAmount = useMemo(
+    () => items.reduce((sum, item) => sum + getShippingCharge(item.product) * item.quantity, 0),
+    [items]
+  );
+  const totalAmount = subtotalAmount + shippingAmount;
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalAmount }}>
+    <CartContext.Provider
+      value={{
+        items,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        subtotalAmount,
+        shippingAmount,
+        totalAmount,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -15,9 +16,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gadget69.catalog.entity.CustomerOrder;
 import com.gadget69.catalog.repository.CustomerOrderRepository;
 import com.gadget69.catalog.service.RazorpayPaymentService;
+import com.gadget69.catalog.service.RazorpayPaymentService.RazorpayOrder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -116,7 +119,66 @@ class CreateOrderPaymentGatewayBehaviorTest {
     assertEquals("Please send the blue color if available", savedOrder.getSpecialInstructions());
   }
 
+  @Test
+  void addsProductShippingChargePerQuantityToOrderAndGatewayAmount() throws Exception {
+    when(razorpayPaymentService.isGatewayReady()).thenReturn(true);
+    when(razorpayPaymentService.createOrder(anyLong(), any(BigDecimal.class)))
+        .thenAnswer(invocation -> {
+          Long localOrderId = invocation.getArgument(0);
+          BigDecimal totalAmount = invocation.getArgument(1);
+          return new RazorpayOrder(
+              "order_shipping_" + localOrderId,
+              totalAmount.multiply(BigDecimal.valueOf(100)).intValueExact(),
+              "INR",
+              "rzp_test_shipping");
+        });
+
+    long productId = createProduct(new BigDecimal("50.00"));
+    MvcResult createOrderResult = mockMvc.perform(post("/api/orders")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "customerName": "Shipping Test",
+                  "phone": "9111111111",
+                  "email": "shipping@example.com",
+                  "address": "88 Lake Road",
+                  "pincode": "560001",
+                  "items": [
+                    {
+                      "productId": %d,
+                      "quantity": 2
+                    }
+                  ]
+                }
+                """.formatted(productId)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.totalAmount").value(3098.00))
+        .andExpect(jsonPath("$.amountPaise").value(309800))
+        .andReturn();
+
+    JsonNode response = objectMapper.readTree(createOrderResult.getResponse().getContentAsString());
+    assertEquals("rzp_test_shipping", response.get("razorpayKeyId").asText());
+
+    ArgumentCaptor<BigDecimal> totalCaptor = ArgumentCaptor.forClass(BigDecimal.class);
+    verify(razorpayPaymentService).createOrder(anyLong(), totalCaptor.capture());
+    assertEquals(0, totalCaptor.getValue().compareTo(new BigDecimal("3098.00")));
+  }
+
+  @Test
+  void creatingProductWithoutShippingChargeReturnsZeroShippingCharge() throws Exception {
+    JsonNode product = createProductResponse(null);
+    assertEquals(0, product.get("shippingCharge").decimalValue().compareTo(BigDecimal.ZERO));
+  }
+
   private long createProduct() throws Exception {
+    return createProduct(null);
+  }
+
+  private long createProduct(BigDecimal shippingCharge) throws Exception {
+    return createProductResponse(shippingCharge).get("id").asLong();
+  }
+
+  private JsonNode createProductResponse(BigDecimal shippingCharge) throws Exception {
     MvcResult loginResult = mockMvc.perform(post("/api/admin/login")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -141,16 +203,19 @@ class CreateOrderPaymentGatewayBehaviorTest {
                   "name": "Gateway Test Phone",
                   "description": "Gateway behavior product",
                   "price": 1499.00,
+                  %s
                   "stockQuantity": 10,
                   "sectionId": %d,
                   "imageUrl": "https://example.com/gateway-test-phone.png",
                   "status": "ACTIVE"
                 }
-                """.formatted(sectionId)))
+                """.formatted(
+                shippingCharge == null ? "" : "\"shippingCharge\": " + shippingCharge + ",",
+                sectionId)))
         .andExpect(status().isOk())
         .andReturn();
 
-    return objectMapper.readTree(productResult.getResponse().getContentAsString()).get("id").asLong();
+    return objectMapper.readTree(productResult.getResponse().getContentAsString());
   }
 
   private long createSubcategory(String token) throws Exception {

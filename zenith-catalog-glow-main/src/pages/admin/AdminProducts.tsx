@@ -36,6 +36,7 @@ const emptyProduct = (sectionId?: number): Partial<Product> => ({
   name: "",
   description: "",
   price: 0,
+  shippingCharge: 0,
   stockQuantity: 0,
   sectionId,
   media: [],
@@ -257,13 +258,14 @@ const AdminProducts = () => {
 
         <div className="overflow-hidden rounded-xl bg-card shadow-premium">
           <div className="admin-table-scroll">
-            <table className="min-w-[860px] w-full">
+            <table className="min-w-[940px] w-full">
               <thead>
                 <tr className="border-b border-border text-left">
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Image</th>
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Product</th>
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Category</th>
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Price</th>
+                  <th className="p-4 text-xs uppercase text-muted-foreground font-body">Shipping</th>
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Offer</th>
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Stock</th>
                   <th className="p-4 text-xs uppercase text-muted-foreground font-body">Variants</th>
@@ -291,6 +293,11 @@ const AdminProducts = () => {
                       <td className="p-4 text-sm font-body">{getProductCategoryLabel(product)}</td>
                       <td className="p-4 text-sm font-semibold font-body">
                         Rs. {getEffectivePrice(product).toLocaleString()}
+                      </td>
+                      <td className="p-4 text-sm font-body">
+                        {product.shippingCharge && product.shippingCharge > 0
+                          ? `Rs. ${product.shippingCharge.toLocaleString()}`
+                          : "Free"}
                       </td>
                       <td className="p-4">
                         <span
@@ -321,7 +328,7 @@ const AdminProducts = () => {
                 })}
                 {!filteredProducts.length && !isLoading ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-sm text-muted-foreground font-body">
+                    <td colSpan={9} className="p-8 text-center text-sm text-muted-foreground font-body">
                       No products found.
                     </td>
                   </tr>
@@ -461,6 +468,21 @@ const AdminProducts = () => {
                       onChange={(event) =>
                         setEditing((current) =>
                           current ? { ...current, price: Number.parseFloat(event.target.value) || 0 } : current
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-body">Shipping Charge</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={editing.shippingCharge ?? 0}
+                      onChange={(event) =>
+                        setEditing((current) =>
+                          current
+                            ? { ...current, shippingCharge: Math.max(0, Number.parseFloat(event.target.value) || 0) }
+                            : current
                         )
                       }
                     />

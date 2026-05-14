@@ -53,6 +53,7 @@ describe("Checkout", () => {
             name: "Smart Speaker",
             description: "Voice-enabled speaker",
             price: 2999,
+            shippingCharge: 150,
             stockQuantity: 10,
             sectionId: 1,
             imageUrl: "https://cdn.example.com/speaker.png",
@@ -62,7 +63,9 @@ describe("Checkout", () => {
           quantity: 1,
         },
       ],
-      totalAmount: 2999,
+      subtotalAmount: 2999,
+      shippingAmount: 150,
+      totalAmount: 3149,
       totalItems: 1,
       clearCart: vi.fn(),
       addToCart: vi.fn(),
@@ -76,12 +79,12 @@ describe("Checkout", () => {
       phone: "9876543210",
       address: "12 Main Street",
       pincode: "600001",
-      totalAmount: 2999,
+      totalAmount: 3149,
       paymentStatus: "PENDING",
       razorpayOrderId: "order_test_42",
       razorpayKeyId: "rzp_test_123",
       currency: "INR",
-      amountPaise: 299900,
+      amountPaise: 314900,
       items: [],
     });
 
@@ -103,6 +106,10 @@ describe("Checkout", () => {
         <Checkout />
       </MemoryRouter>
     );
+
+    expect(screen.getAllByText("Rs. 2,999").length).toBeGreaterThan(0);
+    expect(screen.getByText("Rs. 150")).toBeInTheDocument();
+    expect(screen.getByText("Rs. 3,149")).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("John Doe"), {
       target: { value: "Hari" },

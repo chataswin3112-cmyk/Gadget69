@@ -1,4 +1,4 @@
-import { getEffectivePrice, getOfferStatus, isOfferActive } from "@/lib/pricing";
+import { getEffectivePrice, getOfferStatus, getShippingCharge, getShippingLabel, isOfferActive } from "@/lib/pricing";
 import { Product } from "@/types";
 
 const baseProduct: Product = {
@@ -34,5 +34,12 @@ describe("pricing helpers", () => {
     expect(getOfferStatus(baseProduct, new Date(2026, 3, 8))).toBe("upcoming");
     expect(getOfferStatus(baseProduct, new Date(2026, 3, 18))).toBe("expired");
     expect(getOfferStatus({ ...baseProduct, offer: false })).toBe("no-offer");
+  });
+
+  it("defaults shipping to free and formats positive shipping charges", () => {
+    expect(getShippingCharge(baseProduct)).toBe(0);
+    expect(getShippingLabel(baseProduct)).toBe("Free shipping");
+    expect(getShippingCharge({ ...baseProduct, shippingCharge: 75 })).toBe(75);
+    expect(getShippingLabel({ ...baseProduct, shippingCharge: 75 })).toBe("Shipping: Rs. 75");
   });
 });

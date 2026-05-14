@@ -86,6 +86,18 @@ export const getVariantPrice = (
   return basePrice + (variant.priceAdjustment || 0);
 };
 
+export const getShippingCharge = (product?: Pick<Product, "shippingCharge"> | null) => {
+  const shippingCharge = product?.shippingCharge;
+  return typeof shippingCharge === "number" && Number.isFinite(shippingCharge) && shippingCharge > 0
+    ? shippingCharge
+    : 0;
+};
+
+export const getShippingLabel = (product?: Pick<Product, "shippingCharge"> | null) => {
+  const shippingCharge = getShippingCharge(product);
+  return shippingCharge > 0 ? `Shipping: Rs. ${shippingCharge.toLocaleString()}` : "Free shipping";
+};
+
 export const getDisplayMrp = (product: Product, referenceDate = new Date()) => {
   if (typeof product.mrp === "number") {
     return product.mrp;
