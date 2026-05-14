@@ -16,8 +16,9 @@ backend/.env
 backend/.env.local
 *.local
 backend/.m2repo/
-backend/target/surefire-reports/
-backend/target/classes/com/gadget69/catalog/config/SpaForwardingController.class
+backend/target/
+backend/data/
+backend/uploads/
 
 # Editor directories and files
 .vscode/*
